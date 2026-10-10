@@ -16,7 +16,8 @@ const DEFAULT_SETTINGS = {
   whiteTray: false,
   sleepEnabled: false,
   sleepMinutes: 30,
-  sleepOnStart: false
+  sleepOnStart: false,
+  autoUpdate: true
 };
 
 function configFile() {

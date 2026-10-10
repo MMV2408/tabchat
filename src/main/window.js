@@ -9,6 +9,7 @@ const tray = require('./tray');
 const autostart = require('./autostart');
 const dnd = require('./dnd');
 const sleep = require('./sleep');
+const updater = require('./updater');
 
 const PRELOAD = path.join(__dirname, '..', 'preload', 'preload.js');
 const RENDERER = path.join(__dirname, '..', 'renderer');
@@ -71,6 +72,7 @@ function create() {
   tray.init(); // tray-icoon + kruisje = verbergen
   dnd.apply(); // Niet storen van vorige keer (bv. "tot morgen") weer toepassen
   sleep.start(); // slaapstand: elke minuut kijken welke tabbladen mogen slapen
+  updater.init(); // automatische updates (alleen in de geïnstalleerde versie)
 
   // Sneltoetsen direct laten werken bij het opstarten:
   // eerst de tabbalk (laadt meteen), daarna het tabblad zodra dat klaar is

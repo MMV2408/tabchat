@@ -58,6 +58,10 @@
   .ghost:hover { background: #35373c; }
   .card .top .name { flex: 1; }
   .card .name u { text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .about { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: #1e1f22; border-radius: 10px; padding: 14px 16px; }
+  .about .text { flex: 1; min-width: 200px; }
+  .about .ver { color: #fff; font-weight: 600; }
+  .about .st { font-size: 13px; color: #949ba4; margin-top: 2px; }
   .dndrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #1e1f22; border-radius: 10px; padding: 12px 16px; }
   .dndrow .status { flex: 1 1 100%; color: #949ba4; font-size: 14px; margin-bottom: 4px; }
   .dndrow .status b { color: #e4dcff; font-weight: 600; }
@@ -113,6 +117,9 @@
   <h2>Functies</h2>
   <div id="features"></div>
 
+  <h2>Over Tabchat</h2>
+  <div class="about" id="about"></div>
+
 </main>
 
 <div id="modal">
@@ -134,6 +141,7 @@
     { key: 'unreadBadges', name: 'Ongelezen-tellers', desc: 'Aantal nieuwe berichten op de tabbladen, een rode stip op het tray-icoon en een getal op het dock-icoon.' },
     { key: 'sleepEnabled', name: 'Slaapstand voor tabbladen', desc: 'Tabbladen die je een tijd niet bekijkt, gaan uit het geheugen. Per tabblad in te stellen bij "Jouw tabbladen". Een slapend tabblad krijgt geen meldingen.' },
     { key: 'sleepMinutes', name: 'Slaapstand na', desc: 'Hoe lang een tabblad niet bekeken moet zijn voordat het gaat slapen.', options: [[15, '15 minuten'], [30, '30 minuten'], [60, '1 uur']] },
+    { key: 'autoUpdate', name: 'Automatisch updaten', desc: 'Tabchat zoekt zelf naar nieuwe versies en downloadt ze op de achtergrond. Installeren doe je zelf met één klik.' },
     { key: 'sleepOnStart', name: 'Slapend opstarten', desc: 'Tabbladen die mogen slapen, starten meteen slapend. Sneller opstarten en minder geheugen; hun tellers zie je pas als je ze een keer opent.' }
   ];
 
@@ -264,6 +272,33 @@
       add.onclick = () => window.tabchat.add(c.id);
       card.append(top, el('div', 'desc', c.desc), add);
       cat.append(card);
+    }
+
+    // Over Tabchat / updates
+    const about = document.getElementById('about');
+    about.replaceChildren();
+    const u = s.update || {};
+    const STATUS = {
+      idle: 'Nog niet gecontroleerd.',
+      checking: 'Zoeken naar updates…',
+      latest: 'Je hebt de nieuwste versie.',
+      downloading: `Versie ${u.version} wordt gedownload… ${u.percent || 0}%`,
+      ready: `Versie ${u.version} staat klaar om te installeren.`,
+      error: 'Kon niet controleren op updates. Probeer het later opnieuw.',
+      dev: 'Updates werken alleen in de geïnstalleerde versie (niet met npm start).',
+      off: 'Automatisch updaten staat uit.'
+    };
+    const info = el('div', 'text');
+    info.append(el('div', 'ver', `Tabchat ${u.current || ''}`), el('div', 'st', STATUS[u.state] || ''));
+    about.append(info);
+    if (u.state === 'ready') {
+      const ib = el('button', 'add', 'Nu installeren');
+      ib.onclick = () => window.tabchat.installUpdate();
+      about.append(ib);
+    } else if (u.state !== 'dev' && u.state !== 'downloading' && u.state !== 'checking') {
+      const cb = el('button', 'dndbtn', 'Controleren op updates');
+      cb.onclick = () => window.tabchat.checkUpdate();
+      about.append(cb);
     }
 
     // Niet storen

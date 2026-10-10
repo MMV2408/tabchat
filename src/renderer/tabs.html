@@ -43,6 +43,9 @@
   button.asleep { opacity: .5; }
   button.asleep.active { opacity: 1; }
   .zz { font-size: 12px; }
+  /* update */
+  #update { background: #1f6f43; color: #fff; font-size: 13px; }
+  #update:hover { background: #24834f; }
   /* niet storen */
   #dnd { margin-left: auto; background: #3b2f5c; color: #e4dcff; font-size: 13px; }
   #dnd:hover { background: #4a3b73; }
@@ -140,6 +143,19 @@
     dropTarget(plus, s.tabs.length, null); // neerzetten op + = helemaal achteraan
     document.body.append(plus);
 
+    // Update klaar: knop rechts
+    let right = false; // eerste knop rechts krijgt margin-left:auto
+    if (s.update && s.update.state === 'ready') {
+      const u = document.createElement('button');
+      u.id = 'update';
+      u.textContent = '⬆ Update ' + s.update.version + ' installeren';
+      u.title = 'Tabchat wordt bijgewerkt en opnieuw gestart';
+      u.style.marginLeft = 'auto';
+      u.onclick = () => window.tabchat.installUpdate();
+      document.body.append(u);
+      right = true;
+    }
+
     // Niet storen: label rechts, klik = uitzetten
     if (s.dnd && s.dnd.on) {
       const d = document.createElement('button');
@@ -147,6 +163,7 @@
       d.textContent = '🌙 Niet storen ' + s.dnd.label + '  ✕';
       d.title = 'Klik om Niet storen uit te zetten';
       d.onclick = () => window.tabchat.setDnd(null);
+      if (right) d.style.marginLeft = '0';
       document.body.append(d);
     }
   }

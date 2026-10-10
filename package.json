@@ -1,6 +1,6 @@
 {
   "name": "tabchat",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "WhatsApp, Discord, Teams, Outlook en OneDrive in één venster",
   "main": "src/main/index.js",
   "homepage": "https://github.com/MMV2408/tabchat",
@@ -26,10 +26,20 @@
       "src/**/*",
       "assets/**/*",
       "package.json"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "MMV2408",
+        "repo": "tabchat"
+      }
     ]
   },
   "devDependencies": {
     "electron": "^38.0.0",
     "electron-builder": "^26.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }

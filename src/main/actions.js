@@ -198,19 +198,24 @@ function setSetting(key, value) {
   if (key === 'runInBackground') require('./tray').sync();
   if (key === 'unreadBadges') require('./unread').changed();
   if (key === 'autostart') require('./autostart').sync();
+  if (key === 'autoUpdate') require('./updater').sync();
   views.broadcast();
 }
 
-// Bij afsluiten eerst alle logins (cookies) naar schijf schrijven
+// Alle logins (cookies) naar schijf schrijven (bij afsluiten en voor een update)
+async function flushLogins() {
+  const parts = new Set([...store.config.tabs.map(microsoft.partitionFor), ...microsoft.keptSessions]);
+  await Promise.all([...parts].map(p =>
+    session.fromPartition(p).cookies.flushStore().catch(() => {})
+  ));
+}
+
 let flushing = false;
 async function quit() {
   store.quitting = true; // kruisje-gedrag uit: venster mag nu echt dicht
   if (flushing) return;
   flushing = true;
-  const parts = new Set([...store.config.tabs.map(microsoft.partitionFor), ...microsoft.keptSessions]);
-  await Promise.all([...parts].map(p =>
-    session.fromPartition(p).cookies.flushStore().catch(() => {})
-  ));
+  await flushLogins();
   require('./tray').destroy();
   app.quit();
 }
@@ -219,5 +224,5 @@ Object.assign(module.exports, {
   addTab, closeTab, reopenTab, removeTab,
   moveTab, reorderTab, cycle, goToIndex,
   reload, reloadAll, toggleMute, zoom, navigate, sleepNow,
-  back, toggleFullScreen, showShortcuts, setSetting, quit
+  back, toggleFullScreen, showShortcuts, setSetting, quit, flushLogins
 });

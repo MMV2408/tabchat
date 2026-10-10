@@ -109,6 +109,9 @@ function refresh() {
       click: (item) => actions.setSetting('autostart', item.checked)
     },
     { type: 'separator' },
+    ...(require('./updater').getStatus().state === 'ready'
+      ? [{ label: `Update installeren (${require('./updater').getStatus().version})`, click: () => require('./updater').install() }]
+      : []),
     { label: 'Afsluiten', click: () => actions.quit() }
   ]));
 }

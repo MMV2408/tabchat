@@ -39,6 +39,7 @@ function getState() {
       canSleep: sleep.canSleep(t)
     })),
     dnd: { on: dnd.isOn(), label: dnd.label() },
+    update: require('./updater').getStatus(),
     catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: s.desc })),
     settings: config.settings
   };
