@@ -53,6 +53,10 @@ function register() {
   ipcMain.on('get-dnd', (e) => { e.returnValue = dnd.isOn(); }); // vraag van preload/service.js
   ipcMain.on('set-dnd', (_e, mode) => dnd.set(mode));
 
+  // scherm delen
+  ipcMain.on('share-pick', (_e, id) => require('./share').pick(id));
+  ipcMain.on('share-cancel', () => require('./share').cancel());
+
   // snelzoeken
   ipcMain.on('palette-close', () => palette.hide());
   ipcMain.on('palette-run', (_e, item) => palette.run(item));

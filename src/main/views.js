@@ -1,6 +1,6 @@
 // De schermen in het venster: tabbladen maken, tonen, verbergen en de status
 // doorsturen naar de tabbalk en het +-scherm.
-const { WebContentsView, shell, desktopCapturer } = require('electron');
+const { WebContentsView, shell } = require('electron');
 const path = require('path');
 const store = require('./store');
 const { UA, CATALOG, LOGIN_HOSTS } = require('./catalog');
@@ -77,7 +77,7 @@ function createServiceView(tab) {
   // Een verborgen tabblad (bv. Outlook dat op de achtergrond laadt) kan de focus
   // "stelen". Dan werken de sneltoetsen niet meer. Zet de focus dan direct terug.
   v.webContents.on('focus', () => {
-    if (tab.id !== store.active || store.paletteOpen) setImmediate(focusActive);
+    if (tab.id !== store.active || store.paletteOpen || store.shareOpen) setImmediate(focusActive);
   });
 
   if (CATALOG[tab.service].group) {
@@ -94,12 +94,8 @@ function createServiceView(tab) {
     return { action: 'deny' };
   });
 
-  // Scherm delen (alleen beeld)
-  ses.setDisplayMediaRequestHandler((request, callback) => {
-    desktopCapturer.getSources({ types: ['screen', 'window'] }).then(sources => {
-      callback({ video: sources[0] });
-    });
-  });
+  // Scherm delen: keuzevenster tonen (zie share.js)
+  ses.setDisplayMediaRequestHandler((_request, callback) => require('./share').request(callback));
 
   // Wachten als een ander Microsoft-tabblad met dezelfde login al bezig is
   if (microsoft.shouldWait(tab)) microsoft.waiting.add(tab.id);
@@ -148,10 +144,13 @@ function layout() {
   }
   pal.setBounds({ x: 0, y: 0, width, height });
   pal.setVisible(paletteOpen);
+  store.share.setBounds({ x: 0, y: 0, width, height });
+  store.share.setVisible(store.shareOpen);
 }
 
 // Toetsenbord naar het juiste scherm, zodat de sneltoetsen altijd werken
 function focusActive() {
+  if (store.shareOpen) return store.share.webContents.focus();
   if (store.paletteOpen) return store.palette.webContents.focus();
   const target = store.active === 'home' ? store.home : store.views[store.active];
   (target || store.bar).webContents.focus();
@@ -166,7 +165,7 @@ function show(id) {
   if (id !== 'home') store.lastTab = id;
   layout();
   broadcast();
-  if (!store.paletteOpen) focusActive();
+  if (!store.paletteOpen && !store.shareOpen) focusActive();
 }
 
 Object.assign(module.exports, {

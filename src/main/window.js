@@ -37,6 +37,8 @@ function create() {
   const home = store.home = new WebContentsView({ webPreferences: prefs });
   const palette = store.palette = new WebContentsView({ webPreferences: prefs });
   palette.setBackgroundColor('#00000000'); // doorzichtig, zodat de app erachter zichtbaar blijft
+  const share = store.share = new WebContentsView({ webPreferences: prefs }); // scherm delen
+  share.setBackgroundColor('#00000000');
 
   win.contentView.addChildView(bar);
   win.contentView.addChildView(home);
@@ -46,6 +48,7 @@ function create() {
   bar.webContents.loadFile(path.join(RENDERER, 'tabs.html'));
   home.webContents.loadFile(path.join(RENDERER, 'home.html'));
   palette.webContents.loadFile(path.join(RENDERER, 'palette.html'));
+  share.webContents.loadFile(path.join(RENDERER, 'share.html'));
 
   // De opgeslagen tabbladen. Het eerste tabblad wordt altijd geladen (dat zie je meteen);
   // de rest mag slapend opstarten als dat aanstaat.
@@ -55,13 +58,14 @@ function create() {
     else views.createServiceView(tab);
   }
   win.contentView.addChildView(palette); // bovenop alles
+  win.contentView.addChildView(share);
   store.active = store.config.tabs.length ? store.config.tabs[0].id : 'home';
   if (store.active !== 'home') store.lastTab = store.active;
 
   win.on('resize', views.layout);
   win.on('focus', views.focusActive);
   home.webContents.on('focus', () => {
-    if (store.active !== 'home' || store.paletteOpen) setImmediate(views.focusActive);
+    if (store.active !== 'home' || store.paletteOpen || store.shareOpen) setImmediate(views.focusActive);
   });
   views.layout();
   tray.init(); // tray-icoon + kruisje = verbergen

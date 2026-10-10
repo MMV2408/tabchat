@@ -19,6 +19,11 @@ contextBridge.exposeInMainWorld('tabchat', {
   setDnd: (mode) => ipcRenderer.send('set-dnd', mode), // minuten, 'tomorrow', 'forever' of null
   onShowShortcuts: (cb) => ipcRenderer.on('show-shortcuts', () => cb()),
 
+  // scherm delen
+  onShareOpen: (cb) => ipcRenderer.on('share-open', (_e, list) => cb(list)),
+  sharePick: (id) => ipcRenderer.send('share-pick', id),
+  shareCancel: () => ipcRenderer.send('share-cancel'),
+
   // snelzoeken
   onPaletteOpen: (cb) => ipcRenderer.on('palette-open', (_e, s) => cb(s)),
   paletteRun: (item) => ipcRenderer.send('palette-run', item),
