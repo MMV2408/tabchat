@@ -114,7 +114,7 @@ function goToIndex(i) {
 
 // ---------- binnen een tabblad ----------
 function reload(id = store.active) {
-  if (store.views[id]) store.views[id].webContents.reload();
+  views.reloadView(id);
 }
 
 // Alle tabbladen herladen (voor als een dienst vastloopt).
@@ -122,7 +122,7 @@ function reload(id = store.active) {
 function reloadAll() {
   const waiting = require('./microsoft').waiting;
   for (const [id, v] of Object.entries(store.views)) {
-    if (!waiting.has(id)) v.webContents.reload();
+    if (!waiting.has(id)) views.reloadView(id);
   }
 }
 

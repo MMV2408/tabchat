@@ -12,6 +12,7 @@ const dnd = require('./dnd');
 const sleep = require('./sleep');
 
 const BAR = 44; // hoogte tabbalk in pixels
+const ERROR_PAGE = path.join(__dirname, '..', 'renderer', 'error.html');
 
 // ---------- status naar de schermen ----------
 function labelFor(tab) {
@@ -67,9 +68,15 @@ function createServiceView(tab) {
   unread.watch(tab, v);
 
   v.webContents.on('did-finish-load', () => {
-    // Zoom terugzetten na het laden van een pagina
-    const t = store.config.tabs.find(x => x.id === tab.id);
-    if (t && t.zoom) v.webContents.setZoomFactor(t.zoom);
+    const url = v.webContents.getURL();
+    if (url.startsWith('file:')) {
+      v.webContents.setZoomFactor(1); // foutscherm altijd op normale grootte
+    } else {
+      // Zoom terugzetten na het laden van een pagina
+      const t = store.config.tabs.find(x => x.id === tab.id);
+      if (t && t.zoom) v.webContents.setZoomFactor(t.zoom);
+      checkRawPage(tab, v);
+    }
     // Na herladen (F5) de focus terugzetten op het actieve tabblad
     if (tab.id === store.active && store.win.isFocused()) focusActive();
   });
@@ -92,6 +99,16 @@ function createServiceView(tab) {
     if (LOGIN_HOSTS.includes(host)) return { action: 'allow' };
     if (url.startsWith('http')) shell.openExternal(url);
     return { action: 'deny' };
+  });
+
+  // Foutscherm als de dienst niet laadt (geen internet, storing) of vastloopt
+  v.webContents.on('did-fail-load', (_e, code, desc, url, isMainFrame) => {
+    if (!isMainFrame || code === -3 || url.startsWith('file:')) return; // -3 = afgebroken, geen echte fout
+    showError(tab, v, { code, desc, url: /^https?:/.test(url) ? url : CATALOG[tab.service].url });
+  });
+  v.webContents.on('render-process-gone', (_e, details) => {
+    if (details.reason === 'clean-exit' || store.views[tab.id] !== v) return; // zelf gesloten (bv. slaapstand)
+    showError(tab, v, { reason: 'crash' });
   });
 
   // Scherm delen: keuzevenster tonen (zie share.js)
@@ -128,6 +145,45 @@ function removeForSleep(id) {
   v.webContents.close();
   delete store.views[id];
   unread.forget(id); // een slapend tabblad kan niet tellen
+}
+
+// ---------- foutscherm ----------
+function showError(tab, v, info) {
+  if (v.webContents.isDestroyed()) return;
+  const svc = CATALOG[tab.service];
+  v.webContents.loadFile(ERROR_PAGE, {
+    query: {
+      name: svc.name,
+      color: svc.color,
+      url: info.url || svc.url,
+      code: String(info.code || ''),
+      desc: info.desc || '',
+      reason: info.reason || ''
+    }
+  });
+}
+
+// Sommige diensten (bv. Outlook) tonen zonder internet hun eigen offline-pagina
+// als ruwe code. Die pagina "laadt" wel, dus did-fail-load merkt niets.
+// Herkennen we zo'n pagina, dan tonen we ons eigen foutscherm.
+function checkRawPage(tab, v) {
+  v.webContents.executeJavaScript(
+    "document.contentType === 'text/plain' && /^\\s*<(!doctype|html)/i.test((document.body && document.body.innerText) || '')"
+  ).then(isRaw => {
+    if (isRaw) showError(tab, v, { code: -106, desc: 'OFFLINE_PAGE', url: CATALOG[tab.service].url });
+  }).catch(() => {});
+}
+
+// Herladen. Staat er een foutscherm? Dan de dienst opnieuw proberen.
+function reloadView(id) {
+  const v = store.views[id];
+  if (!v) return;
+  if (v.webContents.getURL().startsWith('file:')) {
+    const tab = store.config.tabs.find(t => t.id === id);
+    if (tab) v.webContents.loadURL(CATALOG[tab.service].url);
+  } else {
+    v.webContents.reload();
+  }
 }
 
 // ---------- tonen ----------
@@ -169,5 +225,5 @@ function show(id) {
 }
 
 Object.assign(module.exports, {
-  getState, broadcast, createServiceView, destroyView, removeForSleep, layout, focusActive, show
+  getState, broadcast, createServiceView, destroyView, removeForSleep, reloadView, layout, focusActive, show
 });

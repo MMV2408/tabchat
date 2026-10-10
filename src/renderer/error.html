@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Tabchat</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #2b2d31; color: #dbdee1; font-family: system-ui, sans-serif;
+    display: grid; place-items: center; padding: 24px;
+  }
+  .card { max-width: 440px; text-align: center; }
+  .badge {
+    width: 64px; height: 64px; border-radius: 18px; margin: 0 auto 18px;
+    display: grid; place-items: center; color: #fff; font-size: 28px; font-weight: 700;
+    position: relative;
+  }
+  .badge .warn {
+    position: absolute; right: -6px; bottom: -6px; width: 26px; height: 26px; border-radius: 50%;
+    background: #f0b232; color: #1e1f22; font-size: 16px; display: grid; place-items: center;
+    border: 3px solid #2b2d31;
+  }
+  h1 { margin: 0 0 8px; font-size: 22px; color: #fff; }
+  p { margin: 0 0 22px; color: #b5bac1; line-height: 1.5; }
+  .buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  button, a.btn {
+    border: none; border-radius: 8px; padding: 10px 18px; font: inherit; font-size: 14px;
+    cursor: pointer; text-decoration: none;
+  }
+  #retry { background: #5865F2; color: #fff; }
+  #retry:hover { background: #4752c4; }
+  a.btn { background: #1e1f22; color: #dbdee1; }
+  a.btn:hover { background: #35373c; }
+  .auto { margin-top: 18px; font-size: 13px; color: #80848e; }
+  .code { margin-top: 6px; font-size: 12px; color: #6d6f78; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="badge" id="badge"><span id="letter"></span><span class="warn">!</span></div>
+  <h1 id="title"></h1>
+  <p id="text"></p>
+  <div class="buttons">
+    <button id="retry">Opnieuw proberen</button>
+    <a class="btn" id="browser" target="_blank" rel="noopener">Openen in browser</a>
+  </div>
+  <div class="auto" id="auto"></div>
+  <div class="code" id="code"></div>
+</div>
+
+<script>
+  // Gegevens komen via het adres mee (zie views.js)
+  const q = new URLSearchParams(location.search);
+  const name = q.get('name') || 'Deze dienst';
+  const url = q.get('url');
+  const code = Number(q.get('code')) || 0;
+  const reason = q.get('reason');
+
+  document.getElementById('badge').style.background = q.get('color') || '#4e5058';
+  document.getElementById('letter').textContent = name[0];
+  document.getElementById('browser').href = url;
+
+  // Passende melding kiezen
+  let title, text;
+  if (reason === 'crash') {
+    title = `${name} is vastgelopen`;
+    text = 'Het tabblad is gestopt. Opnieuw laden lost dit meestal op; je blijft ingelogd.';
+  } else if (!navigator.onLine) {
+    title = 'Geen internetverbinding';
+    text = `${name} laadt vanzelf opnieuw zodra je weer verbinding hebt.`;
+  } else if (code === -7 || code === -118) {
+    title = 'Dat duurt te lang';
+    text = `${name} reageert niet. Misschien is je verbinding traag of heeft ${name} een storing.`;
+  } else {
+    title = `${name} kon niet laden`;
+    text = `Mogelijk heeft ${name} een storing, of blokkeert een netwerk (bijvoorbeeld op school) de verbinding.`;
+  }
+  document.getElementById('title').textContent = title;
+  document.getElementById('text').textContent = text;
+  if (q.get('desc')) document.getElementById('code').textContent = `Foutcode: ${q.get('desc')}`;
+
+  // Opnieuw proberen = terug naar de dienst
+  function retry() { location.href = url; }
+  document.getElementById('retry').onclick = retry;
+
+  // Weer online? Direct opnieuw proberen
+  window.addEventListener('online', retry);
+
+  // Anders elke 30 seconden vanzelf opnieuw (niet na een crash)
+  if (reason !== 'crash') {
+    let left = 30;
+    const auto = document.getElementById('auto');
+    const tick = () => {
+      auto.textContent = `Automatisch opnieuw over ${left} s`;
+      if (left-- <= 0) retry();
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+</script>
+</body>
+</html>
