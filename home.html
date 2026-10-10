@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #2b2d31;
+    color: #dbdee1;
+    font-family: system-ui, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 24px 48px; }
+  h1 { margin: 0 0 4px; font-size: 26px; color: #fff; }
+  .sub { margin: 0 0 32px; color: #949ba4; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: #949ba4; margin: 32px 0 12px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .card {
+    background: #1e1f22; border-radius: 12px; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .card .top { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center;
+    color: #fff; font-weight: 700; font-size: 17px; flex-shrink: 0;
+  }
+  .name { font-weight: 600; color: #fff; }
+  .desc { font-size: 13px; color: #949ba4; min-height: 34px; }
+
+  button {
+    border: none; border-radius: 8px; padding: 8px 12px;
+    font-size: 14px; cursor: pointer; font-family: inherit;
+  }
+  .add { background: #5865F2; color: #fff; }
+  .add:hover { background: #4752c4; }
+  .remove { background: transparent; color: #f23f43; }
+  .remove:hover { background: #3a1d1f; }
+
+  .row {
+    display: flex; align-items: center; gap: 12px;
+    background: #1e1f22; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
+  }
+  .row .name { flex: 1; }
+  .empty { color: #949ba4; background: #1e1f22; border-radius: 10px; padding: 16px; }
+
+  .feature { display: flex; align-items: center; gap: 16px; background: #1e1f22; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; }
+  .feature .text { flex: 1; }
+  .feature .desc { min-height: 0; margin-top: 2px; }
+  .soon { font-size: 11px; color: #949ba4; border: 1px solid #4e5058; border-radius: 6px; padding: 2px 6px; margin-left: 8px; }
+
+  header { display: flex; align-items: flex-start; gap: 16px; }
+  header .titles { flex: 1; }
+  .ghost { background: #1e1f22; color: #dbdee1; display: flex; align-items: center; gap: 8px; }
+  .ghost:hover { background: #35373c; }
+  .card .top .name { flex: 1; }
+  .card .name u { text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  h2 .hint { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  kbd { background: #2b2d31; border: 1px solid #4e5058; border-bottom-width: 2px; border-radius: 5px; padding: 1px 7px; font-family: inherit; font-size: 13px; color: #dbdee1; }
+
+  /* sneltoetsen-venster */
+  #modal { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
+  #modal.open { display: flex; }
+  .sheet { background: #1e1f22; border-radius: 14px; width: min(640px, 100%); padding: 24px 24px 12px; box-shadow: 0 16px 48px rgba(0,0,0,.5); }
+  .sheet-head { display: flex; align-items: center; margin-bottom: 4px; }
+  .sheet-head h3 { flex: 1; margin: 0; color: #fff; font-size: 20px; }
+  .close { background: transparent; color: #949ba4; font-size: 20px; padding: 4px 10px; }
+  .close:hover { background: #35373c; color: #fff; }
+  .sheet h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #949ba4; margin: 20px 0 6px; }
+  .key { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 9px 0; border-bottom: 1px solid #2b2d31; color: #949ba4; font-size: 14px; }
+  .key:last-child { border-bottom: none; }
+  .key span:first-child { color: #dbdee1; }
+  .key .combo { white-space: nowrap; }
+
+  /* schakelaar */
+  .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: #4e5058; border-radius: 24px; cursor: pointer; transition: .15s; }
+  .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .15s; }
+  input:checked + .slider { background: #23a55a; }
+  input:checked + .slider::before { transform: translateX(18px); }
+  input:disabled + .slider { opacity: .4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="titles">
+      <h1>Tabchat</h1>
+      <p class="sub">Voeg je chat-apps toe en stel Tabchat in. Tip: druk overal op <kbd>Ctrl</kbd> + <kbd>K</kbd> om snel te zoeken.</p>
+    </div>
+    <button class="ghost" id="openKeys">⌨ Alle sneltoetsen</button>
+  </header>
+
+  <h2>Jouw tabbladen</h2>
+  <div id="mine"></div>
+
+  <h2>Dienst toevoegen <span class="hint">· Alt + onderstreepte letter</span></h2>
+  <div class="grid" id="catalog"></div>
+
+  <h2>Functies</h2>
+  <div id="features"></div>
+
+</main>
+
+<div id="modal">
+  <div class="sheet" role="dialog" aria-label="Sneltoetsen">
+    <div class="sheet-head"><h3>Sneltoetsen</h3><button class="close" id="closeKeys" title="Sluiten (Esc)">✕</button></div>
+    <div id="keylist"></div>
+  </div>
+</div>
+
+<script>
+  // Functies: key = instelling die echt werkt, soon = komt later
+  const FEATURES = [
+    { key: 'spellcheck', name: 'Spellingscontrole', desc: 'Rode lijntjes onder typfouten (Nederlands en Engels).' },
+    { key: 'stayLoggedIn', name: 'Ingelogd blijven bij Microsoft', desc: 'Teams, Outlook en OneDrive onthouden je login na afsluiten (14 dagen). Alleen op deze computer.' },
+    { key: 'shareMicrosoft', name: 'Eén Microsoft-account', desc: 'Teams, Outlook en OneDrive delen dezelfde login, dus je logt maar één keer in.' },
+    { soon: true, name: 'Tray-icoon', desc: 'Tabchat blijft draaien op de achtergrond als je het venster sluit.' },
+    { soon: true, name: 'Ongelezen-tellers', desc: 'Aantal nieuwe berichten op elk tabblad.' },
+    { soon: true, name: 'Slaapstand voor tabbladen', desc: 'Tabbladen die je niet gebruikt, gaan uit het geheugen.' }
+  ];
+
+  const el = (tag, cls, text) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  };
+
+  const badge = (name, color) => {
+    const b = el('div', 'badge', name[0]);
+    b.style.background = color;
+    return b;
+  };
+
+  // Naam met de sneltoets-letter onderstreept, bv. O<u>n</u>eDrive
+  function nameWithKey(name, key) {
+    const div = el('div', 'name');
+    const i = name.toLowerCase().indexOf(key);
+    if (i < 0) { div.textContent = name; return div; }
+    div.append(name.slice(0, i), el('u', null, name[i]), name.slice(i + 1));
+    return div;
+  }
+
+  // ---------- sneltoetsen-venster ----------
+  const KEYS = [
+    ['Algemeen', [
+      [['Ctrl', 'K'], 'Snelzoeken: dienst of actie zoeken'],
+      [['Alt', 'T'], 'Dit scherm openen (+)'],
+      [['Esc'], 'Terug naar je tabblad (in dit scherm)'],
+      [['Alt', 'W / D / T / O / N'], 'Nieuw tabblad van die dienst (in dit scherm)'],
+      [['F11'], 'Volledig scherm'],
+      [['Ctrl', 'Q'], 'Tabchat afsluiten']
+    ]],
+    ['Tabbladen', [
+      [['Alt', '1 – 8'], 'Naar dat tabblad'],
+      [['Alt', '9'], 'Naar het laatste tabblad'],
+      [['Ctrl', 'Tab'], 'Volgend tabblad'],
+      [['Ctrl', 'Shift', 'Tab'], 'Vorig tabblad'],
+      [['Ctrl', 'W'], 'Tabblad sluiten (login blijft bewaard)'],
+      [['Ctrl', 'Shift', 'T'], 'Gesloten tabblad terughalen'],
+      [['Ctrl', 'Shift', 'PageUp / PageDown'], 'Tabblad naar links / rechts']
+    ]],
+    ['Binnen een tabblad', [
+      [['F5'], 'Herladen'],
+      [['Alt', 'M'], 'Geluid dempen / aanzetten'],
+      [['Alt', '← / →'], 'Terug / vooruit'],
+      [['Ctrl', '+'], 'Inzoomen'],
+      [['Ctrl', '−'], 'Uitzoomen'],
+      [['Ctrl', '0'], 'Zoom herstellen']
+    ]]
+  ];
+
+  function buildKeys() {
+    const box = document.getElementById('keylist');
+    for (const [group, rows] of KEYS) {
+      box.append(el('h4', null, group));
+      for (const [combo, what] of rows) {
+        const row = el('div', 'key');
+        const c = el('span', 'combo');
+        combo.forEach((k, i) => {
+          if (i) c.append(' + ');
+          c.append(el('kbd', null, k));
+        });
+        row.append(el('span', null, what), c);
+        box.append(row);
+      }
+    }
+    const tip = el('div', 'key');
+    tip.append(el('span', null, 'Rechtsklik op een tabblad voor herladen, dempen, verplaatsen en sluiten.'));
+    box.append(tip);
+  }
+
+  const modal = document.getElementById('modal');
+  const openKeys = () => modal.classList.add('open');
+  const closeKeys = () => modal.classList.remove('open');
+  document.getElementById('openKeys').onclick = openKeys;
+  document.getElementById('closeKeys').onclick = closeKeys;
+  modal.onclick = (e) => { if (e.target === modal) closeKeys(); };
+  window.tabchat.onShowShortcuts(openKeys);
+
+  // Esc: eerst het venster sluiten, anders terug naar je tabblad
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (modal.classList.contains('open')) closeKeys();
+    else window.tabchat.back();
+  });
+
+  buildKeys();
+
+  function render(s) {
+    // Jouw tabbladen
+    const mine = document.getElementById('mine');
+    mine.replaceChildren();
+    if (s.tabs.length === 0) {
+      mine.append(el('div', 'empty', 'Nog niets toegevoegd. Kies hieronder een dienst.'));
+    }
+    for (const t of s.tabs) {
+      const row = el('div', 'row');
+      const rm = el('button', 'remove', 'Verwijderen');
+      rm.onclick = () => {
+        if (confirm(`${t.label} verwijderen? Je wordt dan ook uitgelogd.`)) window.tabchat.remove(t.id);
+      };
+      row.append(badge(t.label, t.color), el('div', 'name', t.label), rm);
+      mine.append(row);
+    }
+
+    // Dienst toevoegen
+    const cat = document.getElementById('catalog');
+    cat.replaceChildren();
+    for (const c of s.catalog) {
+      const card = el('div', 'card');
+      const top = el('div', 'top');
+      top.append(badge(c.name, c.color), nameWithKey(c.name, c.key));
+      card.title = 'Alt+' + c.key.toUpperCase() + ': toevoegen';
+      const add = el('button', 'add', '+ Toevoegen');
+      add.onclick = () => window.tabchat.add(c.id);
+      card.append(top, el('div', 'desc', c.desc), add);
+      cat.append(card);
+    }
+
+    // Functies
+    const feat = document.getElementById('features');
+    feat.replaceChildren();
+    for (const f of FEATURES) {
+      const row = el('div', 'feature');
+      const text = el('div', 'text');
+      const title = el('div', 'name', f.name);
+      if (f.soon) title.append(el('span', 'soon', 'binnenkort'));
+      text.append(title, el('div', 'desc', f.desc));
+
+      const label = el('label', 'switch');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      if (f.soon) {
+        input.disabled = true;
+      } else {
+        input.checked = !!s.settings[f.key];
+        input.onchange = () => window.tabchat.setSetting(f.key, input.checked);
+      }
+      label.append(input, el('span', 'slider'));
+      row.append(text, label);
+      feat.append(row);
+    }
+  }
+
+  window.tabchat.onState(render);
+  window.tabchat.getState().then(render);
+</script>
+</body>
+</html>

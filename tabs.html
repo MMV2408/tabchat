@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    background: #1e1f22;
+    font-family: system-ui, sans-serif;
+    user-select: none;
+    overflow-x: auto;
+  }
+  button {
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    padding: 0 14px;
+    background: #2b2d31;
+    color: #cfd1d5;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  button:hover { background: #35373c; }
+  button.active { background: #4e5058; color: #fff; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .muted { font-size: 12px; opacity: .8; }
+  #plus { width: 32px; padding: 0; justify-content: center; font-size: 20px; }
+  /* slepen */
+  .dragging { opacity: .4; }
+  .drop-before { box-shadow: inset 3px 0 0 #5865F2; }
+  .drop-after { box-shadow: inset -3px 0 0 #5865F2; }
+</style>
+</head>
+<body>
+<script>
+  let dragId = null;
+
+  function clearDrop() {
+    document.querySelectorAll('.drop-before, .drop-after').forEach(x => x.classList.remove('drop-before', 'drop-after'));
+  }
+
+  // Maakt een knop een plek waar je een tabblad kunt neerzetten
+  function dropTarget(el, indexBefore, indexAfter) {
+    el.ondragover = (e) => {
+      if (!dragId) return;
+      e.preventDefault();
+      const r = el.getBoundingClientRect();
+      const after = indexAfter != null && e.clientX > r.left + r.width / 2;
+      clearDrop();
+      el.classList.add(after ? 'drop-after' : 'drop-before');
+    };
+    el.ondragleave = () => el.classList.remove('drop-before', 'drop-after');
+    el.ondrop = (e) => {
+      e.preventDefault();
+      if (!dragId) return;
+      const after = el.classList.contains('drop-after');
+      clearDrop();
+      window.tabchat.reorder(dragId, after ? indexAfter : indexBefore);
+    };
+  }
+
+  function render(s) {
+    document.body.replaceChildren();
+
+    s.tabs.forEach((t, i) => {
+      const b = document.createElement('button');
+      b.title = (i < 8 ? 'Alt+' + (i + 1) + ' · ' : '') + 'sleep om te verplaatsen · rechtsklik voor meer';
+      if (s.active === t.id) b.classList.add('active');
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      dot.style.background = t.color;
+      b.append(dot, document.createTextNode(t.label));
+      if (t.muted) {
+        const m = document.createElement('span');
+        m.className = 'muted';
+        m.textContent = '🔇';
+        b.append(m);
+      }
+      b.onclick = () => window.tabchat.open(t.id);
+      b.oncontextmenu = (e) => { e.preventDefault(); window.tabchat.tabMenu(t.id); };
+
+      // Slepen om te verplaatsen
+      b.draggable = true;
+      b.ondragstart = (e) => {
+        dragId = t.id;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', t.id);
+        b.classList.add('dragging');
+      };
+      b.ondragend = () => { dragId = null; b.classList.remove('dragging'); clearDrop(); };
+      dropTarget(b, i, i + 1);
+
+      document.body.append(b);
+    });
+
+    const plus = document.createElement('button');
+    plus.id = 'plus';
+    plus.textContent = '+';
+    plus.title = 'Diensten toevoegen en instellingen (Alt+T)';
+    if (s.active === 'home') plus.classList.add('active');
+    plus.onclick = () => window.tabchat.open('home');
+    dropTarget(plus, s.tabs.length, null); // neerzetten op + = helemaal achteraan
+    document.body.append(plus);
+  }
+
+  window.tabchat.onState(render);
+  window.tabchat.getState().then(render);
+</script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: transparent; font-family: system-ui, sans-serif; }
+  #backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); }
+  #box {
+    position: relative;
+    width: min(560px, calc(100% - 32px));
+    margin: 70px auto 0;
+    background: #2b2d31;
+    border: 1px solid #3f4147;
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .5);
+    overflow: hidden;
+  }
+  input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #fff;
+    font-size: 17px;
+    padding: 16px 18px;
+    border-bottom: 1px solid #3f4147;
+    font-family: inherit;
+  }
+  input::placeholder { color: #80848e; }
+  ul { list-style: none; margin: 0; padding: 6px; max-height: 380px; overflow-y: auto; }
+  li {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 12px; border-radius: 8px; cursor: pointer; color: #dbdee1;
+  }
+  li.sel { background: #404249; color: #fff; }
+  .icon {
+    width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
+    display: grid; place-items: center; font-size: 13px; font-weight: 700; color: #fff;
+    background: #3f4147;
+  }
+  .text { flex: 1; min-width: 0; }
+  .title { font-size: 14px; }
+  .sub { font-size: 12px; color: #949ba4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  kbd {
+    font-family: inherit; font-size: 11px; color: #b5bac1;
+    background: #1e1f22; border: 1px solid #4e5058; border-radius: 5px; padding: 2px 6px; white-space: nowrap;
+  }
+  .empty { color: #949ba4; padding: 14px; font-size: 14px; }
+  .foot { display: flex; gap: 14px; padding: 8px 14px; border-top: 1px solid #3f4147; font-size: 12px; color: #80848e; }
+</style>
+</head>
+<body>
+<div id="backdrop"></div>
+<div id="box">
+  <input id="q" placeholder="Zoek een dienst of actie…" autocomplete="off" spellcheck="false">
+  <ul id="list"></ul>
+  <div class="foot"><span>↑↓ kiezen</span><span>Enter openen</span><span>Esc sluiten</span></div>
+</div>
+
+<script>
+  const q = document.getElementById('q');
+  const list = document.getElementById('list');
+  let items = [];
+  let shown = [];
+  let sel = 0;
+
+  // Alle regels opbouwen uit de huidige status van de app
+  function build(s) {
+    const out = [];
+    const present = new Set(s.tabs.map(t => t.service));
+
+    s.tabs.forEach((t, i) => out.push({
+      run: { type: 'tab', id: t.id }, title: t.label, sub: 'Openen',
+      color: t.color, letter: t.label[0], hint: i < 8 ? 'Alt+' + (i + 1) : '', words: t.label
+    }));
+
+    for (const c of s.catalog) if (!present.has(c.id)) out.push({
+      run: { type: 'add', service: c.id }, title: c.name + ' toevoegen', sub: c.desc,
+      color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen add'
+    });
+
+    const action = (id, title, hint, icon, words, allowed = true) => {
+      if (allowed) out.push({ run: { type: 'action', id }, title, sub: '', icon, hint, words: title + ' ' + words });
+    };
+    const tab = s.activeIsTab;
+    action('reload', 'Tabblad herladen', 'F5', '↻', 'herladen vernieuwen reload refresh', tab);
+    action('mute', s.activeMuted ? 'Geluid aanzetten' : 'Geluid dempen', 'Alt+M', '🔇', 'dempen mute geluid stil', tab);
+    action('close', 'Tabblad sluiten', 'Ctrl+W', '✕', 'sluiten close', tab);
+    action('reopen', 'Gesloten tabblad terughalen', 'Ctrl+Shift+T', '↺', 'terughalen herstellen reopen', s.canReopen);
+    action('zoomIn', 'Inzoomen', 'Ctrl+Plus', '+', 'zoom groter', tab);
+    action('zoomOut', 'Uitzoomen', 'Ctrl+Min', '−', 'zoom kleiner', tab);
+    action('zoomReset', 'Zoom herstellen', 'Ctrl+0', '1:1', 'zoom normaal 100', tab);
+    action('fullscreen', 'Volledig scherm', 'F11', '⛶', 'fullscreen groot');
+    action('settings', 'Diensten en instellingen', 'Alt+T', '⚙', 'instellingen plus toevoegen settings');
+    action('shortcuts', 'Alle sneltoetsen', '', '⌨', 'sneltoetsen toetsen shortcuts help');
+
+    for (const c of s.catalog) if (present.has(c.id)) out.push({
+      run: { type: 'add', service: c.id }, title: 'Nog een ' + c.name + '-account', sub: 'Extra tabblad met eigen login',
+      color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen account extra'
+    });
+
+    action('quit', 'Tabchat afsluiten', 'Ctrl+Q', '⏻', 'afsluiten quit stoppen');
+    return out;
+  }
+
+  function filter() {
+    const words = q.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    shown = items.filter(it => {
+      const hay = (it.title + ' ' + it.words).toLowerCase();
+      return words.every(w => hay.includes(w));
+    });
+    sel = 0;
+    render();
+  }
+
+  function render() {
+    list.replaceChildren();
+    if (!shown.length) {
+      const li = document.createElement('div');
+      li.className = 'empty';
+      li.textContent = 'Niets gevonden';
+      list.append(li);
+      return;
+    }
+    shown.forEach((it, i) => {
+      const li = document.createElement('li');
+      if (i === sel) li.className = 'sel';
+      const icon = document.createElement('div');
+      icon.className = 'icon';
+      icon.textContent = it.icon || it.letter;
+      if (it.color) icon.style.background = it.color;
+      const text = document.createElement('div');
+      text.className = 'text';
+      const title = document.createElement('div');
+      title.className = 'title';
+      title.textContent = it.title;
+      text.append(title);
+      if (it.sub) {
+        const sub = document.createElement('div');
+        sub.className = 'sub';
+        sub.textContent = it.sub;
+        text.append(sub);
+      }
+      li.append(icon, text);
+      if (it.hint) {
+        const k = document.createElement('kbd');
+        k.textContent = it.hint;
+        li.append(k);
+      }
+      li.onmousemove = () => { if (sel !== i) { sel = i; render(); } };
+      li.onclick = () => window.tabchat.paletteRun(it.run);
+      list.append(li);
+    });
+    const cur = list.children[sel];
+    if (cur) cur.scrollIntoView({ block: 'nearest' });
+  }
+
+  q.addEventListener('input', filter);
+  q.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') { sel = Math.min(sel + 1, shown.length - 1); render(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { sel = Math.max(sel - 1, 0); render(); e.preventDefault(); }
+    else if (e.key === 'Enter') { if (shown[sel]) window.tabchat.paletteRun(shown[sel].run); e.preventDefault(); }
+    else if (e.key === 'Escape') { window.tabchat.paletteClose(); e.preventDefault(); }
+  });
+  document.getElementById('backdrop').onclick = () => window.tabchat.paletteClose();
+
+  window.tabchat.onPaletteOpen((s) => {
+    items = build(s);
+    q.value = '';
+    filter();
+    q.focus();
+  });
+</script>
+</body>
+</html>
