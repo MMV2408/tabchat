@@ -2,7 +2,7 @@
   "name": "tabchat",
   "version": "1.0.0",
   "description": "WhatsApp, Discord en Teams in één venster",
-  "main": "main.js",
+  "main": "src/main/index.js",
   "homepage": "https://github.com/MMV2408/tabchat",
   "author": {
     "name": "Mike Vijverberg",
@@ -19,9 +19,14 @@
     "productName": "Tabchat",
     "linux": {
       "category": "Network",
-      "icon": "icon.png",
+      "icon": "assets/icon.png",
       "syncDesktopName": true
-    }
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ]
   },
   "devDependencies": {
     "electron": "^38.0.0",

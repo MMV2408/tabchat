@@ -1,0 +1,57 @@
+// Het snelzoekvenster (Ctrl+K)
+const store = require('./store');
+const views = require('./views');
+const actions = require('./actions');
+const { CATALOG } = require('./catalog');
+
+// Acties die je vanuit Ctrl+K kunt kiezen. Nieuwe actie = één regel hier
+// (en een regel in palette.html zodat hij in de lijst staat).
+const ACTIONS = {
+  reload: () => actions.reload(),
+  mute: () => actions.toggleMute(),
+  close: () => actions.closeTab(),
+  reopen: () => actions.reopenTab(),
+  zoomIn: () => actions.zoom(0.1),
+  zoomOut: () => actions.zoom(-0.1),
+  zoomReset: () => actions.zoom(0),
+  fullscreen: () => actions.toggleFullScreen(),
+  settings: () => views.show('home'),
+  shortcuts: () => actions.showShortcuts(),
+  quit: () => actions.quit()
+};
+
+// Het venster bovenop alle tabbladen leggen
+function bringToFront() {
+  store.win.contentView.removeChildView(store.palette);
+  store.win.contentView.addChildView(store.palette);
+}
+
+function open() {
+  store.paletteOpen = true;
+  bringToFront();
+  views.layout();
+  store.palette.webContents.send('palette-open', views.getState());
+  store.palette.webContents.focus();
+}
+
+function hide() {
+  if (!store.paletteOpen) return;
+  store.paletteOpen = false;
+  views.layout();
+  views.focusActive();
+}
+
+function toggle() {
+  if (store.paletteOpen) hide(); else open();
+}
+
+// Een gekozen regel uitvoeren
+function run(item) {
+  hide();
+  if (!item) return;
+  if (item.type === 'tab' && store.views[item.id]) views.show(item.id);
+  else if (item.type === 'add' && CATALOG[item.service]) actions.addTab(item.service);
+  else if (item.type === 'action' && ACTIONS[item.id]) ACTIONS[item.id]();
+}
+
+Object.assign(module.exports, { bringToFront, open, hide, toggle, run });

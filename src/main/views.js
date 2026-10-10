@@ -1,0 +1,147 @@
+// De schermen in het venster: tabbladen maken, tonen, verbergen en de status
+// doorsturen naar de tabbalk en het +-scherm.
+const { WebContentsView, shell, desktopCapturer } = require('electron');
+const store = require('./store');
+const { UA, CATALOG, LOGIN_HOSTS } = require('./catalog');
+const microsoft = require('./microsoft');
+const shortcuts = require('./shortcuts');
+const palette = require('./palette');
+
+const BAR = 44; // hoogte tabbalk in pixels
+
+// ---------- status naar de schermen ----------
+function labelFor(tab) {
+  const same = store.config.tabs.filter(t => t.service === tab.service);
+  const name = CATALOG[tab.service].name;
+  return same.length > 1 ? `${name} ${same.indexOf(tab) + 1}` : name;
+}
+
+function getState() {
+  const { config, views, active, mutedTabs, closedTabs } = store;
+  return {
+    active,
+    activeIsTab: !!views[active],
+    activeMuted: mutedTabs.has(active),
+    canReopen: closedTabs.length > 0,
+    tabs: config.tabs.map(t => ({
+      id: t.id,
+      service: t.service,
+      label: labelFor(t),
+      color: CATALOG[t.service].color,
+      muted: mutedTabs.has(t.id)
+    })),
+    catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: s.desc })),
+    settings: config.settings
+  };
+}
+
+function broadcast() {
+  const s = getState();
+  store.bar.webContents.send('state', s);
+  store.home.webContents.send('state', s);
+}
+
+// ---------- tabblad maken ----------
+function createServiceView(tab) {
+  const v = new WebContentsView({
+    webPreferences: {
+      partition: microsoft.partitionFor(tab),
+      spellcheck: store.config.settings.spellcheck,
+      zoomFactor: tab.zoom || 1
+    }
+  });
+  const ses = v.webContents.session;
+  ses.setSpellCheckerLanguages(['nl', 'en-US']);
+  v.webContents.setUserAgent(UA);
+  v.webContents.on('before-input-event', shortcuts.handler('tab'));
+
+  v.webContents.on('did-finish-load', () => {
+    // Zoom terugzetten na het laden van een pagina
+    const t = store.config.tabs.find(x => x.id === tab.id);
+    if (t && t.zoom) v.webContents.setZoomFactor(t.zoom);
+    // Na herladen (F5) de focus terugzetten op het actieve tabblad
+    if (tab.id === store.active && store.win.isFocused()) focusActive();
+  });
+
+  // Een verborgen tabblad (bv. Outlook dat op de achtergrond laadt) kan de focus
+  // "stelen". Dan werken de sneltoetsen niet meer. Zet de focus dan direct terug.
+  v.webContents.on('focus', () => {
+    if (tab.id !== store.active || store.paletteOpen) setImmediate(focusActive);
+  });
+
+  if (CATALOG[tab.service].group) {
+    microsoft.keepLogin(ses, microsoft.partitionFor(tab));
+    microsoft.watchLogin(tab, v);
+  }
+
+  // Inlogvensters in de app, andere links in de gewone browser
+  v.webContents.setWindowOpenHandler(({ url }) => {
+    let host = '';
+    try { host = new URL(url).hostname; } catch {}
+    if (LOGIN_HOSTS.includes(host)) return { action: 'allow' };
+    if (url.startsWith('http')) shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
+  // Scherm delen (alleen beeld)
+  ses.setDisplayMediaRequestHandler((request, callback) => {
+    desktopCapturer.getSources({ types: ['screen', 'window'] }).then(sources => {
+      callback({ video: sources[0] });
+    });
+  });
+
+  // Wachten als een ander Microsoft-tabblad met dezelfde login al bezig is
+  if (microsoft.shouldWait(tab)) microsoft.waiting.add(tab.id);
+  else v.webContents.loadURL(CATALOG[tab.service].url);
+
+  v.setVisible(false);
+  store.win.contentView.addChildView(v);
+  store.views[tab.id] = v;
+  if (store.paletteOpen) palette.bringToFront();
+}
+
+function destroyView(id) {
+  const v = store.views[id];
+  if (!v) return;
+  microsoft.waiting.delete(id);
+  store.mutedTabs.delete(id);
+  store.win.contentView.removeChildView(v);
+  v.webContents.close();
+  delete store.views[id];
+}
+
+// ---------- tonen ----------
+function layout() {
+  const { win, bar, home, palette: pal, views, active, paletteOpen } = store;
+  const { width, height } = win.getContentBounds();
+  const area = { x: 0, y: BAR, width, height: height - BAR };
+  bar.setBounds({ x: 0, y: 0, width, height: BAR });
+  home.setBounds(area);
+  home.setVisible(active === 'home');
+  for (const [id, v] of Object.entries(views)) {
+    v.setBounds(area);
+    v.setVisible(id === active);
+  }
+  pal.setBounds({ x: 0, y: 0, width, height });
+  pal.setVisible(paletteOpen);
+}
+
+// Toetsenbord naar het juiste scherm, zodat de sneltoetsen altijd werken
+function focusActive() {
+  if (store.paletteOpen) return store.palette.webContents.focus();
+  const target = store.active === 'home' ? store.home : store.views[store.active];
+  (target || store.bar).webContents.focus();
+}
+
+function show(id) {
+  if (microsoft.waiting.has(id)) microsoft.loadTab(id); // zelf geopend: dan toch laden
+  store.active = id;
+  if (id !== 'home') store.lastTab = id;
+  layout();
+  broadcast();
+  if (!store.paletteOpen) focusActive();
+}
+
+Object.assign(module.exports, {
+  getState, broadcast, createServiceView, destroyView, layout, focusActive, show
+});
