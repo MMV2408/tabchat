@@ -83,7 +83,14 @@ function refresh() {
     { label: visible ? 'Tabchat verbergen' : 'Tabchat tonen', click: toggleWindow },
     { type: 'separator' },
     ...tabItems,
-    { label: 'Dienst toevoegen…', click: () => { showWindow(); views.show('home'); } },
+    { type: 'separator' },
+    { label: 'Instellingen en diensten…', click: () => { showWindow(); views.show('home'); } },
+    {
+      label: 'Laatst gesloten tabblad terughalen',
+      enabled: store.closedTabs.length > 0,
+      click: () => { showWindow(); actions.reopenTab(); }
+    },
+    { label: 'Alles herladen', click: () => actions.reloadAll() },
     { type: 'separator' },
     {
       label: dnd.isOn() ? `Niet storen (${dnd.label()})` : 'Niet storen',

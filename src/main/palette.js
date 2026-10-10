@@ -9,6 +9,7 @@ const dnd = require('./dnd');
 // (en een regel in palette.html zodat hij in de lijst staat).
 const ACTIONS = {
   reload: () => actions.reload(),
+  reloadAll: () => actions.reloadAll(),
   mute: () => actions.toggleMute(),
   close: () => actions.closeTab(),
   reopen: () => actions.reopenTab(),

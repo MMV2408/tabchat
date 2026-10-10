@@ -117,6 +117,15 @@ function reload(id = store.active) {
   if (store.views[id]) store.views[id].webContents.reload();
 }
 
+// Alle tabbladen herladen (voor als een dienst vastloopt).
+// Tabbladen die nog wachten op een Microsoft-login slaan we over.
+function reloadAll() {
+  const waiting = require('./microsoft').waiting;
+  for (const [id, v] of Object.entries(store.views)) {
+    if (!waiting.has(id)) v.webContents.reload();
+  }
+}
+
 function toggleMute(id = store.active) {
   const v = store.views[id];
   if (!v) return;
@@ -196,6 +205,6 @@ async function quit() {
 Object.assign(module.exports, {
   addTab, closeTab, reopenTab, removeTab,
   moveTab, reorderTab, cycle, goToIndex,
-  reload, toggleMute, zoom, navigate,
+  reload, reloadAll, toggleMute, zoom, navigate,
   back, toggleFullScreen, showShortcuts, setSetting, quit
 });
