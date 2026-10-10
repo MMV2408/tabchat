@@ -8,6 +8,7 @@ const shortcuts = require('./shortcuts');
 const tray = require('./tray');
 const autostart = require('./autostart');
 const dnd = require('./dnd');
+const sleep = require('./sleep');
 
 const PRELOAD = path.join(__dirname, '..', 'preload', 'preload.js');
 const RENDERER = path.join(__dirname, '..', 'renderer');
@@ -46,8 +47,13 @@ function create() {
   home.webContents.loadFile(path.join(RENDERER, 'home.html'));
   palette.webContents.loadFile(path.join(RENDERER, 'palette.html'));
 
-  // De opgeslagen tabbladen
-  for (const tab of store.config.tabs) views.createServiceView(tab);
+  // De opgeslagen tabbladen. Het eerste tabblad wordt altijd geladen (dat zie je meteen);
+  // de rest mag slapend opstarten als dat aanstaat.
+  const firstId = store.config.tabs.length ? store.config.tabs[0].id : null;
+  for (const tab of store.config.tabs) {
+    if (tab.id !== firstId && sleep.shouldStartAsleep(tab)) sleep.startAsleep(tab.id);
+    else views.createServiceView(tab);
+  }
   win.contentView.addChildView(palette); // bovenop alles
   store.active = store.config.tabs.length ? store.config.tabs[0].id : 'home';
   if (store.active !== 'home') store.lastTab = store.active;
@@ -60,6 +66,7 @@ function create() {
   views.layout();
   tray.init(); // tray-icoon + kruisje = verbergen
   dnd.apply(); // Niet storen van vorige keer (bv. "tot morgen") weer toepassen
+  sleep.start(); // slaapstand: elke minuut kijken welke tabbladen mogen slapen
 
   // Sneltoetsen direct laten werken bij het opstarten:
   // eerst de tabbalk (laadt meteen), daarna het tabblad zodra dat klaar is

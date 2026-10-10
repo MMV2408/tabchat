@@ -13,7 +13,10 @@ const DEFAULT_SETTINGS = {
   runInBackground: true,
   unreadBadges: true,
   autostart: false,
-  whiteTray: false
+  whiteTray: false,
+  sleepEnabled: false,
+  sleepMinutes: 30,
+  sleepOnStart: false
 };
 
 function configFile() {

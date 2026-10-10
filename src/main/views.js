@@ -9,6 +9,7 @@ const shortcuts = require('./shortcuts');
 const palette = require('./palette');
 const unread = require('./unread');
 const dnd = require('./dnd');
+const sleep = require('./sleep');
 
 const BAR = 44; // hoogte tabbalk in pixels
 
@@ -32,7 +33,9 @@ function getState() {
       label: labelFor(t),
       color: CATALOG[t.service].color,
       muted: mutedTabs.has(t.id),
-      unread: unread.get(t.id) // aantal, 'dot' of 0
+      unread: unread.get(t.id), // aantal, 'dot' of 0
+      asleep: sleep.isAsleep(t.id),
+      canSleep: sleep.canSleep(t)
     })),
     dnd: { on: dnd.isOn(), label: dnd.label() },
     catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: s.desc })),
@@ -110,6 +113,7 @@ function createServiceView(tab) {
 }
 
 function destroyView(id) {
+  sleep.forget(id);
   const v = store.views[id];
   if (!v) return;
   microsoft.waiting.delete(id);
@@ -118,6 +122,16 @@ function destroyView(id) {
   store.win.contentView.removeChildView(v);
   v.webContents.close();
   delete store.views[id];
+}
+
+// Uit het geheugen halen voor de slaapstand (tabblad blijft in de balk staan)
+function removeForSleep(id) {
+  const v = store.views[id];
+  if (!v) return;
+  store.win.contentView.removeChildView(v);
+  v.webContents.close();
+  delete store.views[id];
+  unread.forget(id); // een slapend tabblad kan niet tellen
 }
 
 // ---------- tonen ----------
@@ -144,7 +158,10 @@ function focusActive() {
 }
 
 function show(id) {
+  if (sleep.isAsleep(id)) sleep.wake(id); // slapend tabblad: weer laden
   if (microsoft.waiting.has(id)) microsoft.loadTab(id); // zelf geopend: dan toch laden
+  sleep.seen(store.active); // vorige tabblad: net nog bekeken
+  sleep.seen(id);
   store.active = id;
   if (id !== 'home') store.lastTab = id;
   layout();
@@ -153,5 +170,5 @@ function show(id) {
 }
 
 Object.assign(module.exports, {
-  getState, broadcast, createServiceView, destroyView, layout, focusActive, show
+  getState, broadcast, createServiceView, destroyView, removeForSleep, layout, focusActive, show
 });

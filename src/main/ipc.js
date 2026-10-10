@@ -7,6 +7,7 @@ const actions = require('./actions');
 const palette = require('./palette');
 const unread = require('./unread');
 const dnd = require('./dnd');
+const sleep = require('./sleep');
 
 // Rechtsklikmenu op een tabblad
 function showTabMenu(id) {
@@ -16,6 +17,9 @@ function showTabMenu(id) {
   Menu.buildFromTemplate([
     { label: 'Herladen', accelerator: 'F5', click: () => actions.reload(id) },
     { label: store.mutedTabs.has(id) ? 'Geluid aanzetten' : 'Geluid dempen', accelerator: 'Alt+M', click: () => actions.toggleMute(id) },
+    { type: 'separator' },
+    { label: 'Nu laten slapen', enabled: !sleep.isAsleep(id), click: () => actions.sleepNow(id) },
+    { label: 'Nooit laten slapen', type: 'checkbox', checked: !sleep.canSleep(tabs[i]), click: (item) => sleep.setAllowed(id, !item.checked) },
     { type: 'separator' },
     { label: 'Naar links', accelerator: 'Ctrl+Shift+PageUp', enabled: i > 0, click: () => actions.moveTab(id, -1) },
     { label: 'Naar rechts', accelerator: 'Ctrl+Shift+PageDown', enabled: i < tabs.length - 1, click: () => actions.moveTab(id, 1) },
@@ -28,7 +32,8 @@ function register() {
   ipcMain.handle('get-state', () => views.getState());
 
   // tabbladen
-  ipcMain.on('open', (_e, id) => { if (id === 'home' || store.views[id]) views.show(id); });
+  ipcMain.on('open', (_e, id) => { if (id === 'home' || store.config.tabs.some(t => t.id === id)) views.show(id); });
+  ipcMain.on('tab-sleep', (_e, id, allowed) => sleep.setAllowed(id, allowed));
   ipcMain.on('add', (_e, service) => actions.addTab(service));
   ipcMain.on('remove', (_e, id) => actions.removeTab(id));
   ipcMain.on('back', () => actions.back());

@@ -151,9 +151,22 @@ function navigate(dir, id = store.active) {
   if (dir > 0 && h.canGoForward()) h.goForward();
 }
 
+// ---------- slaapstand ----------
+// Nu laten slapen. Is het het tabblad dat je bekijkt? Dan eerst naar een ander.
+function sleepNow(id = store.active) {
+  const tabs = store.config.tabs;
+  const i = tabs.findIndex(t => t.id === id);
+  if (i < 0) return;
+  if (store.active === id) {
+    const next = tabs[i + 1] || tabs[i - 1];
+    views.show(next ? next.id : 'home');
+  }
+  require('./sleep').sleep(id);
+}
+
 // ---------- app ----------
 function back() {
-  if (store.lastTab && store.views[store.lastTab]) views.show(store.lastTab);
+  if (store.lastTab && store.config.tabs.some(t => t.id === store.lastTab)) views.show(store.lastTab);
 }
 
 function toggleFullScreen() {
@@ -176,7 +189,7 @@ function setSetting(key, value) {
   if (key === 'shareMicrosoft') {
     // Microsoft-tabbladen opnieuw laden met de nieuwe opslag
     for (const tab of store.config.tabs) {
-      if (!CATALOG[tab.service].group) continue;
+      if (!CATALOG[tab.service].group || require('./sleep').isAsleep(tab.id)) continue;
       views.destroyView(tab.id);
       views.createServiceView(tab);
     }
@@ -205,6 +218,6 @@ async function quit() {
 Object.assign(module.exports, {
   addTab, closeTab, reopenTab, removeTab,
   moveTab, reorderTab, cycle, goToIndex,
-  reload, reloadAll, toggleMute, zoom, navigate,
+  reload, reloadAll, toggleMute, zoom, navigate, sleepNow,
   back, toggleFullScreen, showShortcuts, setSetting, quit
 });

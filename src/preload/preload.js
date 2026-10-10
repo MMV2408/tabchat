@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('tabchat', {
   back: () => ipcRenderer.send('back'),
   tabMenu: (id) => ipcRenderer.send('tab-menu', id),
   reorder: (id, to) => ipcRenderer.send('reorder', id, to),
+  setTabSleep: (id, allowed) => ipcRenderer.send('tab-sleep', id, allowed),
 
   // instellingen
   setSetting: (key, value) => ipcRenderer.send('set-setting', key, value),

@@ -11,6 +11,7 @@ const ACTIONS = {
   reload: () => actions.reload(),
   reloadAll: () => actions.reloadAll(),
   mute: () => actions.toggleMute(),
+  sleepNow: () => actions.sleepNow(),
   close: () => actions.closeTab(),
   reopen: () => actions.reopenTab(),
   zoomIn: () => actions.zoom(0.1),
@@ -55,7 +56,7 @@ function toggle() {
 function run(item) {
   hide();
   if (!item) return;
-  if (item.type === 'tab' && store.views[item.id]) views.show(item.id);
+  if (item.type === 'tab' && store.config.tabs.some(t => t.id === item.id)) views.show(item.id);
   else if (item.type === 'add' && CATALOG[item.service]) actions.addTab(item.service);
   else if (item.type === 'action' && ACTIONS[item.id]) ACTIONS[item.id]();
 }

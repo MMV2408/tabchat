@@ -43,6 +43,8 @@
     background: #1e1f22; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
   }
   .row .name { flex: 1; }
+  .row .sleepsw { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #949ba4; margin-right: 8px; }
+  select { background: #2b2d31; color: #dbdee1; border: 1px solid #4e5058; border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 14px; }
   .empty { color: #949ba4; background: #1e1f22; border-radius: 10px; padding: 16px; }
 
   .feature { display: flex; align-items: center; gap: 16px; background: #1e1f22; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; }
@@ -130,7 +132,9 @@
     { key: 'runInBackground', name: 'Op de achtergrond blijven draaien', desc: 'Het kruisje verbergt Tabchat, zodat je berichten blijft krijgen. Openen via het icoon rechtsboven, afsluiten met Ctrl+Q.' },
     { key: 'whiteTray', name: 'Wit tray-icoon', desc: 'Wit icoon rechtsboven, past bij de andere icoontjes in de balk van Ubuntu.' },
     { key: 'unreadBadges', name: 'Ongelezen-tellers', desc: 'Aantal nieuwe berichten op de tabbladen, een rode stip op het tray-icoon en een getal op het dock-icoon.' },
-    { soon: true, name: 'Slaapstand voor tabbladen', desc: 'Tabbladen die je niet gebruikt, gaan uit het geheugen.' }
+    { key: 'sleepEnabled', name: 'Slaapstand voor tabbladen', desc: 'Tabbladen die je een tijd niet bekijkt, gaan uit het geheugen. Per tabblad in te stellen bij "Jouw tabbladen". Een slapend tabblad krijgt geen meldingen.' },
+    { key: 'sleepMinutes', name: 'Slaapstand na', desc: 'Hoe lang een tabblad niet bekeken moet zijn voordat het gaat slapen.', options: [[15, '15 minuten'], [30, '30 minuten'], [60, '1 uur']] },
+    { key: 'sleepOnStart', name: 'Slapend opstarten', desc: 'Tabbladen die mogen slapen, starten meteen slapend. Sneller opstarten en minder geheugen; hun tellers zie je pas als je ze een keer opent.' }
   ];
 
   const el = (tag, cls, text) => {
@@ -234,7 +238,17 @@
       rm.onclick = () => {
         if (confirm(`${t.label} verwijderen? Je wordt dan ook uitgelogd.`)) window.tabchat.remove(t.id);
       };
-      row.append(badge(t.label, t.color), el('div', 'name', t.label), rm);
+      // Mag dit tabblad in slaapstand?
+      const sw = el('label', 'sleepsw');
+      const swBox = el('span', 'switch');
+      const inp = document.createElement('input');
+      inp.type = 'checkbox';
+      inp.checked = t.canSleep;
+      inp.onchange = () => window.tabchat.setTabSleep(t.id, inp.checked);
+      swBox.append(inp, el('span', 'slider'));
+      sw.append(t.asleep ? '💤 Slaapt · mag slapen' : 'Mag slapen', swBox);
+      sw.title = 'Uit = altijd wakker, zodat je meldingen en tellers blijft krijgen';
+      row.append(badge(t.label, t.color), el('div', 'name', t.label), sw, rm);
       mine.append(row);
     }
 
@@ -278,6 +292,21 @@
       const title = el('div', 'name', f.name);
       if (f.soon) title.append(el('span', 'soon', 'binnenkort'));
       text.append(title, el('div', 'desc', f.desc));
+
+      // Keuzelijst in plaats van schakelaar
+      if (f.options) {
+        const sel = document.createElement('select');
+        for (const [value, text] of f.options) {
+          const o = el('option', null, text);
+          o.value = value;
+          if (Number(s.settings[f.key]) === value) o.selected = true;
+          sel.append(o);
+        }
+        sel.onchange = () => window.tabchat.setSetting(f.key, Number(sel.value));
+        row.append(text, sel);
+        feat.append(row);
+        continue;
+      }
 
       const label = el('label', 'switch');
       const input = document.createElement('input');
