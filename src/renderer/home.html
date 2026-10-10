@@ -61,6 +61,8 @@
   .about { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: #1e1f22; border-radius: 10px; padding: 14px 16px; }
   .about .text { flex: 1; min-width: 200px; }
   .about .ver { color: #fff; font-weight: 600; }
+  .about .donate { background: none; border: none; padding: 0; margin-top: 4px; font: inherit; font-size: 12px; color: #949ba4; cursor: pointer; }
+  .about .donate:hover { color: #db61a2; text-decoration: underline; }
   .about .st { font-size: 13px; color: #949ba4; margin-top: 2px; }
   .dndrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #1e1f22; border-radius: 10px; padding: 12px 16px; }
   .dndrow .status { flex: 1 1 100%; color: #949ba4; font-size: 14px; margin-bottom: 4px; }
@@ -300,7 +302,9 @@
     const u = s.update || {};
     const info = el('div', 'text');
     const st = u.state ? T('upd.' + u.state, { v: u.version, p: u.percent || 0 }) : '';
-    info.append(el('div', 'ver', `Tabchat ${u.current || ''}`), el('div', 'st', st));
+    const don = el('button', 'donate', T('don.link'));
+    don.onclick = () => window.tabchat.openDonate();
+    info.append(el('div', 'ver', `Tabchat ${u.current || ''}`), el('div', 'st', st), don);
     about.append(info);
     if (u.state === 'ready') {
       const ib = el('button', 'add', T('upd.install'));

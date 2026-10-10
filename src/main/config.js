@@ -34,11 +34,12 @@ function load() {
       loginNoticeShown: !!c.loginNoticeShown,
       trayNoticeShown: !!c.trayNoticeShown,
       dndUntil: c.dndUntil || null,
-      lastVersion: c.lastVersion || null
+      lastVersion: c.lastVersion || null,
+      donateNever: !!c.donateNever
     };
   } catch {
     // Geen of kapot bestand: met een lege app beginnen
-    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null, lastVersion: null };
+    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null, lastVersion: null, donateNever: false };
   }
 }
 

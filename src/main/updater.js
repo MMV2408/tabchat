@@ -45,7 +45,8 @@ function announceUpdate() {
   if (!app.isPackaged) return; // npm start: geen melding
   // Geen vorige versie bekend? Dan alleen melden als Tabchat al eerder gebruikt is
   // (versies van vóór 1.9.1 onthielden hun versienummer nog niet)
-  if (!before && store.config.tabs.length === 0) return;
+  if (!before && store.config.tabs.length === 0) return require('./donate').schedule('install');
+  require('./donate').schedule('update');
   if (Notification.isSupported()) {
     new Notification({
       title: t('upd.doneTitle', { v: now }),

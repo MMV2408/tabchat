@@ -59,6 +59,7 @@ function register() {
   // updates
   ipcMain.on('update-check', () => require('./updater').check());
   ipcMain.on('update-install', () => require('./updater').install());
+  ipcMain.on('donate-open', () => require('./donate').open());
 
   // scherm delen
   ipcMain.on('share-pick', (_e, id) => require('./share').pick(id));

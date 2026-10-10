@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('tabchat', {
   // updates
   checkUpdate: () => ipcRenderer.send('update-check'),
   installUpdate: () => ipcRenderer.send('update-install'),
+  openDonate: () => ipcRenderer.send('donate-open'),
 
   // scherm delen
   onShareOpen: (cb) => ipcRenderer.on('share-open', (_e, list) => cb(list)),
