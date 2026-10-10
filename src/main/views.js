@@ -1,11 +1,13 @@
 // De schermen in het venster: tabbladen maken, tonen, verbergen en de status
 // doorsturen naar de tabbalk en het +-scherm.
 const { WebContentsView, shell, desktopCapturer } = require('electron');
+const path = require('path');
 const store = require('./store');
 const { UA, CATALOG, LOGIN_HOSTS } = require('./catalog');
 const microsoft = require('./microsoft');
 const shortcuts = require('./shortcuts');
 const palette = require('./palette');
+const unread = require('./unread');
 
 const BAR = 44; // hoogte tabbalk in pixels
 
@@ -28,7 +30,8 @@ function getState() {
       service: t.service,
       label: labelFor(t),
       color: CATALOG[t.service].color,
-      muted: mutedTabs.has(t.id)
+      muted: mutedTabs.has(t.id),
+      unread: unread.get(t.id) // aantal, 'dot' of 0
     })),
     catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: s.desc })),
     settings: config.settings
@@ -47,6 +50,7 @@ function createServiceView(tab) {
   const v = new WebContentsView({
     webPreferences: {
       partition: microsoft.partitionFor(tab),
+      preload: path.join(__dirname, '..', 'preload', 'service.js'),
       spellcheck: store.config.settings.spellcheck,
       zoomFactor: tab.zoom || 1
     }
@@ -55,6 +59,7 @@ function createServiceView(tab) {
   ses.setSpellCheckerLanguages(['nl', 'en-US']);
   v.webContents.setUserAgent(UA);
   v.webContents.on('before-input-event', shortcuts.handler('tab'));
+  unread.watch(tab, v);
 
   v.webContents.on('did-finish-load', () => {
     // Zoom terugzetten na het laden van een pagina
@@ -106,6 +111,7 @@ function destroyView(id) {
   if (!v) return;
   microsoft.waiting.delete(id);
   store.mutedTabs.delete(id);
+  unread.forget(id);
   store.win.contentView.removeChildView(v);
   v.webContents.close();
   delete store.views[id];

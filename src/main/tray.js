@@ -6,8 +6,22 @@ const store = require('./store');
 const config = require('./config');
 const views = require('./views');
 const actions = require('./actions');
+const unread = require('./unread');
 
-const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
+const ASSETS = path.join(__dirname, '..', '..', 'assets');
+const ICON = path.join(ASSETS, 'icon.png');
+
+// Tray-icoon zonder en met rode stip (ongelezen berichten)
+let images = null;
+function trayImage(withDot) {
+  if (!images) {
+    images = {
+      normal: nativeImage.createFromPath(path.join(ASSETS, 'tray.png')).resize({ width: 24, height: 24 }),
+      dot: nativeImage.createFromPath(path.join(ASSETS, 'tray-unread.png')).resize({ width: 24, height: 24 })
+    };
+  }
+  return withDot ? images.dot : images.normal;
+}
 
 let tray = null;
 let pending = null; // timer voor het aanmaken van het icoon
@@ -34,8 +48,7 @@ function sync() {
     pending = setTimeout(() => {
       pending = null;
       if (tray || store.quitting || !store.config.settings.runInBackground) return;
-      const image = nativeImage.createFromPath(ICON).resize({ width: 24, height: 24 });
-      tray = new Tray(image);
+      tray = new Tray(trayImage(unread.any()));
       tray.setToolTip('Tabchat');
       tray.on('click', toggleWindow); // werkt niet op elke Linux-versie, daarom ook in het menu
       refresh();
@@ -55,9 +68,15 @@ function destroy() {
 // Menu opnieuw opbouwen (na elke verandering van tabbladen of zichtbaarheid)
 function refresh() {
   if (!tray) return;
+
+  // Icoon en tooltip: rode stip bij ongelezen berichten
+  const total = unread.total();
+  tray.setImage(trayImage(unread.any()));
+  tray.setToolTip(total ? `Tabchat · ${total} ongelezen` : unread.any() ? 'Tabchat · nieuwe berichten' : 'Tabchat');
+
   const visible = store.win.isVisible();
   const tabItems = views.getState().tabs.map(t => ({
-    label: t.label + (t.muted ? '  🔇' : ''),
+    label: t.label + (typeof t.unread === 'number' && t.unread ? ` (${t.unread})` : t.unread === 'dot' ? '  •' : '') + (t.muted ? '  🔇' : ''),
     click: () => { showWindow(); views.show(t.id); }
   }));
   tray.setContextMenu(Menu.buildFromTemplate([

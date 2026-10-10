@@ -174,6 +174,7 @@ function setSetting(key, value) {
     views.layout();
   }
   if (key === 'runInBackground') require('./tray').sync();
+  if (key === 'unreadBadges') require('./unread').changed();
   views.broadcast();
 }
 

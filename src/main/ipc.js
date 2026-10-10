@@ -5,6 +5,7 @@ const store = require('./store');
 const views = require('./views');
 const actions = require('./actions');
 const palette = require('./palette');
+const unread = require('./unread');
 
 // Rechtsklikmenu op een tabblad
 function showTabMenu(id) {
@@ -35,6 +36,12 @@ function register() {
 
   // instellingen
   ipcMain.on('set-setting', (_e, key, value) => actions.setSetting(key, value));
+
+  // ongelezen: badge-getal van een dienst (zie preload/service.js)
+  ipcMain.on('badge', (e, n) => {
+    const id = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
+    if (id) unread.setBadge(id, n);
+  });
 
   // snelzoeken
   ipcMain.on('palette-close', () => palette.hide());

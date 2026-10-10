@@ -10,7 +10,8 @@ const DEFAULT_SETTINGS = {
   spellcheck: false,
   shareMicrosoft: true,
   stayLoggedIn: true,
-  runInBackground: true
+  runInBackground: true,
+  unreadBadges: true
 };
 
 function configFile() {
