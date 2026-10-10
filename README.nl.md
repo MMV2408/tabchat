@@ -40,6 +40,8 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 - ↔️ Tabbladen verslepen, rechtsklik voor meer opties
 - 🔐 Eén gedeelde Microsoft-login voor Teams, Outlook en OneDrive (ook voor school- en werkaccounts), en je **blijft ingelogd** na een herstart
 
+<img align="right" src="docs/screenshots/tray.png" alt="Tray-menu" width="210">
+
 **Nooit een bericht missen**
 - 🔴 Ongelezen-tellers op elk tabblad, een rode stip op het tray-icoon en een getal op het dock-icoon
 - 🖥️ Blijft op de achtergrond draaien als je het venster sluit, met een tray-icoon rechtsboven

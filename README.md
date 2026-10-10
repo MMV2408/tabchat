@@ -40,6 +40,8 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 - ↔️ Drag tabs to reorder them, right-click for more options
 - 🔐 One shared Microsoft sign-in for Teams, Outlook and OneDrive (school and work accounts too), and it **stays signed in** after a restart
 
+<img align="right" src="docs/screenshots/tray.png" alt="Tray menu" width="210">
+
 **Never miss a message**
 - 🔴 Unread counters on every tab, a red dot on the tray icon and a number on the dock icon
 - 🖥️ Keeps running in the background when you close the window, with a tray icon at the top right
