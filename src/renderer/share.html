@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <style>
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: transparent; font-family: system-ui, sans-serif; color: #dbdee1; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; font-family: system-ui, sans-serif; color: #dbdee1; }
   #backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .55); }
   #box {
     position: relative;
@@ -39,6 +39,9 @@
   #cancel:hover { background: #35373c; }
   #ok { background: #5865F2; color: #fff; }
   #ok:disabled { opacity: .5; cursor: default; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-thumb { background: #4e5058; border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
 </style>
 </head>
 <body>
