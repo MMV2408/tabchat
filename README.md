@@ -13,6 +13,7 @@
   <a href="https://github.com/MMV2408/tabchat/releases/latest"><img src="https://img.shields.io/github/v/release/MMV2408/tabchat?label=download&color=5865F2" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/platform-Linux-informational" alt="Linux">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/MMV2408/tabchat" alt="MIT license"></a>
+  <a href="https://github.com/sponsors/MMV2408"><img src="https://img.shields.io/badge/sponsor-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white" alt="Sponsor"></a>
 </p>
 
 <p align="center">
@@ -212,6 +213,10 @@ gh release create v1.2.3 dist/tabchat_1.2.3_amd64.deb dist/Tabchat-1.2.3.AppImag
 - [ ] Profiles (e.g. "School" and "Personal")
 
 Ideas and bug reports are welcome in [Issues](https://github.com/MMV2408/tabchat/issues).
+
+## Support Tabchat
+
+Tabchat is free and stays free. If it saves you time, you can support development via **[GitHub Sponsors](https://github.com/sponsors/MMV2408)**. Starring the repo or reporting bugs helps too!
 
 ## License
 
