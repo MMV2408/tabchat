@@ -22,7 +22,7 @@
 ---
 
 <p align="center">
-  <img src="docs/screenshots/settings.png" alt="Tabchat met vijf diensten en het instellingenscherm" width="860">
+  <img src="docs/screenshots/main.png" alt="Tabchat met WhatsApp open" width="860">
 </p>
 
 ## Waarom Tabchat?
@@ -95,6 +95,10 @@ Tabchat zoekt zelf naar nieuwe versies en downloadt ze op de achtergrond. Staat 
 3. Log één keer in — Tabchat onthoudt het.
 
 Al het andere — taal, slaapstand, starten bij inloggen, wit tray-icoon — staat in hetzelfde **+**-scherm.
+
+<p align="center">
+  <img src="docs/screenshots/settings.png" alt="Het +-scherm met diensten en instellingen" width="860">
+</p>
 
 ## Sneltoetsen
 

@@ -22,7 +22,7 @@
 ---
 
 <p align="center">
-  <img src="docs/screenshots/settings.png" alt="Tabchat with five services and the settings screen" width="860">
+  <img src="docs/screenshots/main.png" alt="Tabchat with WhatsApp open" width="860">
 </p>
 
 ## Why Tabchat?
@@ -95,6 +95,10 @@ Tabchat checks for new versions by itself and downloads them in the background. 
 3. Sign in once — Tabchat remembers it.
 
 Everything else — language, tab sleep, start at login, white tray icon — is on the same **+** screen.
+
+<p align="center">
+  <img src="docs/screenshots/settings.png" alt="The + screen with services and settings" width="860">
+</p>
 
 ## Keyboard shortcuts
 
