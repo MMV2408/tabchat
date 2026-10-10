@@ -121,7 +121,7 @@ function toggleMute(id = store.active) {
   const v = store.views[id];
   if (!v) return;
   const muted = !store.mutedTabs.has(id);
-  v.webContents.setAudioMuted(muted);
+  v.webContents.setAudioMuted(muted || require('./dnd').isOn());
   if (muted) store.mutedTabs.add(id); else store.mutedTabs.delete(id);
   views.broadcast();
 }
@@ -175,6 +175,7 @@ function setSetting(key, value) {
   }
   if (key === 'runInBackground') require('./tray').sync();
   if (key === 'unreadBadges') require('./unread').changed();
+  if (key === 'autostart') require('./autostart').sync();
   views.broadcast();
 }
 

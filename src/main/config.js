@@ -11,7 +11,9 @@ const DEFAULT_SETTINGS = {
   shareMicrosoft: true,
   stayLoggedIn: true,
   runInBackground: true,
-  unreadBadges: true
+  unreadBadges: true,
+  autostart: false,
+  whiteTray: false
 };
 
 function configFile() {
@@ -25,11 +27,12 @@ function load() {
       tabs: Array.isArray(c.tabs) ? c.tabs.filter(t => CATALOG[t.service]) : [],
       settings: { ...DEFAULT_SETTINGS, ...(c.settings || {}) },
       loginNoticeShown: !!c.loginNoticeShown,
-      trayNoticeShown: !!c.trayNoticeShown
+      trayNoticeShown: !!c.trayNoticeShown,
+      dndUntil: c.dndUntil || null
     };
   } catch {
     // Geen of kapot bestand: met een lege app beginnen
-    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false };
+    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null };
   }
 }
 

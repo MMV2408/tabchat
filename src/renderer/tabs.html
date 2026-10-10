@@ -39,6 +39,9 @@
   .count { background: #f23f43; color: #fff; font-size: 11px; font-weight: 700; border-radius: 9px; padding: 1px 6px; min-width: 18px; text-align: center; }
   .udot { width: 8px; height: 8px; border-radius: 50%; background: #f23f43; }
   #plus { width: 32px; padding: 0; justify-content: center; font-size: 20px; }
+  /* niet storen */
+  #dnd { margin-left: auto; background: #3b2f5c; color: #e4dcff; font-size: 13px; }
+  #dnd:hover { background: #4a3b73; }
   /* slepen */
   .dragging { opacity: .4; }
   .drop-before { box-shadow: inset 3px 0 0 #5865F2; }
@@ -125,6 +128,16 @@
     plus.onclick = () => window.tabchat.open('home');
     dropTarget(plus, s.tabs.length, null); // neerzetten op + = helemaal achteraan
     document.body.append(plus);
+
+    // Niet storen: label rechts, klik = uitzetten
+    if (s.dnd && s.dnd.on) {
+      const d = document.createElement('button');
+      d.id = 'dnd';
+      d.textContent = '🌙 Niet storen ' + s.dnd.label + '  ✕';
+      d.title = 'Klik om Niet storen uit te zetten';
+      d.onclick = () => window.tabchat.setDnd(null);
+      document.body.append(d);
+    }
   }
 
   window.tabchat.onState(render);

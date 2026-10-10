@@ -6,6 +6,8 @@ const config = require('./config');
 const views = require('./views');
 const shortcuts = require('./shortcuts');
 const tray = require('./tray');
+const autostart = require('./autostart');
+const dnd = require('./dnd');
 
 const PRELOAD = path.join(__dirname, '..', 'preload', 'preload.js');
 const RENDERER = path.join(__dirname, '..', 'renderer');
@@ -13,6 +15,10 @@ const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
 
 function create() {
   store.config = config.load();
+  autostart.sync(); // pad in het autostart-bestand bijwerken (bv. na een update)
+
+  // Via autostart gestart: verborgen in de tray (alleen als er een tray-icoon is)
+  const hidden = autostart.startedHidden && store.config.settings.runInBackground;
 
   const win = store.win = new BaseWindow({
     width: 1200,
@@ -20,7 +26,8 @@ function create() {
     title: 'Tabchat',
     autoHideMenuBar: true,
     backgroundColor: '#1e1f22',
-    icon: ICON
+    icon: ICON,
+    show: !hidden
   });
 
   // De drie eigen schermen
@@ -52,6 +59,7 @@ function create() {
   });
   views.layout();
   tray.init(); // tray-icoon + kruisje = verbergen
+  dnd.apply(); // Niet storen van vorige keer (bv. "tot morgen") weer toepassen
 
   // Sneltoetsen direct laten werken bij het opstarten:
   // eerst de tabbalk (laadt meteen), daarna het tabblad zodra dat klaar is

@@ -3,6 +3,7 @@ const store = require('./store');
 const views = require('./views');
 const actions = require('./actions');
 const { CATALOG } = require('./catalog');
+const dnd = require('./dnd');
 
 // Acties die je vanuit Ctrl+K kunt kiezen. Nieuwe actie = één regel hier
 // (en een regel in palette.html zodat hij in de lijst staat).
@@ -17,7 +18,11 @@ const ACTIONS = {
   fullscreen: () => actions.toggleFullScreen(),
   settings: () => views.show('home'),
   shortcuts: () => actions.showShortcuts(),
-  quit: () => actions.quit()
+  quit: () => actions.quit(),
+  dnd60: () => dnd.set(60),
+  dndTomorrow: () => dnd.set('tomorrow'),
+  dndForever: () => dnd.set('forever'),
+  dndOff: () => dnd.set(null)
 };
 
 // Het venster bovenop alle tabbladen leggen

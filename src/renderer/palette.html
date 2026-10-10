@@ -92,6 +92,13 @@
     action('zoomOut', 'Uitzoomen', 'Ctrl+Min', '−', 'zoom kleiner', tab);
     action('zoomReset', 'Zoom herstellen', 'Ctrl+0', '1:1', 'zoom normaal 100', tab);
     action('fullscreen', 'Volledig scherm', 'F11', '⛶', 'fullscreen groot');
+    if (s.dnd && s.dnd.on) {
+      action('dndOff', 'Niet storen uitzetten', '', '🔔', 'niet storen dnd uit meldingen aan');
+    } else {
+      action('dnd60', 'Niet storen: 1 uur', '', '🌙', 'niet storen dnd stil meldingen uit');
+      action('dndTomorrow', 'Niet storen: tot morgen 08:00', '', '🌙', 'niet storen dnd stil meldingen uit');
+      action('dndForever', 'Niet storen: tot ik het uitzet', '', '🌙', 'niet storen dnd stil meldingen uit');
+    }
     action('settings', 'Diensten en instellingen', 'Alt+T', '⚙', 'instellingen plus toevoegen settings');
     action('shortcuts', 'Alle sneltoetsen', '', '⌨', 'sneltoetsen toetsen shortcuts help');
 

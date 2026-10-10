@@ -7,20 +7,19 @@ const config = require('./config');
 const views = require('./views');
 const actions = require('./actions');
 const unread = require('./unread');
+const dnd = require('./dnd');
 
 const ASSETS = path.join(__dirname, '..', '..', 'assets');
 const ICON = path.join(ASSETS, 'icon.png');
 
-// Tray-icoon zonder en met rode stip (ongelezen berichten)
-let images = null;
+// Tray-icoon: gekleurd of wit, zonder of met rode stip (ongelezen berichten)
+const images = {};
 function trayImage(withDot) {
-  if (!images) {
-    images = {
-      normal: nativeImage.createFromPath(path.join(ASSETS, 'tray.png')).resize({ width: 24, height: 24 }),
-      dot: nativeImage.createFromPath(path.join(ASSETS, 'tray-unread.png')).resize({ width: 24, height: 24 })
-    };
+  const name = (store.config.settings.whiteTray ? 'tray-white' : 'tray') + (withDot ? '-unread' : '');
+  if (!images[name]) {
+    images[name] = nativeImage.createFromPath(path.join(ASSETS, name + '.png')).resize({ width: 24, height: 24 });
   }
-  return withDot ? images.dot : images.normal;
+  return images[name];
 }
 
 let tray = null;
@@ -72,7 +71,8 @@ function refresh() {
   // Icoon en tooltip: rode stip bij ongelezen berichten
   const total = unread.total();
   tray.setImage(trayImage(unread.any()));
-  tray.setToolTip(total ? `Tabchat · ${total} ongelezen` : unread.any() ? 'Tabchat · nieuwe berichten' : 'Tabchat');
+  const dndText = dnd.isOn() ? ` · niet storen ${dnd.label()}` : '';
+  tray.setToolTip((total ? `Tabchat · ${total} ongelezen` : unread.any() ? 'Tabchat · nieuwe berichten' : 'Tabchat') + dndText);
 
   const visible = store.win.isVisible();
   const tabItems = views.getState().tabs.map(t => ({
@@ -84,6 +84,23 @@ function refresh() {
     { type: 'separator' },
     ...tabItems,
     { label: 'Dienst toevoegen…', click: () => { showWindow(); views.show('home'); } },
+    { type: 'separator' },
+    {
+      label: dnd.isOn() ? `Niet storen (${dnd.label()})` : 'Niet storen',
+      submenu: [
+        { label: '1 uur', click: () => dnd.set(60) },
+        { label: 'Tot morgen 08:00', click: () => dnd.set('tomorrow') },
+        { label: 'Tot ik het uitzet', click: () => dnd.set('forever') },
+        { type: 'separator' },
+        { label: 'Uitzetten', enabled: dnd.isOn(), click: () => dnd.set(null) }
+      ]
+    },
+    {
+      label: 'Starten bij inloggen',
+      type: 'checkbox',
+      checked: !!store.config.settings.autostart,
+      click: (item) => actions.setSetting('autostart', item.checked)
+    },
     { type: 'separator' },
     { label: 'Afsluiten', click: () => actions.quit() }
   ]));

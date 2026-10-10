@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('tabchat', {
 
   // instellingen
   setSetting: (key, value) => ipcRenderer.send('set-setting', key, value),
+  setDnd: (mode) => ipcRenderer.send('set-dnd', mode), // minuten, 'tomorrow', 'forever' of null
   onShowShortcuts: (cb) => ipcRenderer.on('show-shortcuts', () => cb()),
 
   // snelzoeken

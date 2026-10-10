@@ -6,6 +6,7 @@ const views = require('./views');
 const actions = require('./actions');
 const palette = require('./palette');
 const unread = require('./unread');
+const dnd = require('./dnd');
 
 // Rechtsklikmenu op een tabblad
 function showTabMenu(id) {
@@ -42,6 +43,10 @@ function register() {
     const id = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
     if (id) unread.setBadge(id, n);
   });
+
+  // niet storen
+  ipcMain.on('get-dnd', (e) => { e.returnValue = dnd.isOn(); }); // vraag van preload/service.js
+  ipcMain.on('set-dnd', (_e, mode) => dnd.set(mode));
 
   // snelzoeken
   ipcMain.on('palette-close', () => palette.hide());

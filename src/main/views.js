@@ -8,6 +8,7 @@ const microsoft = require('./microsoft');
 const shortcuts = require('./shortcuts');
 const palette = require('./palette');
 const unread = require('./unread');
+const dnd = require('./dnd');
 
 const BAR = 44; // hoogte tabbalk in pixels
 
@@ -33,6 +34,7 @@ function getState() {
       muted: mutedTabs.has(t.id),
       unread: unread.get(t.id) // aantal, 'dot' of 0
     })),
+    dnd: { on: dnd.isOn(), label: dnd.label() },
     catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: s.desc })),
     settings: config.settings
   };
@@ -103,6 +105,7 @@ function createServiceView(tab) {
   v.setVisible(false);
   store.win.contentView.addChildView(v);
   store.views[tab.id] = v;
+  dnd.applyToView(tab.id, v); // geluid uit bij Niet storen
   if (store.paletteOpen) palette.bringToFront();
 }
 

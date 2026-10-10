@@ -56,6 +56,12 @@
   .ghost:hover { background: #35373c; }
   .card .top .name { flex: 1; }
   .card .name u { text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .dndrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #1e1f22; border-radius: 10px; padding: 12px 16px; }
+  .dndrow .status { flex: 1 1 100%; color: #949ba4; font-size: 14px; margin-bottom: 4px; }
+  .dndrow .status b { color: #e4dcff; font-weight: 600; }
+  .dndbtn { background: #2b2d31; color: #dbdee1; }
+  .dndbtn:hover { background: #35373c; }
+  .dndbtn.off { background: transparent; color: #f23f43; }
   h2 .hint { text-transform: none; letter-spacing: 0; font-weight: 400; }
   kbd { background: #2b2d31; border: 1px solid #4e5058; border-bottom-width: 2px; border-radius: 5px; padding: 1px 7px; font-family: inherit; font-size: 13px; color: #dbdee1; }
 
@@ -99,6 +105,9 @@
   <h2>Dienst toevoegen <span class="hint">· Alt + onderstreepte letter</span></h2>
   <div class="grid" id="catalog"></div>
 
+  <h2>Niet storen <span class="hint">· meldingen en geluid uit</span></h2>
+  <div class="dndrow" id="dndrow"></div>
+
   <h2>Functies</h2>
   <div id="features"></div>
 
@@ -117,7 +126,9 @@
     { key: 'spellcheck', name: 'Spellingscontrole', desc: 'Rode lijntjes onder typfouten (Nederlands en Engels).' },
     { key: 'stayLoggedIn', name: 'Ingelogd blijven bij Microsoft', desc: 'Teams, Outlook en OneDrive onthouden je login na afsluiten (14 dagen). Alleen op deze computer.' },
     { key: 'shareMicrosoft', name: 'Eén Microsoft-account', desc: 'Teams, Outlook en OneDrive delen dezelfde login, dus je logt maar één keer in.' },
+    { key: 'autostart', name: 'Starten bij inloggen', desc: 'Tabchat start verborgen in de tray zodra je inlogt op je computer, zodat je nooit iets mist.' },
     { key: 'runInBackground', name: 'Op de achtergrond blijven draaien', desc: 'Het kruisje verbergt Tabchat, zodat je berichten blijft krijgen. Openen via het icoon rechtsboven, afsluiten met Ctrl+Q.' },
+    { key: 'whiteTray', name: 'Wit tray-icoon', desc: 'Wit icoon rechtsboven, past bij de andere icoontjes in de balk van Ubuntu.' },
     { key: 'unreadBadges', name: 'Ongelezen-tellers', desc: 'Aantal nieuwe berichten op de tabbladen, een rode stip op het tray-icoon en een getal op het dock-icoon.' },
     { soon: true, name: 'Slaapstand voor tabbladen', desc: 'Tabbladen die je niet gebruikt, gaan uit het geheugen.' }
   ];
@@ -240,6 +251,23 @@
       card.append(top, el('div', 'desc', c.desc), add);
       cat.append(card);
     }
+
+    // Niet storen
+    const dr = document.getElementById('dndrow');
+    dr.replaceChildren();
+    const status = el('div', 'status');
+    if (s.dnd.on) status.append('🌙 Staat aan ', el('b', null, s.dnd.label));
+    else status.textContent = 'Staat uit. Zet aan voor:';
+    dr.append(status);
+    const btn = (text, mode, cls = 'dndbtn') => {
+      const b = el('button', cls, text);
+      b.onclick = () => window.tabchat.setDnd(mode);
+      dr.append(b);
+    };
+    btn('1 uur', 60);
+    btn('Tot morgen 08:00', 'tomorrow');
+    btn('Tot ik het uitzet', 'forever');
+    if (s.dnd.on) btn('Uitzetten', null, 'dndbtn off');
 
     // Functies
     const feat = document.getElementById('features');
