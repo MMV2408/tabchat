@@ -10,6 +10,7 @@ const palette = require('./palette');
 const unread = require('./unread');
 const dnd = require('./dnd');
 const sleep = require('./sleep');
+const i18n = require('./i18n');
 
 const BAR = 44; // hoogte tabbalk in pixels
 const ERROR_PAGE = path.join(__dirname, '..', 'renderer', 'error.html');
@@ -24,6 +25,7 @@ function labelFor(tab) {
 function getState() {
   const { config, views, active, mutedTabs, closedTabs } = store;
   return {
+    lang: i18n.lang(),
     active,
     activeIsTab: !!views[active],
     activeMuted: mutedTabs.has(active),
@@ -40,7 +42,7 @@ function getState() {
     })),
     dnd: { on: dnd.isOn(), label: dnd.label() },
     update: require('./updater').getStatus(),
-    catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: s.desc })),
+    catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: i18n.t('svc.' + id) })),
     settings: config.settings
   };
 }
@@ -159,7 +161,8 @@ function showError(tab, v, info) {
       url: info.url || svc.url,
       code: String(info.code || ''),
       desc: info.desc || '',
-      reason: info.reason || ''
+      reason: info.reason || '',
+      lang: i18n.lang()
     }
   });
 }

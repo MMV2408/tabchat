@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('tabchat', {
   // status
   getState: () => ipcRenderer.invoke('get-state'),
+  getStrings: () => ipcRenderer.invoke('get-strings'), // teksten in de gekozen taal
   onState: (cb) => ipcRenderer.on('state', (_e, s) => cb(s)),
 
   // tabbladen

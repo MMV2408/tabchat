@@ -7,6 +7,7 @@ const store = require('./store');
 const config = require('./config');
 const { CATALOG, isMsAppHost } = require('./catalog');
 const views = require('./views');
+const { t } = require('./i18n');
 
 // ---------- welke opslag (login) een tabblad gebruikt ----------
 // Met "Eén Microsoft-account" delen Teams, Outlook en OneDrive dezelfde opslag.
@@ -100,14 +101,10 @@ function keepLogin(ses, part) {
 async function showLoginNotice() {
   const { response } = await dialog.showMessageBox(store.win, {
     type: 'info',
-    title: 'Ingelogd blijven bij Microsoft',
-    message: 'Tabchat kan je Microsoft-login onthouden',
-    detail:
-      'Microsoft en scholen gebruiken cookies die normaal verdwijnen zodra je de app sluit. ' +
-      'Tabchat kan die cookies 14 dagen bewaren, zodat je niet elke keer opnieuw hoeft in te loggen.\n\n' +
-      'Deze cookies blijven alleen op deze computer. Tabchat stuurt niets naar de maker of naar anderen.\n\n' +
-      'Gebruik je een gedeelde computer? Kies dan "Niet onthouden". Je kunt dit later altijd wijzigen in het +-scherm.',
-    buttons: ['Onthouden', 'Niet onthouden'],
+    title: t('ms.title'),
+    message: t('ms.message'),
+    detail: t('ms.detail'),
+    buttons: [t('ms.yes'), t('ms.no')],
     defaultId: 0,
     cancelId: 1
   });

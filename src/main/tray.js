@@ -8,6 +8,7 @@ const views = require('./views');
 const actions = require('./actions');
 const unread = require('./unread');
 const dnd = require('./dnd');
+const { t } = require('./i18n');
 
 const ASSETS = path.join(__dirname, '..', '..', 'assets');
 const ICON = path.join(ASSETS, 'icon.png');
@@ -71,8 +72,8 @@ function refresh() {
   // Icoon en tooltip: rode stip bij ongelezen berichten
   const total = unread.total();
   tray.setImage(trayImage(unread.any()));
-  const dndText = dnd.isOn() ? ` · niet storen ${dnd.label()}` : '';
-  tray.setToolTip((total ? `Tabchat · ${total} ongelezen` : unread.any() ? 'Tabchat · nieuwe berichten' : 'Tabchat') + dndText);
+  const dndText = dnd.isOn() ? t('tray.tipDnd', { label: dnd.label() }) : '';
+  tray.setToolTip((total ? t('tray.tipUnread', { n: total }) : unread.any() ? t('tray.tipNew') : 'Tabchat') + dndText);
 
   const visible = store.win.isVisible();
   const tabItems = views.getState().tabs.map(t => ({
@@ -80,39 +81,39 @@ function refresh() {
     click: () => { showWindow(); views.show(t.id); }
   }));
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: visible ? 'Tabchat verbergen' : 'Tabchat tonen', click: toggleWindow },
+    { label: t(visible ? 'tray.hide' : 'tray.show'), click: toggleWindow },
     { type: 'separator' },
     ...tabItems,
     { type: 'separator' },
-    { label: 'Instellingen en diensten…', click: () => { showWindow(); views.show('home'); } },
+    { label: t('tray.settings'), click: () => { showWindow(); views.show('home'); } },
     {
-      label: 'Laatst gesloten tabblad terughalen',
+      label: t('tray.reopen'),
       enabled: store.closedTabs.length > 0,
       click: () => { showWindow(); actions.reopenTab(); }
     },
-    { label: 'Alles herladen', click: () => actions.reloadAll() },
+    { label: t('tray.reloadAll'), click: () => actions.reloadAll() },
     { type: 'separator' },
     {
-      label: dnd.isOn() ? `Niet storen (${dnd.label()})` : 'Niet storen',
+      label: dnd.isOn() ? t('tray.dndOn', { label: dnd.label() }) : t('tray.dnd'),
       submenu: [
-        { label: '1 uur', click: () => dnd.set(60) },
-        { label: 'Tot morgen 08:00', click: () => dnd.set('tomorrow') },
-        { label: 'Tot ik het uitzet', click: () => dnd.set('forever') },
+        { label: t('dnd.1h'), click: () => dnd.set(60) },
+        { label: t('dnd.tomorrow'), click: () => dnd.set('tomorrow') },
+        { label: t('dnd.forever'), click: () => dnd.set('forever') },
         { type: 'separator' },
-        { label: 'Uitzetten', enabled: dnd.isOn(), click: () => dnd.set(null) }
+        { label: t('dnd.turnOff'), enabled: dnd.isOn(), click: () => dnd.set(null) }
       ]
     },
     {
-      label: 'Starten bij inloggen',
+      label: t('tray.autostart'),
       type: 'checkbox',
       checked: !!store.config.settings.autostart,
       click: (item) => actions.setSetting('autostart', item.checked)
     },
     { type: 'separator' },
     ...(require('./updater').getStatus().state === 'ready'
-      ? [{ label: `Update installeren (${require('./updater').getStatus().version})`, click: () => require('./updater').install() }]
+      ? [{ label: t('tray.update', { v: require('./updater').getStatus().version }), click: () => require('./updater').install() }]
       : []),
-    { label: 'Afsluiten', click: () => actions.quit() }
+    { label: t('tray.quit'), click: () => actions.quit() }
   ]));
 }
 
@@ -128,9 +129,8 @@ function onClose(event) {
     config.save();
     if (Notification.isSupported()) {
       new Notification({
-        title: 'Tabchat draait op de achtergrond',
-        body: 'Je krijgt nog steeds berichten. Open Tabchat via het icoon rechtsboven. ' +
-              'Echt afsluiten: Ctrl+Q of "Afsluiten" in dat menu.',
+        title: t('tray.noticeTitle'),
+        body: t('tray.noticeBody'),
         icon: ICON
       }).show();
     }

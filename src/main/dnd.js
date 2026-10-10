@@ -3,6 +3,7 @@
 const store = require('./store');
 const config = require('./config');
 const views = require('./views');
+const i18n = require('./i18n');
 
 let timer = null;
 
@@ -62,10 +63,11 @@ function applyToView(id, v) {
 function label() {
   if (!isOn()) return null;
   const until = store.config.dndUntil;
-  if (until === 'forever') return 'tot je het uitzet';
+  if (until === 'forever') return i18n.t('dnd.untilOff');
   const d = new Date(until);
-  const time = d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-  return d.toDateString() === new Date().toDateString() ? `tot ${time}` : `tot morgen ${time}`;
+  const time = d.toLocaleTimeString(i18n.lang() === 'nl' ? 'nl-NL' : 'en-GB', { hour: '2-digit', minute: '2-digit' });
+  const today = d.toDateString() === new Date().toDateString();
+  return i18n.t(today ? 'dnd.until' : 'dnd.untilTomorrow', { t: time });
 }
 
 Object.assign(module.exports, { isOn, set, apply, applyToView, label });

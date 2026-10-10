@@ -42,8 +42,8 @@
   <h1 id="title"></h1>
   <p id="text"></p>
   <div class="buttons">
-    <button id="retry">Opnieuw proberen</button>
-    <a class="btn" id="browser" target="_blank" rel="noopener">Openen in browser</a>
+    <button id="retry"></button>
+    <a class="btn" id="browser" target="_blank" rel="noopener"></a>
   </div>
   <div class="auto" id="auto"></div>
   <div class="code" id="code"></div>
@@ -57,28 +57,44 @@
   const code = Number(q.get('code')) || 0;
   const reason = q.get('reason');
 
+  // Deze pagina heeft geen toegang tot i18n.js, dus de teksten staan hier zelf
+  const TEXT = {
+    nl: {
+      crashTitle: '{n} is vastgelopen', crashText: 'Het tabblad is gestopt. Opnieuw laden lost dit meestal op; je blijft ingelogd.',
+      offTitle: 'Geen internetverbinding', offText: '{n} laadt vanzelf opnieuw zodra je weer verbinding hebt.',
+      slowTitle: 'Dat duurt te lang', slowText: '{n} reageert niet. Misschien is je verbinding traag of heeft {n} een storing.',
+      failTitle: '{n} kon niet laden', failText: 'Mogelijk heeft {n} een storing, of blokkeert een netwerk (bijvoorbeeld op school) de verbinding.',
+      retry: 'Opnieuw proberen', browser: 'Openen in browser', auto: 'Automatisch opnieuw over {s} s', code: 'Foutcode: {c}'
+    },
+    en: {
+      crashTitle: '{n} has crashed', crashText: 'The tab stopped. Reloading usually fixes this; you stay signed in.',
+      offTitle: 'No internet connection', offText: '{n} will reload by itself as soon as you are back online.',
+      slowTitle: 'This is taking too long', slowText: '{n} is not responding. Your connection may be slow or {n} may be having problems.',
+      failTitle: '{n} could not load', failText: '{n} may be having problems, or a network (for example at school) is blocking the connection.',
+      retry: 'Try again', browser: 'Open in browser', auto: 'Retrying automatically in {s} s', code: 'Error code: {c}'
+    }
+  };
+  const L = TEXT[q.get('lang')] || TEXT.en;
+  const T = (k, v = {}) => Object.entries(v).reduce((s, [a, b]) => s.split('{' + a + '}').join(b), L[k]);
+  document.documentElement.lang = q.get('lang') || 'en';
+  document.getElementById('retry').textContent = T('retry');
+  document.getElementById('browser').textContent = T('browser');
+
   document.getElementById('badge').style.background = q.get('color') || '#4e5058';
   document.getElementById('letter').textContent = name[0];
   document.getElementById('browser').href = url;
 
   // Passende melding kiezen
   let title, text;
-  if (reason === 'crash') {
-    title = `${name} is vastgelopen`;
-    text = 'Het tabblad is gestopt. Opnieuw laden lost dit meestal op; je blijft ingelogd.';
-  } else if (!navigator.onLine) {
-    title = 'Geen internetverbinding';
-    text = `${name} laadt vanzelf opnieuw zodra je weer verbinding hebt.`;
-  } else if (code === -7 || code === -118) {
-    title = 'Dat duurt te lang';
-    text = `${name} reageert niet. Misschien is je verbinding traag of heeft ${name} een storing.`;
-  } else {
-    title = `${name} kon niet laden`;
-    text = `Mogelijk heeft ${name} een storing, of blokkeert een netwerk (bijvoorbeeld op school) de verbinding.`;
-  }
+  const kind = reason === 'crash' ? 'crash'
+    : !navigator.onLine ? 'off'
+    : (code === -7 || code === -118) ? 'slow'
+    : 'fail';
+  title = T(kind + 'Title', { n: name });
+  text = T(kind + 'Text', { n: name });
   document.getElementById('title').textContent = title;
   document.getElementById('text').textContent = text;
-  if (q.get('desc')) document.getElementById('code').textContent = `Foutcode: ${q.get('desc')}`;
+  if (q.get('desc')) document.getElementById('code').textContent = T('code', { c: q.get('desc') });
 
   // Opnieuw proberen = terug naar de dienst
   function retry() { location.href = url; }
@@ -92,7 +108,7 @@
     let left = 30;
     const auto = document.getElementById('auto');
     const tick = () => {
-      auto.textContent = `Automatisch opnieuw over ${left} s`;
+      auto.textContent = T('auto', { s: left });
       if (left-- <= 0) retry();
     };
     tick();

@@ -8,6 +8,8 @@ const palette = require('./palette');
 const unread = require('./unread');
 const dnd = require('./dnd');
 const sleep = require('./sleep');
+const i18n = require('./i18n');
+const { t } = i18n;
 
 // Rechtsklikmenu op een tabblad
 function showTabMenu(id) {
@@ -15,21 +17,22 @@ function showTabMenu(id) {
   const i = tabs.findIndex(t => t.id === id);
   if (i < 0) return;
   Menu.buildFromTemplate([
-    { label: 'Herladen', accelerator: 'F5', click: () => actions.reload(id) },
-    { label: store.mutedTabs.has(id) ? 'Geluid aanzetten' : 'Geluid dempen', accelerator: 'Alt+M', click: () => actions.toggleMute(id) },
+    { label: t('menu.reload'), accelerator: 'F5', click: () => actions.reload(id) },
+    { label: t(store.mutedTabs.has(id) ? 'menu.unmute' : 'menu.mute'), accelerator: 'Alt+M', click: () => actions.toggleMute(id) },
     { type: 'separator' },
-    { label: 'Nu laten slapen', enabled: !sleep.isAsleep(id), click: () => actions.sleepNow(id) },
-    { label: 'Nooit laten slapen', type: 'checkbox', checked: !sleep.canSleep(tabs[i]), click: (item) => sleep.setAllowed(id, !item.checked) },
+    { label: t('menu.sleepNow'), enabled: !sleep.isAsleep(id), click: () => actions.sleepNow(id) },
+    { label: t('menu.neverSleep'), type: 'checkbox', checked: !sleep.canSleep(tabs[i]), click: (item) => sleep.setAllowed(id, !item.checked) },
     { type: 'separator' },
-    { label: 'Naar links', accelerator: 'Ctrl+Shift+PageUp', enabled: i > 0, click: () => actions.moveTab(id, -1) },
-    { label: 'Naar rechts', accelerator: 'Ctrl+Shift+PageDown', enabled: i < tabs.length - 1, click: () => actions.moveTab(id, 1) },
+    { label: t('menu.left'), accelerator: 'Ctrl+Shift+PageUp', enabled: i > 0, click: () => actions.moveTab(id, -1) },
+    { label: t('menu.right'), accelerator: 'Ctrl+Shift+PageDown', enabled: i < tabs.length - 1, click: () => actions.moveTab(id, 1) },
     { type: 'separator' },
-    { label: 'Tabblad sluiten', accelerator: 'Ctrl+W', click: () => actions.closeTab(id) }
+    { label: t('menu.close'), accelerator: 'Ctrl+W', click: () => actions.closeTab(id) }
   ]).popup({ window: store.win });
 }
 
 function register() {
   ipcMain.handle('get-state', () => views.getState());
+  ipcMain.handle('get-strings', () => i18n.strings()); // teksten in de gekozen taal
 
   // tabbladen
   ipcMain.on('open', (_e, id) => { if (id === 'home' || store.config.tabs.some(t => t.id === id)) views.show(id); });

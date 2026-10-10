@@ -7,6 +7,7 @@ const { CATALOG } = require('./catalog');
 
 // Een nieuwe instelling = één regel hier (plus een schakelaar in home.html)
 const DEFAULT_SETTINGS = {
+  language: 'auto', // 'auto', 'nl' of 'en'
   spellcheck: false,
   shareMicrosoft: true,
   stayLoggedIn: true,

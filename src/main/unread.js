@@ -1,6 +1,7 @@
 // Ongelezen berichten tellen.
-// De diensten zetten het aantal zelf in de titel van hun pagina,
-// bv. "(3) WhatsApp" of "(5) Discord". Die titel lezen we hier uit.
+// Twee manieren waarop diensten het aantal doorgeven:
+// - in de paginatitel, bv. "(45) WhatsApp", "(2) Teams..." of "• Discord"
+// - via de app-badge (navigator.setAppBadge), zie preload/service.js
 const { app } = require('electron');
 const store = require('./store');
 const views = require('./views');
@@ -30,14 +31,12 @@ function enabled() {
 // Een tabblad in de gaten houden
 function watch(tab, view) {
   view.webContents.on('page-title-updated', (_e, title) => {
-    console.log(`[tabchat] titel ${tab.id}: ${title}`); // tijdelijk, om te zien wat diensten doorgeven
     update(fromTitle, tab.id, parse(title));
   });
 }
 
 // Badge-getal van een tabblad (via ipc.js)
 function setBadge(id, n) {
-  console.log(`[tabchat] badge ${id}: ${n}`); // tijdelijk
   update(fromBadge, id, n);
 }
 

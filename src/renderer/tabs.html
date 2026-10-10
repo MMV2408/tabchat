@@ -57,6 +57,25 @@
 </head>
 <body>
 <script>
+  // ---------- vertalingen (zie src/main/i18n.js) ----------
+  let L = {};
+  let curLang = null;
+  const T = (k, v = {}) => {
+    let s = L[k] ?? k;
+    for (const [a, b] of Object.entries(v)) s = s.split('{' + a + '}').join(b);
+    return s;
+  };
+  async function loadStrings(lang) {
+    if (lang && lang === curLang) return;
+    const r = await window.tabchat.getStrings();
+    L = r.strings;
+    curLang = r.lang;
+    document.documentElement.lang = r.lang;
+    document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = T(e.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-title]').forEach(e => { e.title = T(e.dataset.i18nTitle); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(e => { e.placeholder = T(e.dataset.i18nPlaceholder); });
+  }
+
   let dragId = null;
 
   function clearDrop() {
@@ -88,9 +107,9 @@
 
     s.tabs.forEach((t, i) => {
       const b = document.createElement('button');
-      b.title = (i < 8 ? 'Alt+' + (i + 1) + ' · ' : '') + 'sleep om te verplaatsen · rechtsklik voor meer';
+      b.title = (i < 8 ? 'Alt+' + (i + 1) + ' · ' : '') + T('tabs.hint');
       if (s.active === t.id) b.classList.add('active');
-      if (t.asleep) { b.classList.add('asleep'); b.title = 'Slaapt · klik om te laden · ' + b.title; }
+      if (t.asleep) { b.classList.add('asleep'); b.title = T('tabs.asleep') + ' · ' + b.title; }
       const dot = document.createElement('span');
       dot.className = 'dot';
       dot.style.background = t.color;
@@ -137,7 +156,7 @@
     const plus = document.createElement('button');
     plus.id = 'plus';
     plus.textContent = '+';
-    plus.title = 'Diensten toevoegen en instellingen (Alt+T)';
+    plus.title = T('tabs.plus');
     if (s.active === 'home') plus.classList.add('active');
     plus.onclick = () => window.tabchat.open('home');
     dropTarget(plus, s.tabs.length, null); // neerzetten op + = helemaal achteraan
@@ -148,8 +167,8 @@
     if (s.update && s.update.state === 'ready') {
       const u = document.createElement('button');
       u.id = 'update';
-      u.textContent = '⬆ Update ' + s.update.version + ' installeren';
-      u.title = 'Tabchat wordt bijgewerkt en opnieuw gestart';
+      u.textContent = T('tabs.update', { v: s.update.version });
+      u.title = T('tabs.updateTitle');
       u.style.marginLeft = 'auto';
       u.onclick = () => window.tabchat.installUpdate();
       document.body.append(u);
@@ -160,16 +179,17 @@
     if (s.dnd && s.dnd.on) {
       const d = document.createElement('button');
       d.id = 'dnd';
-      d.textContent = '🌙 Niet storen ' + s.dnd.label + '  ✕';
-      d.title = 'Klik om Niet storen uit te zetten';
+      d.textContent = T('tabs.dnd', { label: s.dnd.label });
+      d.title = T('tabs.dndTitle');
       d.onclick = () => window.tabchat.setDnd(null);
       if (right) d.style.marginLeft = '0';
       document.body.append(d);
     }
   }
 
-  window.tabchat.onState(render);
-  window.tabchat.getState().then(render);
+  const update = async (s) => { await loadStrings(s.lang); render(s); };
+  window.tabchat.onState(update);
+  window.tabchat.getState().then(update);
 </script>
 </body>
 </html>

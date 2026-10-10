@@ -43,19 +43,38 @@
 </head>
 <body>
 <div id="backdrop"></div>
-<div id="box" role="dialog" aria-label="Scherm delen">
+<div id="box" role="dialog">
   <header>
-    <h1>Wat wil je delen?</h1>
-    <p class="sub">Kies een scherm of venster. Geluid delen kan op Linux niet.</p>
+    <h1 data-i18n="share.title"></h1>
+    <p class="sub" data-i18n="share.sub"></p>
   </header>
   <main id="list"></main>
   <footer>
-    <button class="act" id="cancel">Annuleren</button>
-    <button class="act" id="ok" disabled>Delen</button>
+    <button class="act" id="cancel" data-i18n="share.cancel"></button>
+    <button class="act" id="ok" data-i18n="share.ok" disabled></button>
   </footer>
 </div>
 
 <script>
+  // ---------- vertalingen (zie src/main/i18n.js) ----------
+  let L = {};
+  let curLang = null;
+  const T = (k, v = {}) => {
+    let s = L[k] ?? k;
+    for (const [a, b] of Object.entries(v)) s = s.split('{' + a + '}').join(b);
+    return s;
+  };
+  async function loadStrings(lang) {
+    if (lang && lang === curLang) return;
+    const r = await window.tabchat.getStrings();
+    L = r.strings;
+    curLang = r.lang;
+    document.documentElement.lang = r.lang;
+    document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = T(e.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-title]').forEach(e => { e.title = T(e.dataset.i18nTitle); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(e => { e.placeholder = T(e.dataset.i18nPlaceholder); });
+  }
+
   const list = document.getElementById('list');
   const ok = document.getElementById('ok');
   let selected = null;
@@ -77,7 +96,7 @@
     list.replaceChildren();
     selected = null;
     ok.disabled = true;
-    const groups = [['screen', 'Schermen'], ['window', 'Vensters']];
+    const groups = [['screen', T('share.screens')], ['window', T('share.windows')]];
     for (const [type, title] of groups) {
       const items = sources.filter(s => s.type === type);
       if (!items.length) continue;
@@ -111,7 +130,10 @@
     if (e.key === 'Enter' && selected) { window.tabchat.sharePick(selected); e.preventDefault(); }
   });
 
-  window.tabchat.onShareOpen(render);
+  window.tabchat.onShareOpen(async (sources) => {
+    await loadStrings(); // taal kan veranderd zijn: altijd even ophalen
+    render(sources);
+  });
 </script>
 </body>
 </html>

@@ -53,12 +53,31 @@
 <body>
 <div id="backdrop"></div>
 <div id="box">
-  <input id="q" placeholder="Zoek een dienst of actie…" autocomplete="off" spellcheck="false">
+  <input id="q" data-i18n-placeholder="pal.placeholder" autocomplete="off" spellcheck="false">
   <ul id="list"></ul>
-  <div class="foot"><span>↑↓ kiezen</span><span>Enter openen</span><span>Esc sluiten</span></div>
+  <div class="foot"><span data-i18n="pal.choose"></span><span data-i18n="pal.open"></span><span data-i18n="pal.close"></span></div>
 </div>
 
 <script>
+  // ---------- vertalingen (zie src/main/i18n.js) ----------
+  let L = {};
+  let curLang = null;
+  const T = (k, v = {}) => {
+    let s = L[k] ?? k;
+    for (const [a, b] of Object.entries(v)) s = s.split('{' + a + '}').join(b);
+    return s;
+  };
+  async function loadStrings(lang) {
+    if (lang && lang === curLang) return;
+    const r = await window.tabchat.getStrings();
+    L = r.strings;
+    curLang = r.lang;
+    document.documentElement.lang = r.lang;
+    document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = T(e.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-title]').forEach(e => { e.title = T(e.dataset.i18nTitle); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(e => { e.placeholder = T(e.dataset.i18nPlaceholder); });
+  }
+
   const q = document.getElementById('q');
   const list = document.getElementById('list');
   let items = [];
@@ -71,12 +90,12 @@
     const present = new Set(s.tabs.map(t => t.service));
 
     s.tabs.forEach((t, i) => out.push({
-      run: { type: 'tab', id: t.id }, title: t.label, sub: 'Openen',
+      run: { type: 'tab', id: t.id }, title: t.label, sub: T('pal.openTab'),
       color: t.color, letter: t.label[0], hint: i < 8 ? 'Alt+' + (i + 1) : '', words: t.label
     }));
 
     for (const c of s.catalog) if (!present.has(c.id)) out.push({
-      run: { type: 'add', service: c.id }, title: c.name + ' toevoegen', sub: c.desc,
+      run: { type: 'add', service: c.id }, title: T('pal.add', { name: c.name }), sub: c.desc,
       color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen add'
     });
 
@@ -84,32 +103,33 @@
       if (allowed) out.push({ run: { type: 'action', id }, title, sub: '', icon, hint, words: title + ' ' + words });
     };
     const tab = s.activeIsTab;
-    action('reload', 'Tabblad herladen', 'F5', '↻', 'herladen vernieuwen reload refresh', tab);
-    action('reloadAll', 'Alle tabbladen herladen', '', '↻', 'alles herladen vernieuwen reload refresh vastgelopen', s.tabs.length > 0);
-    action('mute', s.activeMuted ? 'Geluid aanzetten' : 'Geluid dempen', 'Alt+M', '🔇', 'dempen mute geluid stil', tab);
-    action('sleepNow', 'Tabblad laten slapen', '', '💤', 'slapen slaapstand geheugen sleep', tab);
-    action('close', 'Tabblad sluiten', 'Ctrl+W', '✕', 'sluiten close', tab);
-    action('reopen', 'Gesloten tabblad terughalen', 'Ctrl+Shift+T', '↺', 'terughalen herstellen reopen', s.canReopen);
-    action('zoomIn', 'Inzoomen', 'Ctrl+Plus', '+', 'zoom groter', tab);
-    action('zoomOut', 'Uitzoomen', 'Ctrl+Min', '−', 'zoom kleiner', tab);
-    action('zoomReset', 'Zoom herstellen', 'Ctrl+0', '1:1', 'zoom normaal 100', tab);
-    action('fullscreen', 'Volledig scherm', 'F11', '⛶', 'fullscreen groot');
+    // Zoekwoorden in beide talen, zodat zoeken altijd werkt
+    action('reload', T('pal.reload'), 'F5', '↻', 'herladen vernieuwen reload refresh', tab);
+    action('reloadAll', T('pal.reloadAll'), '', '↻', 'alles herladen vernieuwen reload refresh all vastgelopen stuck', s.tabs.length > 0);
+    action('mute', T(s.activeMuted ? 'pal.unmute' : 'pal.mute'), 'Alt+M', '🔇', 'dempen mute geluid stil sound', tab);
+    action('sleepNow', T('pal.sleep'), '', '💤', 'slapen slaapstand geheugen sleep memory', tab);
+    action('close', T('pal.closeTab'), 'Ctrl+W', '✕', 'sluiten close', tab);
+    action('reopen', T('pal.reopen'), 'Ctrl+Shift+T', '↺', 'terughalen herstellen reopen restore', s.canReopen);
+    action('zoomIn', T('pal.zoomIn'), 'Ctrl+Plus', '+', 'zoom groter bigger', tab);
+    action('zoomOut', T('pal.zoomOut'), 'Ctrl+Min', '−', 'zoom kleiner smaller', tab);
+    action('zoomReset', T('pal.zoomReset'), 'Ctrl+0', '1:1', 'zoom normaal reset 100', tab);
+    action('fullscreen', T('pal.fullscreen'), 'F11', '⛶', 'fullscreen volledig groot');
     if (s.dnd && s.dnd.on) {
-      action('dndOff', 'Niet storen uitzetten', '', '🔔', 'niet storen dnd uit meldingen aan');
+      action('dndOff', T('pal.dndOff'), '', '🔔', 'niet storen dnd do not disturb uit off');
     } else {
-      action('dnd60', 'Niet storen: 1 uur', '', '🌙', 'niet storen dnd stil meldingen uit');
-      action('dndTomorrow', 'Niet storen: tot morgen 08:00', '', '🌙', 'niet storen dnd stil meldingen uit');
-      action('dndForever', 'Niet storen: tot ik het uitzet', '', '🌙', 'niet storen dnd stil meldingen uit');
+      action('dnd60', T('pal.dnd60'), '', '🌙', 'niet storen dnd do not disturb stil quiet');
+      action('dndTomorrow', T('pal.dndTomorrow'), '', '🌙', 'niet storen dnd do not disturb stil quiet');
+      action('dndForever', T('pal.dndForever'), '', '🌙', 'niet storen dnd do not disturb stil quiet');
     }
-    action('settings', 'Diensten en instellingen', 'Alt+T', '⚙', 'instellingen plus toevoegen settings');
-    action('shortcuts', 'Alle sneltoetsen', '', '⌨', 'sneltoetsen toetsen shortcuts help');
+    action('settings', T('pal.settings'), 'Alt+T', '⚙', 'instellingen plus toevoegen settings add');
+    action('shortcuts', T('pal.shortcuts'), '', '⌨', 'sneltoetsen toetsen shortcuts keys help');
 
     for (const c of s.catalog) if (present.has(c.id)) out.push({
-      run: { type: 'add', service: c.id }, title: 'Nog een ' + c.name + '-account', sub: 'Extra tabblad met eigen login',
-      color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen account extra'
+      run: { type: 'add', service: c.id }, title: T('pal.another', { name: c.name }), sub: T('pal.anotherSub'),
+      color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen account extra another'
     });
 
-    action('quit', 'Tabchat afsluiten', 'Ctrl+Q', '⏻', 'afsluiten quit stoppen');
+    action('quit', T('pal.quit'), 'Ctrl+Q', '⏻', 'afsluiten quit stoppen exit');
     return out;
   }
 
@@ -128,7 +148,7 @@
     if (!shown.length) {
       const li = document.createElement('div');
       li.className = 'empty';
-      li.textContent = 'Niets gevonden';
+      li.textContent = T('pal.none');
       list.append(li);
       return;
     }
@@ -174,7 +194,8 @@
   });
   document.getElementById('backdrop').onclick = () => window.tabchat.paletteClose();
 
-  window.tabchat.onPaletteOpen((s) => {
+  window.tabchat.onPaletteOpen(async (s) => {
+    await loadStrings(s.lang);
     items = build(s);
     q.value = '';
     filter();

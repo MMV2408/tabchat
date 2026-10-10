@@ -6,6 +6,7 @@ const { app, Notification } = require('electron');
 const path = require('path');
 const store = require('./store');
 const views = require('./views');
+const { t } = require('./i18n');
 
 let autoUpdater = null;
 try {
@@ -47,8 +48,8 @@ function announceUpdate() {
   if (!before && store.config.tabs.length === 0) return;
   if (Notification.isSupported()) {
     new Notification({
-      title: `Tabchat is bijgewerkt naar ${now}`,
-      body: before ? `Je had versie ${before}. Alles staat weer klaar.` : 'Alles staat weer klaar.',
+      title: t('upd.doneTitle', { v: now }),
+      body: before ? t('upd.doneBodyFrom', { v: before }) : t('upd.doneBody'),
       icon: ICON
     }).show();
   }
@@ -68,8 +69,8 @@ function init() {
     set({ state: 'ready', version: info.version });
     if (Notification.isSupported()) {
       new Notification({
-        title: `Tabchat ${info.version} staat klaar`,
-        body: 'Installeer de update via de knop in de tabbalk of het tray-menu.',
+        title: t('upd.readyTitle', { v: info.version }),
+        body: t('upd.readyBody'),
         icon: ICON
       }).show();
     }
