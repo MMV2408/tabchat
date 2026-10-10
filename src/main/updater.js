@@ -34,7 +34,28 @@ function enabled() {
   return store.config.settings.autoUpdate;
 }
 
+// Na een update: eenmalig laten weten dat het gelukt is
+function announceUpdate() {
+  const now = app.getVersion();
+  const before = store.config.lastVersion;
+  if (before === now) return;
+  store.config.lastVersion = now;
+  require('./config').save();
+  if (!app.isPackaged) return; // npm start: geen melding
+  // Geen vorige versie bekend? Dan alleen melden als Tabchat al eerder gebruikt is
+  // (versies van vóór 1.9.1 onthielden hun versienummer nog niet)
+  if (!before && store.config.tabs.length === 0) return;
+  if (Notification.isSupported()) {
+    new Notification({
+      title: `Tabchat is bijgewerkt naar ${now}`,
+      body: before ? `Je had versie ${before}. Alles staat weer klaar.` : 'Alles staat weer klaar.',
+      icon: ICON
+    }).show();
+  }
+}
+
 function init() {
+  announceUpdate();
   if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' }); // npm start: geen updates
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = false; // zelf kiezen wanneer (wachtwoord nodig bij .deb)

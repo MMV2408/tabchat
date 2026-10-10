@@ -32,11 +32,12 @@ function load() {
       settings: { ...DEFAULT_SETTINGS, ...(c.settings || {}) },
       loginNoticeShown: !!c.loginNoticeShown,
       trayNoticeShown: !!c.trayNoticeShown,
-      dndUntil: c.dndUntil || null
+      dndUntil: c.dndUntil || null,
+      lastVersion: c.lastVersion || null
     };
   } catch {
     // Geen of kapot bestand: met een lege app beginnen
-    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null };
+    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null, lastVersion: null };
   }
 }
 
