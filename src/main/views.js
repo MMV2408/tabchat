@@ -39,6 +39,7 @@ function broadcast() {
   const s = getState();
   store.bar.webContents.send('state', s);
   store.home.webContents.send('state', s);
+  require('./tray').refresh(); // tabbladen in het tray-menu bijwerken
 }
 
 // ---------- tabblad maken ----------

@@ -173,18 +173,21 @@ function setSetting(key, value) {
     }
     views.layout();
   }
+  if (key === 'runInBackground') require('./tray').sync();
   views.broadcast();
 }
 
 // Bij afsluiten eerst alle logins (cookies) naar schijf schrijven
-let quitting = false;
+let flushing = false;
 async function quit() {
-  if (quitting) return;
-  quitting = true;
+  store.quitting = true; // kruisje-gedrag uit: venster mag nu echt dicht
+  if (flushing) return;
+  flushing = true;
   const parts = new Set([...store.config.tabs.map(microsoft.partitionFor), ...microsoft.keptSessions]);
   await Promise.all([...parts].map(p =>
     session.fromPartition(p).cookies.flushStore().catch(() => {})
   ));
+  require('./tray').destroy();
   app.quit();
 }
 

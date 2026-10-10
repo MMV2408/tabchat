@@ -5,6 +5,7 @@ const store = require('./store');
 const config = require('./config');
 const views = require('./views');
 const shortcuts = require('./shortcuts');
+const tray = require('./tray');
 
 const PRELOAD = path.join(__dirname, '..', 'preload', 'preload.js');
 const RENDERER = path.join(__dirname, '..', 'renderer');
@@ -50,6 +51,7 @@ function create() {
     if (store.active !== 'home' || store.paletteOpen) setImmediate(views.focusActive);
   });
   views.layout();
+  tray.init(); // tray-icoon + kruisje = verbergen
 
   // Sneltoetsen direct laten werken bij het opstarten:
   // eerst de tabbalk (laadt meteen), daarna het tabblad zodra dat klaar is

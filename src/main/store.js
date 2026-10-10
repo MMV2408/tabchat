@@ -12,5 +12,6 @@ module.exports = {
   lastTab: null,          // laatst geopende tabblad (voor Esc in het +-scherm)
   paletteOpen: false,
   mutedTabs: new Set(),   // gedempte tabbladen (alleen deze sessie)
-  closedTabs: []          // gesloten tabbladen, voor Ctrl+Shift+T
+  closedTabs: [],         // gesloten tabbladen, voor Ctrl+Shift+T
+  quitting: false         // true zodra de app echt afsluit (dan niet naar de tray)
 };

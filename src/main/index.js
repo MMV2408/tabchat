@@ -8,7 +8,20 @@ const actions = require('./actions');
 // Minder geheugen voor JavaScript per tabblad
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=256');
 
-ipc.register();
+// Maar één Tabchat tegelijk. Start je hem nog een keer terwijl hij op de
+// achtergrond draait, dan komt het bestaande venster tevoorschijn.
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => require('./tray').showWindow());
 
-app.whenReady().then(window.create);
-app.on('window-all-closed', actions.quit);
+  ipc.register();
+
+  app.whenReady().then(window.create);
+  // Bij elk afsluiten (ook uitloggen of afsluiten van de computer)
+  app.on('before-quit', () => {
+    require('./store').quitting = true;
+    require('./tray').destroy();
+  });
+  app.on('window-all-closed', actions.quit);
+}

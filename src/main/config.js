@@ -9,7 +9,8 @@ const { CATALOG } = require('./catalog');
 const DEFAULT_SETTINGS = {
   spellcheck: false,
   shareMicrosoft: true,
-  stayLoggedIn: true
+  stayLoggedIn: true,
+  runInBackground: true
 };
 
 function configFile() {
@@ -22,11 +23,12 @@ function load() {
     return {
       tabs: Array.isArray(c.tabs) ? c.tabs.filter(t => CATALOG[t.service]) : [],
       settings: { ...DEFAULT_SETTINGS, ...(c.settings || {}) },
-      loginNoticeShown: !!c.loginNoticeShown
+      loginNoticeShown: !!c.loginNoticeShown,
+      trayNoticeShown: !!c.trayNoticeShown
     };
   } catch {
     // Geen of kapot bestand: met een lege app beginnen
-    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false };
+    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false };
   }
 }
 
