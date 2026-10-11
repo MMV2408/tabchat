@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="theme.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    background: var(--bg-0);
+    font-family: system-ui, sans-serif;
+    user-select: none;
+    overflow-x: auto;
+  }
+  button {
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    padding: 0 14px;
+    background: var(--bg-1);
+    color: var(--tab-text);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  button:hover { background: var(--bg-2); }
+  button.active { background: var(--bg-3); color: var(--text-strong); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .muted { font-size: 12px; opacity: .8; }
+  /* ongelezen */
+  .count { background: #f23f43; color: #fff; font-size: 11px; font-weight: 700; border-radius: 9px; padding: 1px 6px; min-width: 18px; text-align: center; }
+  .udot { width: 8px; height: 8px; border-radius: 50%; background: #f23f43; }
+  #plus { width: 32px; padding: 0; justify-content: center; font-size: 20px; }
+  /* slaapstand */
+  button.asleep { opacity: .5; }
+  button.asleep.active { opacity: 1; }
+  .zz { font-size: 12px; }
+  /* update */
+  #update { background: #1f6f43; color: #fff; font-size: 13px; }
+  #update:hover { background: #24834f; }
+  /* niet storen */
+  #dnd { margin-left: auto; background: var(--dnd-bg); color: var(--dnd-text); font-size: 13px; }
+  #dnd:hover { background: var(--dnd-hover); }
+  /* slepen */
+  .dragging { opacity: .4; }
+  .drop-before { box-shadow: inset 3px 0 0 #5865F2; }
+  .drop-after { box-shadow: inset -3px 0 0 #5865F2; }
+</style>
+<script src="mock.js"></script>
+</head>
+<body>
+<script>
+  // ---------- vertalingen (zie src/main/i18n.js) ----------
+  let L = {};
+  let curLang = null;
+  const T = (k, v = {}) => {
+    let s = L[k] ?? k;
+    for (const [a, b] of Object.entries(v)) s = s.split('{' + a + '}').join(b);
+    return s;
+  };
+  async function loadStrings(lang) {
+    if (lang && lang === curLang) return;
+    const r = await window.tabchat.getStrings();
+    L = r.strings;
+    curLang = r.lang;
+    document.documentElement.lang = r.lang;
+    document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = T(e.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-title]').forEach(e => { e.title = T(e.dataset.i18nTitle); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(e => { e.placeholder = T(e.dataset.i18nPlaceholder); });
+  }
+
+  let dragId = null;
+
+  function clearDrop() {
+    document.querySelectorAll('.drop-before, .drop-after').forEach(x => x.classList.remove('drop-before', 'drop-after'));
+  }
+
+  // Maakt een knop een plek waar je een tabblad kunt neerzetten
+  function dropTarget(el, indexBefore, indexAfter) {
+    el.ondragover = (e) => {
+      if (!dragId) return;
+      e.preventDefault();
+      const r = el.getBoundingClientRect();
+      const after = indexAfter != null && e.clientX > r.left + r.width / 2;
+      clearDrop();
+      el.classList.add(after ? 'drop-after' : 'drop-before');
+    };
+    el.ondragleave = () => el.classList.remove('drop-before', 'drop-after');
+    el.ondrop = (e) => {
+      e.preventDefault();
+      if (!dragId) return;
+      const after = el.classList.contains('drop-after');
+      clearDrop();
+      window.tabchat.reorder(dragId, after ? indexAfter : indexBefore);
+    };
+  }
+
+  function render(s) {
+    document.body.replaceChildren();
+
+    s.tabs.forEach((t, i) => {
+      const b = document.createElement('button');
+      b.title = (i < 8 ? 'Alt+' + (i + 1) + ' · ' : '') + T('tabs.hint');
+      if (s.active === t.id) b.classList.add('active');
+      if (t.asleep) { b.classList.add('asleep'); b.title = T('tabs.asleep') + ' · ' + b.title; }
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      dot.style.background = t.color;
+      b.append(dot, document.createTextNode(t.label));
+      if (typeof t.unread === 'number' && t.unread > 0) {
+        const c = document.createElement('span');
+        c.className = 'count';
+        c.textContent = t.unread > 99 ? '99+' : t.unread;
+        b.append(c);
+      } else if (t.unread === 'dot') {
+        const d = document.createElement('span');
+        d.className = 'udot';
+        b.append(d);
+      }
+      if (t.asleep) {
+        const z = document.createElement('span');
+        z.className = 'zz';
+        z.textContent = '💤';
+        b.append(z);
+      }
+      if (t.muted) {
+        const m = document.createElement('span');
+        m.className = 'muted';
+        m.textContent = '🔇';
+        b.append(m);
+      }
+      b.onclick = () => window.tabchat.open(t.id);
+      b.oncontextmenu = (e) => { e.preventDefault(); window.tabchat.tabMenu(t.id); };
+
+      // Slepen om te verplaatsen
+      b.draggable = true;
+      b.ondragstart = (e) => {
+        dragId = t.id;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', t.id);
+        b.classList.add('dragging');
+      };
+      b.ondragend = () => { dragId = null; b.classList.remove('dragging'); clearDrop(); };
+      dropTarget(b, i, i + 1);
+
+      document.body.append(b);
+    });
+
+    const plus = document.createElement('button');
+    plus.id = 'plus';
+    plus.textContent = '+';
+    plus.title = T('tabs.plus');
+    if (s.active === 'home') plus.classList.add('active');
+    plus.onclick = () => window.tabchat.open('home');
+    dropTarget(plus, s.tabs.length, null); // neerzetten op + = helemaal achteraan
+    document.body.append(plus);
+
+    // Update klaar: knop rechts
+    let right = false; // eerste knop rechts krijgt margin-left:auto
+    if (s.update && s.update.state === 'ready') {
+      const u = document.createElement('button');
+      u.id = 'update';
+      u.textContent = T('tabs.update', { v: s.update.version });
+      u.title = T('tabs.updateTitle');
+      u.style.marginLeft = 'auto';
+      u.onclick = () => window.tabchat.installUpdate();
+      document.body.append(u);
+      right = true;
+    }
+
+    // Niet storen: label rechts, klik = uitzetten
+    if (s.dnd && s.dnd.on) {
+      const d = document.createElement('button');
+      d.id = 'dnd';
+      if (s.dnd.manual) {
+        d.textContent = T('tabs.dnd', { label: s.dnd.label });
+        d.title = T('tabs.dndTitle');
+        d.onclick = () => window.tabchat.setDnd(null);
+      } else {
+        // Via Ubuntu aangezet: uitzetten kan alleen in Ubuntu zelf
+        d.textContent = T('tabs.dndSystem');
+        d.title = T('tabs.dndSystemTitle');
+        d.style.cursor = 'default';
+      }
+      if (right) d.style.marginLeft = '0';
+      document.body.append(d);
+    }
+  }
+
+  const update = async (s) => { await loadStrings(s.lang); render(s); };
+  window.tabchat.onState(update);
+  window.tabchat.getState().then(update);
+</script>
+</body>
+</html>

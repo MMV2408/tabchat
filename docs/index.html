@@ -3,216 +3,295 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tabchat — your chat apps in one window, for Linux</title>
+<title>Tabchat: WhatsApp, Discord, Teams and Outlook in one window for Linux</title>
 <meta name="description" content="Tabchat puts WhatsApp, Discord, Microsoft Teams, Outlook and OneDrive in one lightweight window with tabs. Free and open source, made for Linux.">
-<meta property="og:title" content="Tabchat">
-<meta property="og:description" content="WhatsApp, Discord, Teams, Outlook and OneDrive in one window. Free and open source, made for Linux.">
-<meta property="og:image" content="https://mmv2408.github.io/tabchat/banner.png">
+<link rel="canonical" href="https://mmv2408.github.io/tabchat/">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://mmv2408.github.io/tabchat/">
+<meta property="og:title" content="Tabchat: your chat apps in one window">
+<meta property="og:description" content="WhatsApp, Discord, Teams, Outlook and OneDrive in one window with tabs. Free and open source, made for Linux.">
+<meta property="og:image" content="https://mmv2408.github.io/tabchat/banner.png">
+<meta property="og:image:width" content="2160">
+<meta property="og:image:height" content="720">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1b1320">
+<!-- Snapcraft-verificatie: plak hier de meta-tag die snapcraft.io geeft (Settings → Verify) -->
 <link rel="icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #1b1320;        /* aubergine-zwart, knipoog naar Ubuntu */
-    --surface: #271d2e;
-    --line: #3a2e43;
-    --text: #f4eff7;
-    --muted: #b8acc3;
-    --lilac: #c9b6ff;     /* links en focus */
-    --wa: #25d366; --dc: #5865f2; --tm: #6264a7; --ol: #0f78d4; --od: #0364b8;
+    color-scheme: dark;
+    --bg: #1b1320; --surface: #271d2e; --surface-2: #31253a; --line: #3a2e43;
+    --text: #f4eff7; --muted: #b8acc3; --link: #c9b6ff; --code: #120d16;
     --display: 'Bricolage Grotesque', system-ui, sans-serif;
     --body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #faf7fc; --surface: #f0e9f5; --surface-2: #e6dcee; --line: #ddd2e5;
+    --text: #1f1426; --muted: #5b4f66; --link: #5b3fc0; --code: #2a1f31;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 18px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
   img { max-width: 100%; height: auto; display: block; }
-  a { color: var(--lilac); }
-  a:focus-visible, button:focus-visible { outline: 3px solid var(--lilac); outline-offset: 3px; border-radius: 6px; }
-  .wrap { width: min(1120px, 100% - 40px); margin-inline: auto; }
+  a { color: var(--link); }
+  a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--link); outline-offset: 3px; border-radius: 6px; }
+  .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+  kbd { font: 700 .85em var(--body); background: var(--surface-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
 
   /* ---------- kop ---------- */
-  header.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
-  .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font: 700 22px var(--display); }
+  header.top { display: flex; align-items: center; gap: 20px; padding: 20px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font: 700 22px var(--display); margin-right: auto; }
   .brand img { width: 34px; height: 34px; }
-  nav.top a { color: var(--muted); text-decoration: none; margin-left: 22px; font-size: 16px; }
+  nav.top { display: flex; gap: 20px; }
+  nav.top a { color: var(--muted); text-decoration: none; font-size: 16px; }
   nav.top a:hover { color: var(--text); }
+  .tools { display: flex; gap: 6px; }
+  .tool { background: transparent; color: var(--muted); border: 1.5px solid var(--line); border-radius: 10px; padding: 6px 10px; font: 700 14px var(--body); cursor: pointer; min-width: 40px; }
+  .tool:hover { color: var(--text); border-color: var(--muted); }
 
   /* ---------- hero ---------- */
-  .hero { padding: 48px 0 24px; }
+  .hero { padding: 40px 0 0; }
   .hero h1 { font: 800 clamp(40px, 6.4vw, 78px)/1.02 var(--display); letter-spacing: -0.02em; margin: 0 0 22px; max-width: 15ch; }
-  .hero p.lead { font-size: 21px; color: var(--muted); max-width: 58ch; margin: 0 0 30px; }
+  .lead { font-size: 21px; color: var(--muted); max-width: 58ch; margin: 0 0 30px; }
   .get { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 12px; font: 700 17px var(--body); text-decoration: none; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 12px; font: 700 17px var(--body); text-decoration: none; cursor: pointer; border: 0; }
   .btn.primary { background: var(--text); color: var(--bg); }
-  .btn.primary:hover { background: #fff; }
-  .btn.ghost { color: var(--text); border: 1.5px solid var(--line); }
+  .btn.ghost { color: var(--text); border: 1.5px solid var(--line); background: transparent; }
   .btn.ghost:hover { border-color: var(--muted); }
-  .btn small { font-weight: 400; color: inherit; opacity: .7; }
 
-  /* ---------- tabbladen-demo: het herkenbare element ---------- */
-  .demo { margin-top: 56px; }
-  .tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; background: #121014; border-radius: 14px 14px 0 0; width: fit-content; max-width: 100%; }
-  .tab { display: inline-flex; align-items: center; gap: 8px; border: 0; cursor: pointer; padding: 9px 14px; border-radius: 9px; background: #2a2730; color: #cfccd6; font: 600 15px var(--body); }
-  .tab:hover { background: #34303b; }
-  .tab[aria-selected="true"] { background: #4b4655; color: #fff; }
-  .tab .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
-  .tab .count { background: #f23f43; color: #fff; font-size: 11px; font-weight: 700; border-radius: 9px; padding: 1px 6px; }
-  .tab .zz { font-size: 13px; opacity: .8; }
-  .tab.asleep { color: #8d8996; }
-  .stage { position: relative; background: #121014; border-radius: 0 14px 14px 14px; padding: 6px; }
-  .stage img { width: 100%; border-radius: 10px; }
-  .caption { color: var(--muted); font-size: 16px; margin: 14px 4px 0; min-height: 1.6em; }
+  /* ---------- de simulatie: het herkenbare element ---------- */
+  .try { margin: 56px 0 12px; color: var(--muted); font-size: 16px; }
+  .try b { color: var(--text); }
+  .simbox { position: relative; width: 100%; }
+  .win { position: absolute; top: 0; left: 0; width: 1120px; transform-origin: 0 0; border-radius: 12px; overflow: hidden;
+         box-shadow: 0 30px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06); background: #1e1f22; }
+  .win.light { background: #fff; box-shadow: 0 30px 80px rgba(60,30,80,.18), 0 0 0 1px rgba(0,0,0,.08); }
+  .titlebar { height: 38px; display: flex; align-items: center; justify-content: center; position: relative; background: #2a2a2e; color: #e8e8ea; font: 700 14px system-ui, sans-serif; }
+  .win.light .titlebar { background: #ebebed; color: #2e2e33; }
+  .titlebar .ctl { position: absolute; right: 12px; display: flex; gap: 14px; opacity: .75; font-size: 13px; }
+  .tabsframe { display: block; width: 100%; height: 44px; border: 0; }
+  .content { position: relative; height: 646px; background: #2b2d31; }
+  .win.light .content { background: #f2f3f5; }
+  .content > * { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .content img { object-fit: cover; object-position: top left; }
+  .content [hidden] { display: none; }
+  .placeholder { display: grid; place-content: center; justify-items: center; gap: 14px; color: #949ba4; font: 16px system-ui, sans-serif; }
+  .placeholder .badge { width: 72px; height: 72px; border-radius: 18px; display: grid; place-items: center; color: #fff; font: 700 34px system-ui, sans-serif; }
+  .placeholder strong { color: #dbdee1; font-size: 22px; }
+  .win.light .placeholder strong { color: #313338; }
+  .caption { color: var(--muted); font-size: 16px; margin: 18px 4px 0; min-height: 3.2em; max-width: 70ch; }
 
-  /* ---------- functies ---------- */
-  section { padding: 96px 0 0; }
-  h2 { font: 800 clamp(30px, 4vw, 46px)/1.1 var(--display); letter-spacing: -0.015em; margin: 0 0 18px; max-width: 20ch; }
-  .intro { color: var(--muted); max-width: 60ch; margin: 0 0 40px; }
-  .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 44px 48px; }
+  /* ---------- secties ---------- */
+  section { padding: 104px 0 0; }
+  h2 { font: 800 clamp(30px, 4vw, 46px)/1.1 var(--display); letter-spacing: -0.015em; margin: 0 0 18px; max-width: 22ch; }
+  .intro { color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .intro strong { color: var(--text); }
+
+  .why { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: center; }
+  .mem { display: grid; gap: 14px; }
+  .mem .bar { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 14px; font-size: 16px; }
+  .mem .track { height: 30px; border-radius: 8px; display: flex; overflow: hidden; background: var(--surface); }
+  .mem .seg { height: 100%; }
+  .mem .bar span { color: var(--muted); }
+  .mem small { color: var(--muted); font-size: 14px; }
+
+  .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 44px 48px; margin-top: 36px; }
   .group h3 { font: 700 22px/1.25 var(--display); margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
   .group h3 i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
   .group ul { margin: 0; padding: 0; list-style: none; }
-  .group li { padding: 9px 0; border-top: 1px solid var(--line); color: #e5ddec; }
+  .group li { padding: 9px 0; border-top: 1px solid var(--line); }
   .group li:last-child { border-bottom: 1px solid var(--line); }
 
-  .split { display: grid; grid-template-columns: 1fr 230px; gap: 56px; align-items: center; }
-  .split .tray { filter: drop-shadow(0 20px 40px rgba(0,0,0,.45)); }
+  .split { display: grid; grid-template-columns: 1fr 230px; gap: 56px; align-items: start; }
+  .split .tray { filter: drop-shadow(0 20px 40px rgba(0,0,0,.35)); }
+  details.keys { margin-top: 10px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  details.keys summary { cursor: pointer; padding: 14px 0; font-weight: 700; }
+  .keytable { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0 40px; padding-bottom: 18px; }
+  .keytable h4 { font: 700 17px var(--display); margin: 14px 0 4px; }
+  .keyrow { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .keyrow span:first-child { color: var(--muted); }
 
-  /* ---------- installeren ---------- */
-  .install { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-  .way { background: var(--surface); border-radius: 18px; padding: 26px; }
-  .way h3 { font: 700 22px var(--display); margin: 0 0 6px; }
-  .way p { color: var(--muted); margin: 0 0 16px; font-size: 16px; }
-  pre { margin: 0 0 16px; background: #120d16; border-radius: 10px; padding: 14px 16px; overflow-x: auto; font: 15px/1.5 ui-monospace, 'DejaVu Sans Mono', monospace; color: #efe8f5; }
+  .news { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .news article { background: var(--surface); border-radius: 16px; padding: 22px 24px; }
+  .news h3 { font: 700 20px var(--display); margin: 0 0 8px; }
+  .news ul { margin: 0; padding-left: 20px; color: var(--muted); font-size: 16px; }
+  .news li + li { margin-top: 6px; }
 
   .privacy { background: var(--surface); border-radius: 22px; padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-  .privacy p { margin: 0; color: #e5ddec; }
+  .privacy p { margin: 0 0 14px; }
+  .privacy p:last-child { margin: 0; }
 
-  footer { padding: 96px 0 48px; color: var(--muted); font-size: 15px; }
+  .faq details { border-top: 1px solid var(--line); }
+  .faq details:last-child { border-bottom: 1px solid var(--line); }
+  .faq summary { cursor: pointer; padding: 18px 0; font: 700 19px var(--display); list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: '+'; color: var(--muted); font-size: 24px; line-height: 1; }
+  .faq details[open] summary::after { content: '−'; }
+  .faq details p { margin: 0 0 20px; color: var(--muted); max-width: 70ch; }
+
+  .install { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; }
+  .way { background: var(--surface); border-radius: 18px; padding: 26px; display: flex; flex-direction: column; }
+  .way h3 { font: 700 22px var(--display); margin: 0 0 6px; }
+  .way p { color: var(--muted); margin: 0 0 16px; font-size: 16px; }
+  .way .btn { margin-top: auto; align-self: flex-start; }
+  pre { margin: 0 0 18px; background: var(--code); border-radius: 10px; padding: 14px 16px; overflow-x: auto; font: 15px/1.5 ui-monospace, 'DejaVu Sans Mono', monospace; color: #efe8f5; }
+
+  footer { padding: 104px 0 48px; color: var(--muted); font-size: 15px; }
   footer .row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; border-top: 1px solid var(--line); padding-top: 24px; }
+  footer p { margin: 14px 0 0; font-size: 13px; }
 
-  @media (max-width: 760px) {
-    body { font-size: 17px; }
-    nav.top a:not(.gh) { display: none; }
-    .split, .privacy { grid-template-columns: 1fr; }
-    .split .tray { max-width: 260px; }
+  @media (max-width: 860px) {
+    nav.top { display: none; }
+    .why, .split, .privacy { grid-template-columns: 1fr; }
+    .split .tray { max-width: 200px; }
     .privacy { padding: 26px; }
+  }
+  @media (max-width: 560px) {
+    body { font-size: 17px; }
+    .lead { font-size: 19px; }
+    .mem .bar { grid-template-columns: 1fr; gap: 4px; }
+    section { padding-top: 80px; }
   }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
+<script>
+  // Thema en taal zo vroeg mogelijk, zodat de pagina niet eerst verkeerd verschijnt
+  (function () {
+    let t = null, l = null;
+    try { t = localStorage.getItem('theme'); l = localStorage.getItem('lang'); } catch {}
+    if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    if (!l) l = (navigator.language || '').toLowerCase().startsWith('nl') ? 'nl' : 'en';
+    document.documentElement.dataset.theme = t;
+    document.documentElement.lang = l;
+  })();
+</script>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <a class="brand" href="#"><img src="icon.png" alt="">Tabchat</a>
     <nav class="top">
-      <a href="#features">Features</a>
-      <a href="#install">Install</a>
-      <a class="gh" href="https://github.com/MMV2408/tabchat">GitHub</a>
+      <a href="#features" data-i18n="nav.features"></a>
+      <a href="#faq" data-i18n="nav.faq"></a>
+      <a href="#install" data-i18n="nav.install"></a>
+      <a href="https://github.com/MMV2408/tabchat">GitHub</a>
     </nav>
+    <div class="tools">
+      <button class="tool" id="langBtn" type="button"></button>
+      <button class="tool" id="themeBtn" type="button"></button>
+    </div>
   </header>
 
   <main>
     <div class="hero">
-      <h1>Your chat apps, in one window.</h1>
-      <p class="lead">Tabchat puts WhatsApp, Discord, Microsoft Teams, Outlook and OneDrive side by side in tabs. Light on memory, keyboard-friendly and built for Linux.</p>
+      <h1 data-i18n="hero.title"></h1>
+      <p class="lead" data-i18n="hero.lead"></p>
       <div class="get">
-        <a class="btn primary" href="https://snapcraft.io/tabchat">Get it from the Snap Store</a>
-        <a class="btn ghost" href="https://github.com/MMV2408/tabchat/releases/latest">.deb or AppImage <small>for any Linux</small></a>
+        <a class="btn primary" href="#install" data-i18n="hero.install"></a>
+        <a class="btn ghost" href="https://snapcraft.io/tabchat" data-i18n="hero.snap"></a>
       </div>
 
-      <div class="demo" aria-label="Screenshots">
-        <div class="tabs" role="tablist">
-          <button class="tab" role="tab" aria-selected="true" data-shot="main" style="--c: var(--wa)"><span class="dot"></span>WhatsApp<span class="count">45</span></button>
-          <button class="tab" role="tab" aria-selected="false" data-shot="quick-search" style="--c: var(--dc)"><span class="dot"></span>Discord</button>
-          <button class="tab" role="tab" aria-selected="false" data-shot="onedrive" style="--c: var(--od)"><span class="dot"></span>OneDrive</button>
-          <button class="tab asleep" role="tab" aria-selected="false" data-shot="settings" style="--c: var(--tm)"><span class="dot"></span>Teams<span class="zz" aria-label="asleep">💤</span></button>
-          <button class="tab" role="tab" aria-selected="false" data-shot="features" style="--c: #8b8794"><span class="dot"></span>Settings</button>
+      <p class="try" data-i18n-html="sim.try"></p>
+      <div class="simbox" id="simbox">
+        <div class="win" id="win" role="application" aria-label="Tabchat demo">
+          <div class="titlebar"><span id="wintitle">Tabchat</span><span class="ctl" aria-hidden="true">–&nbsp;&nbsp;□&nbsp;&nbsp;✕</span></div>
+          <iframe class="tabsframe" src="sim/tabs.html" title="Tabs" scrolling="no"></iframe>
+          <div class="content">
+            <iframe id="home" src="sim/home.html" title="Settings" hidden></iframe>
+            <img id="shot" alt="" hidden>
+            <div class="placeholder" id="ph" hidden><div class="badge" id="phBadge"></div><strong id="phName"></strong><span data-i18n="sim.soon"></span></div>
+          </div>
         </div>
-        <div class="stage"><img id="shot" src="screenshots/main.png" alt="Tabchat with WhatsApp open" width="1623" height="1089"></div>
-        <p class="caption" id="caption">Unread counters on every tab, so you see at a glance where something new is waiting.</p>
       </div>
+      <p class="caption" id="caption" aria-live="polite"></p>
     </div>
 
+    <section>
+      <div class="why">
+        <div>
+          <h2 data-i18n="why.title"></h2>
+          <p class="intro" data-i18n="why.p1"></p>
+          <p class="intro" data-i18n="why.p2"></p>
+        </div>
+        <div class="mem" aria-hidden="true">
+          <div class="bar"><span data-i18n="why.separate"></span>
+            <div class="track"><div class="seg" style="width:33%;background:#25d366"></div><div class="seg" style="width:33%;background:#5865f2"></div><div class="seg" style="width:34%;background:#6264a7"></div></div></div>
+          <div class="bar"><span>Tabchat</span>
+            <div class="track"><div class="seg" style="width:45%;background:linear-gradient(90deg,#25d366,#5865f2,#6264a7)"></div></div></div>
+          <small data-i18n="why.note"></small>
+        </div>
+      </div>
+    </section>
+
     <section id="features">
-      <h2>Everything the web versions are missing.</h2>
-      <p class="intro">Tabchat shows the official web versions of your apps, and adds what you expect from a real desktop app.</p>
+      <h2 data-i18n="feat.title"></h2>
+      <p class="intro" data-i18n="feat.intro"></p>
       <div class="groups">
-        <div class="group" style="--c: var(--wa)">
-          <h3><i></i>Never miss a message</h3>
-          <ul>
-            <li>Unread counters on tabs, the tray icon and the dock</li>
-            <li>Keeps running in the background when you close the window</li>
-            <li>Click a notification to jump straight to that chat</li>
-            <li>Starts hidden when you log in, if you want</li>
-          </ul>
-        </div>
-        <div class="group" style="--c: var(--tm)">
-          <h3><i></i>Made for school and work</h3>
-          <ul>
-            <li>One shared Microsoft sign-in for Teams, Outlook and OneDrive</li>
-            <li>Stays signed in after a restart, also with school accounts</li>
-            <li>Several accounts of the same service, side by side</li>
-            <li>Screen sharing in Discord and Teams</li>
-          </ul>
-        </div>
-        <div class="group" style="--c: var(--dc)">
-          <h3><i></i>Quiet when you need it</h3>
-          <ul>
-            <li>Do not disturb for an hour, until tomorrow or until you turn it off</li>
-            <li>Follows Ubuntu's own Do not disturb</li>
-            <li>Tabs you don't use go to sleep and free up memory</li>
-            <li>Light and dark theme that follows your system</li>
-          </ul>
-        </div>
+        <div class="group" style="--c:#25d366"><h3><i></i><span data-i18n="feat.g1"></span></h3><ul data-i18n-list="feat.g1l"></ul></div>
+        <div class="group" style="--c:#6264a7"><h3><i></i><span data-i18n="feat.g2"></span></h3><ul data-i18n-list="feat.g2l"></ul></div>
+        <div class="group" style="--c:#5865f2"><h3><i></i><span data-i18n="feat.g3"></span></h3><ul data-i18n-list="feat.g3l"></ul></div>
       </div>
     </section>
 
     <section>
       <div class="split">
         <div>
-          <h2>Fast with the keyboard.</h2>
-          <p class="intro">Press <strong>Ctrl+K</strong> to jump to any tab or action. Switch tabs with <strong>Alt+1–9</strong> or <strong>Ctrl+Tab</strong>, close one with <strong>Ctrl+W</strong> and bring it back with <strong>Ctrl+Shift+T</strong>, just like in your browser.</p>
-          <p class="intro">Everything else is one click away in the tray menu, right next to your clock.</p>
+          <h2 data-i18n="keys.title"></h2>
+          <p class="intro" data-i18n-html="keys.p1"></p>
+          <p class="intro" data-i18n="keys.p2"></p>
+          <details class="keys">
+            <summary data-i18n="keys.all"></summary>
+            <div class="keytable" id="keytable"></div>
+          </details>
         </div>
-        <img class="tray" src="screenshots/tray.png" alt="The Tabchat tray menu with all tabs, Do not disturb and settings" width="276" height="740" loading="lazy">
+        <img class="tray" src="screenshots/tray.png" data-i18n-alt="keys.trayAlt" width="276" height="740" loading="lazy">
       </div>
+    </section>
+
+    <section id="news">
+      <h2 data-i18n="news.title"></h2>
+      <p class="intro" data-i18n-html="news.intro"></p>
+      <div class="news" id="newslist"></div>
     </section>
 
     <section>
       <div class="privacy">
-        <h2>Your chats stay yours.</h2>
-        <div>
-          <p>Tabchat collects nothing: no analytics, no tracking and no account. Your sign-ins stay on your own computer, and the code is open for anyone to check.</p>
-          <p style="margin-top:14px">Tabchat is free and open source under the MIT license. It is an independent project, not affiliated with WhatsApp, Meta, Discord or Microsoft.</p>
-        </div>
+        <h2 data-i18n="priv.title"></h2>
+        <div><p data-i18n="priv.p1"></p><p data-i18n="priv.p2"></p></div>
       </div>
     </section>
 
+    <section id="faq" class="faq">
+      <h2 data-i18n="faq.title"></h2>
+      <div id="faqlist"></div>
+    </section>
+
     <section id="install">
-      <h2>Install Tabchat.</h2>
-      <p class="intro">Pick whatever suits your Linux. All versions update themselves.</p>
+      <h2 data-i18n="inst.title"></h2>
+      <p class="intro" data-i18n="inst.intro"></p>
       <div class="install">
         <div class="way">
           <h3>Snap Store</h3>
-          <p>Ubuntu and most other distributions. Search for Tabchat in the App Center, or run:</p>
+          <p data-i18n="inst.snap"></p>
           <pre>sudo snap install tabchat</pre>
-          <a class="btn ghost" href="https://snapcraft.io/tabchat">Open in the Snap Store</a>
+          <a class="btn ghost" href="https://snapcraft.io/tabchat" data-i18n="inst.snapBtn"></a>
         </div>
         <div class="way">
-          <h3>.deb package</h3>
-          <p>Ubuntu, Debian, Linux Mint and Pop!_OS. Download it, then double-click, or run:</p>
+          <h3 data-i18n="inst.debT"></h3>
+          <p data-i18n="inst.deb"></p>
           <pre>sudo apt install ./tabchat_*_amd64.deb</pre>
-          <a class="btn ghost" href="https://github.com/MMV2408/tabchat/releases/latest">Download .deb</a>
+          <a class="btn ghost" href="https://github.com/MMV2408/tabchat/releases/latest" data-i18n="inst.debBtn"></a>
         </div>
         <div class="way">
           <h3>AppImage</h3>
-          <p>Any distribution, no installation needed.</p>
+          <p data-i18n="inst.app"></p>
           <pre>chmod +x Tabchat-*.AppImage
 ./Tabchat-*.AppImage</pre>
-          <a class="btn ghost" href="https://github.com/MMV2408/tabchat/releases/latest">Download AppImage</a>
+          <a class="btn ghost" href="https://github.com/MMV2408/tabchat/releases/latest" data-i18n="inst.appBtn"></a>
         </div>
       </div>
     </section>
@@ -220,35 +299,214 @@
 
   <footer>
     <div class="row">
-      <span>Made by <a href="https://github.com/MMV2408">MMV2408</a>. Like Tabchat? <a href="https://github.com/sponsors/MMV2408">Support its development</a>.</span>
-      <span><a href="https://github.com/MMV2408/tabchat">Source code</a> · <a href="https://github.com/MMV2408/tabchat/issues">Report a problem</a></span>
+      <span data-i18n-html="foot.made"></span>
+      <span><a href="https://github.com/MMV2408/tabchat" data-i18n="foot.source"></a> · <a href="https://github.com/MMV2408/tabchat/issues" data-i18n="foot.issue"></a></span>
     </div>
+    <p data-i18n="foot.tm"></p>
   </footer>
 </div>
 
+<script src="sim/data.js"></script>
+<script src="sim/engine.js"></script>
 <script>
-  // Tabbladen wisselen de screenshot, net als in Tabchat zelf
-  const shots = {
-    'main': ['Tabchat with WhatsApp open', 'Unread counters on every tab, so you see at a glance where something new is waiting.'],
-    'quick-search': ['Quick search with Ctrl+K on top of Discord', 'Ctrl+K finds any tab or action in a second.'],
-    'onedrive': ['OneDrive in Tabchat', 'Teams, Outlook and OneDrive share one Microsoft sign-in, so you sign in once.'],
-    'settings': ['The Tabchat start screen with all tabs', 'Teams is asleep: tabs you don’t use free up memory and wake up with one click.'],
-    'features': ['Tabchat settings', 'Language, theme, where links open and more, all in one place.']
-  };
-  const img = document.getElementById('shot'), cap = document.getElementById('caption');
-  const tabs = [...document.querySelectorAll('.tab')];
-  function select(tab) {
-    tabs.forEach(t => t.setAttribute('aria-selected', t === tab));
-    const k = tab.dataset.shot; img.src = `screenshots/${k}.png`; img.alt = shots[k][0]; cap.textContent = shots[k][1];
+// ---------- teksten van de website ----------
+const TEXT = {
+  en: {
+    'nav.features': 'Features', 'nav.faq': 'FAQ', 'nav.install': 'Install',
+    'tool.lang': 'Nederlands', 'tool.dark': 'Switch to dark theme', 'tool.light': 'Switch to light theme',
+    'hero.title': 'Your chat apps, in one window.',
+    'hero.lead': 'Tabchat puts WhatsApp, Discord, Microsoft Teams, Outlook and OneDrive side by side in tabs. Light on memory, keyboard-friendly and built for Linux.',
+    'hero.install': 'Install Tabchat', 'hero.snap': 'Get it from the Snap Store',
+    'sim.try': '<b>Try it:</b> click the tabs, drag them around, or open <b>+</b> to change the real settings.',
+    'sim.soon': 'Screenshot coming soon',
+    'cap.whatsapp': 'Unread counters on every tab, so you see at a glance where something new is waiting.',
+    'cap.discord': 'Press Ctrl+K anywhere to jump to a tab or action in a second.',
+    'cap.teams': 'Teams, Outlook and OneDrive share one Microsoft sign-in. Sign in once, also with a school or work account.',
+    'cap.outlook': 'Your mail and calendar in a tab. Links open where you want: your browser or Tabchat itself.',
+    'cap.onedrive': 'Tabs you don\u2019t use fall asleep and free up memory. Click one and it wakes up.',
+    'cap.home': 'This is the real + screen of Tabchat. Flip the switches, change the theme or language, turn on Do not disturb or add a second account.',
+    'why.title': 'One app instead of three.',
+    'why.p1': 'Most chat apps on Linux are separate Electron apps, and each one runs its own copy of Chromium. With WhatsApp, Discord and Teams open, that easily adds up to 3–4 GB of memory.',
+    'why.p2': 'Tabchat runs them all in one window with one shared browser engine, and puts tabs you are not using to sleep.',
+    'why.separate': 'Three separate apps', 'why.note': 'Illustration: memory use with WhatsApp, Discord and Teams open.',
+    'feat.title': 'Everything the web versions are missing.',
+    'feat.intro': 'Tabchat shows the official web versions of your apps, and adds what you expect from a real desktop app.',
+    'feat.g1': 'Never miss a message', 'feat.g1l': ['Unread counters on tabs, the tray icon and the dock', 'Keeps running in the background when you close the window', 'Click a notification to jump straight to that chat', 'Starts hidden when you log in, if you want'],
+    'feat.g2': 'Made for school and work', 'feat.g2l': ['One shared Microsoft sign-in for Teams, Outlook and OneDrive', 'Stays signed in after a restart, also with school accounts', 'Several accounts of the same service, side by side', 'Screen sharing in Discord and Teams'],
+    'feat.g3': 'Quiet when you need it', 'feat.g3l': ['Do not disturb for an hour, until tomorrow or until you turn it off', 'Follows Ubuntu\u2019s own Do not disturb', 'Tabs you don\u2019t use go to sleep and free up memory', 'Light and dark theme that follows your system'],
+    'keys.title': 'Fast with the keyboard.',
+    'keys.p1': 'Press <kbd>Ctrl+K</kbd> to jump to any tab or action. Switch tabs with <kbd>Alt+1–9</kbd> or <kbd>Ctrl+Tab</kbd>, close one with <kbd>Ctrl+W</kbd> and bring it back with <kbd>Ctrl+Shift+T</kbd>, just like in your browser.',
+    'keys.p2': 'Everything else is one click away in the tray menu, right next to your clock.',
+    'keys.all': 'All keyboard shortcuts', 'keys.trayAlt': 'The Tabchat tray menu with all tabs, Do not disturb and settings',
+    'news.title': 'What\u2019s new.', 'news.intro': 'Tabchat updates itself. All changes are on <a href="https://github.com/MMV2408/tabchat/releases">GitHub</a>.',
+    'news.version': 'Version {v}',
+    'priv.title': 'Your chats stay yours.',
+    'priv.p1': 'Tabchat collects nothing: no analytics, no tracking and no account. Your sign-ins stay on your own computer, and Tabchat only talks to the services you add and to GitHub to check for updates.',
+    'priv.p2': 'Tabchat is free and open source under the MIT license, so anyone can check the code. It is an independent project, not affiliated with WhatsApp, Meta, Discord or Microsoft.',
+    'faq.title': 'Questions.',
+    'faq': [
+      ['Is this an official app?', 'No. Tabchat is an independent open-source project. It shows the official web versions of WhatsApp, Discord, Teams, Outlook and OneDrive, so they work exactly like in your browser.'],
+      ['Is Tabchat free?', 'Yes, and it stays free, without ads. If it saves you time, you can support development through GitHub Sponsors.'],
+      ['Which Linux distributions does it work on?', 'Any modern 64-bit distribution. Use the Snap Store on Ubuntu, the .deb package on Debian, Linux Mint or Pop!_OS, and the AppImage everywhere else.'],
+      ['Why do I see Ubuntu\u2019s own picker when sharing my screen?', 'On Wayland, the default on Ubuntu, apps may not look at your screen themselves; the system always asks. Tabchat notices this and skips its own picker. Sharing audio is not possible on Linux.'],
+      ['A sleeping tab did not show my new messages.', 'That is expected: a sleeping tab is fully unloaded. Turn off May sleep for that tab on the + screen to keep it awake. WhatsApp, Discord and Teams stay awake by default.'],
+      ['Can I add other websites, like Gmail?', 'Not yet. Some services, such as Gmail, block signing in inside apps. Adding your own services is on the roadmap.'],
+      ['Is Tabchat available for Windows or macOS?', 'Not yet. Tabchat is made for Linux first; a Windows version may follow later.']
+    ],
+    'inst.title': 'Install Tabchat.', 'inst.intro': 'Pick whatever suits your Linux. All versions update themselves.',
+    'inst.snap': 'Ubuntu and most other distributions. Search for Tabchat in the App Center, or run:', 'inst.snapBtn': 'Open in the Snap Store',
+    'inst.debT': '.deb package', 'inst.deb': 'Ubuntu, Debian, Linux Mint and Pop!_OS. Download it and double-click, or run:', 'inst.debBtn': 'Download .deb',
+    'inst.app': 'Any distribution, nothing to install. Download it, then run:', 'inst.appBtn': 'Download AppImage',
+    'foot.made': 'Made by <a href="https://github.com/MMV2408">MMV2408</a>. Like Tabchat? <a href="https://github.com/sponsors/MMV2408">Support its development</a>.',
+    'foot.source': 'Source code', 'foot.issue': 'Report a problem',
+    'foot.tm': 'WhatsApp, Discord, Microsoft Teams, Outlook and OneDrive are trademarks of their respective owners.'
+  },
+  nl: {
+    'nav.features': 'Functies', 'nav.faq': 'Vragen', 'nav.install': 'Installeren',
+    'tool.lang': 'English', 'tool.dark': 'Donker thema', 'tool.light': 'Licht thema',
+    'hero.title': 'Je chat-apps, in één venster.',
+    'hero.lead': 'Tabchat zet WhatsApp, Discord, Microsoft Teams, Outlook en OneDrive naast elkaar in tabbladen. Zuinig met geheugen, handig met het toetsenbord en gemaakt voor Linux.',
+    'hero.install': 'Tabchat installeren', 'hero.snap': 'Download in de Snap Store',
+    'sim.try': '<b>Probeer het:</b> klik op de tabbladen, versleep ze, of open <b>+</b> om de echte instellingen te veranderen.',
+    'sim.soon': 'Screenshot volgt',
+    'cap.whatsapp': 'Ongelezen-tellers op elk tabblad, zodat je meteen ziet waar iets nieuws op je wacht.',
+    'cap.discord': 'Druk overal op Ctrl+K om in een seconde naar een tabblad of actie te gaan.',
+    'cap.teams': 'Teams, Outlook en OneDrive delen één Microsoft-login. Eén keer inloggen, ook met een school- of werkaccount.',
+    'cap.outlook': 'Je mail en agenda in een tabblad. Links openen waar jij wilt: in je browser of in Tabchat zelf.',
+    'cap.onedrive': 'Tabbladen die je niet gebruikt, gaan slapen en maken geheugen vrij. Klik erop en ze worden wakker.',
+    'cap.home': 'Dit is het echte +-scherm van Tabchat. Zet schakelaars om, kies een ander thema of een andere taal, zet Niet storen aan of voeg een tweede account toe.',
+    'why.title': 'Eén app in plaats van drie.',
+    'why.p1': 'De meeste chat-apps op Linux zijn losse Electron-apps, en elke app draait zijn eigen Chromium. Met WhatsApp, Discord en Teams open ben je zo 3 tot 4 GB geheugen kwijt.',
+    'why.p2': 'Tabchat draait ze allemaal in één venster met één gedeelde browser, en laat tabbladen die je niet gebruikt slapen.',
+    'why.separate': 'Drie losse apps', 'why.note': 'Illustratie: geheugengebruik met WhatsApp, Discord en Teams open.',
+    'feat.title': 'Alles wat de webversies missen.',
+    'feat.intro': 'Tabchat toont de officiële webversies van je apps, en voegt toe wat je van een echte desktop-app verwacht.',
+    'feat.g1': 'Nooit een bericht missen', 'feat.g1l': ['Ongelezen-tellers op tabbladen, het tray-icoon en het dock', 'Blijft op de achtergrond draaien als je het venster sluit', 'Klik op een melding en je zit meteen in die chat', 'Start desgewenst verborgen als je inlogt'],
+    'feat.g2': 'Gemaakt voor school en werk', 'feat.g2l': ['Eén gedeelde Microsoft-login voor Teams, Outlook en OneDrive', 'Blijft ingelogd na een herstart, ook met schoolaccounts', 'Meerdere accounts van dezelfde dienst naast elkaar', 'Scherm delen in Discord en Teams'],
+    'feat.g3': 'Rust als je dat wilt', 'feat.g3l': ['Niet storen voor een uur, tot morgen of tot je het uitzet', 'Volgt Niet storen van Ubuntu zelf', 'Tabbladen die je niet gebruikt, gaan slapen en maken geheugen vrij', 'Licht en donker thema dat je systeem volgt'],
+    'keys.title': 'Snel met het toetsenbord.',
+    'keys.p1': 'Druk op <kbd>Ctrl+K</kbd> om naar elk tabblad of elke actie te springen. Wissel met <kbd>Alt+1–9</kbd> of <kbd>Ctrl+Tab</kbd>, sluit met <kbd>Ctrl+W</kbd> en haal terug met <kbd>Ctrl+Shift+T</kbd>, net als in je browser.',
+    'keys.p2': 'Al het andere zit één klik verder in het tray-menu, naast je klok.',
+    'keys.all': 'Alle sneltoetsen', 'keys.trayAlt': 'Het tray-menu van Tabchat met alle tabbladen, Niet storen en instellingen',
+    'news.title': 'Wat is er nieuw.', 'news.intro': 'Tabchat werkt zichzelf bij. Alle wijzigingen staan op <a href="https://github.com/MMV2408/tabchat/releases">GitHub</a>.',
+    'news.version': 'Versie {v}',
+    'priv.title': 'Je chats blijven van jou.',
+    'priv.p1': 'Tabchat verzamelt niets: geen statistieken, geen tracking en geen account. Je logins blijven op je eigen computer, en Tabchat praat alleen met de diensten die jij toevoegt en met GitHub voor updates.',
+    'priv.p2': 'Tabchat is gratis en open source onder de MIT-licentie, dus iedereen kan de code bekijken. Het is een onafhankelijk project, niet verbonden met WhatsApp, Meta, Discord of Microsoft.',
+    'faq.title': 'Vragen.',
+    'faq': [
+      ['Is dit een officiële app?', 'Nee. Tabchat is een onafhankelijk open-sourceproject. Het toont de officiële webversies van WhatsApp, Discord, Teams, Outlook en OneDrive, dus ze werken precies zoals in je browser.'],
+      ['Is Tabchat gratis?', 'Ja, en dat blijft zo, zonder reclame. Bespaart het je tijd, dan kun je de ontwikkeling steunen via GitHub Sponsors.'],
+      ['Op welke Linux-versies werkt het?', 'Op elke moderne 64-bit-versie. Gebruik de Snap Store op Ubuntu, het .deb-pakket op Debian, Linux Mint of Pop!_OS, en de AppImage op alle andere.'],
+      ['Waarom zie ik het keuzevenster van Ubuntu bij scherm delen?', 'Op Wayland, standaard op Ubuntu, mogen apps niet zelf naar je scherm kijken; het systeem vraagt het altijd. Tabchat herkent dat en slaat zijn eigen keuzevenster over. Geluid delen kan op Linux niet.'],
+      ['Een slapend tabblad liet mijn nieuwe berichten niet zien.', 'Dat klopt: een slapend tabblad is helemaal uitgeschakeld. Zet Mag slapen uit voor dat tabblad in het +-scherm. WhatsApp, Discord en Teams blijven standaard wakker.'],
+      ['Kan ik andere sites toevoegen, zoals Gmail?', 'Nog niet. Sommige diensten, zoals Gmail, blokkeren het inloggen in apps. Zelf diensten toevoegen staat op de planning.'],
+      ['Is Tabchat er voor Windows of macOS?', 'Nog niet. Tabchat is eerst voor Linux gemaakt; een Windows-versie volgt misschien later.']
+    ],
+    'inst.title': 'Tabchat installeren.', 'inst.intro': 'Kies wat bij jouw Linux past. Alle versies werken zichzelf bij.',
+    'inst.snap': 'Ubuntu en de meeste andere versies. Zoek Tabchat in het App Centrum, of gebruik:', 'inst.snapBtn': 'Open in de Snap Store',
+    'inst.debT': '.deb-pakket', 'inst.deb': 'Ubuntu, Debian, Linux Mint en Pop!_OS. Download en dubbelklik, of gebruik:', 'inst.debBtn': '.deb downloaden',
+    'inst.app': 'Elke Linux-versie, niets te installeren. Download en start met:', 'inst.appBtn': 'AppImage downloaden',
+    'foot.made': 'Gemaakt door <a href="https://github.com/MMV2408">MMV2408</a>. Vind je Tabchat handig? <a href="https://github.com/sponsors/MMV2408">Steun de ontwikkeling</a>.',
+    'foot.source': 'Broncode', 'foot.issue': 'Probleem melden',
+    'foot.tm': 'WhatsApp, Discord, Microsoft Teams, Outlook en OneDrive zijn merken van hun eigenaren.'
   }
-  tabs.forEach((t, i) => {
-    t.addEventListener('click', () => select(t));
-    t.addEventListener('keydown', (e) => {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]; n.focus(); select(n);
-    });
-  });
-  Object.keys(shots).forEach(k => { const p = new Image(); p.src = `screenshots/${k}.png`; }); // vooraf laden
+};
+
+// Screenshots per dienst in de simulatie. null = nog geen screenshot (dan een nette tijdelijke vlak).
+// Een betere screenshot? Zet hem in docs/sim/shots/ (inhoud onder de tabbalk, ca. 1540×890).
+const SHOTS = {
+  whatsapp: 'sim/shots/whatsapp.png',
+  discord: 'sim/shots/discord.png',
+  teams: null,
+  outlook: null,
+  onedrive: 'sim/shots/onedrive.png'
+};
+
+const root = document.documentElement;
+let lang = root.lang, theme = root.dataset.theme, sim = null;
+const T = (k) => TEXT[lang][k] ?? TEXT.en[k] ?? k;
+const save = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function applyText() {
+  root.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = T(e.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(e => { e.innerHTML = T(e.dataset.i18nHtml); });
+  document.querySelectorAll('[data-i18n-alt]').forEach(e => { e.alt = T(e.dataset.i18nAlt); });
+  document.querySelectorAll('[data-i18n-list]').forEach(e => { e.innerHTML = T(e.dataset.i18nList).map(x => `<li>${esc(x)}</li>`).join(''); });
+  document.getElementById('faqlist').innerHTML = T('faq').map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
+  document.getElementById('langBtn').textContent = lang === 'en' ? 'NL' : 'EN';
+  document.getElementById('langBtn').setAttribute('aria-label', T('tool.lang'));
+  buildKeys(); buildNews(); if (sim) renderSim(sim);
+}
+
+function applyTheme() {
+  root.dataset.theme = theme;
+  const b = document.getElementById('themeBtn');
+  b.textContent = theme === 'dark' ? '☀' : '☾';
+  b.setAttribute('aria-label', T(theme === 'dark' ? 'tool.light' : 'tool.dark'));
+  b.title = b.getAttribute('aria-label');
+  document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#1b1320' : '#faf7fc';
+}
+
+document.getElementById('langBtn').onclick = () => { lang = lang === 'en' ? 'nl' : 'en'; save('lang', lang); applyText(); applyTheme(); TabchatSim.setSite({ lang }); };
+document.getElementById('themeBtn').onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; save('theme', theme); applyTheme(); TabchatSim.setSite({ theme }); };
+
+// ---------- sneltoetsen: dezelfde lijst en teksten als in de app ----------
+function buildKeys() {
+  const S = SIM_DATA.strings[lang];
+  document.getElementById('keytable').innerHTML = SIM_DATA.keys.map(([group, rows]) =>
+    `<div><h4>${esc(S[group])}</h4>` + rows.map(([combo, what]) =>
+      `<div class="keyrow"><span>${esc(S[what])}</span><span>${combo.map(k => `<kbd>${esc(k)}</kbd>`).join(' + ')}</span></div>`).join('') + '</div>').join('');
+}
+
+// ---------- wat is er nieuw: rechtstreeks uit de app (changelog.js op GitHub) ----------
+let changelog = SIM_DATA.changelog;
+function buildNews() {
+  document.getElementById('newslist').innerHTML = changelog.slice(0, 3).map(e =>
+    `<article><h3>${esc(T('news.version').replace('{v}', e.v))}</h3><ul>${(e[lang] || e.en).map(x => `<li>${esc(x)}</li>`).join('')}</ul></article>`).join('');
+}
+fetch('https://raw.githubusercontent.com/MMV2408/tabchat/main/src/main/changelog.js').then(r => r.ok ? r.text() : Promise.reject())
+  .then(src => {
+    const strs = (s) => [...s.matchAll(/'((?:[^'\\]|\\.)*)'/g)].map(m => m[1].replace(/\\(.)/g, '$1'));
+    const list = [...src.matchAll(/v:\s*'([^']+)',\s*nl:\s*\[([\s\S]*?)\],\s*en:\s*\[([\s\S]*?)\]/g)].map(m => ({ v: m[1], nl: strs(m[2]), en: strs(m[3]) }));
+    if (list.length) { changelog = list; buildNews(); }
+  }).catch(() => {});
+
+// ---------- de simulatie ----------
+const win = document.getElementById('win'), box = document.getElementById('simbox');
+function fit() { const s = box.clientWidth / 1120; win.style.transform = `scale(${s})`; box.style.height = win.offsetHeight * s + 'px'; }
+new ResizeObserver(fit).observe(box);
+
+function renderSim(s) {
+  sim = s;
+  const simTheme = s.settings.theme === 'system' ? theme : s.settings.theme;
+  win.classList.toggle('light', simTheme === 'light');
+  const unread = s.tabs.reduce((n, t) => n + (typeof t.unread === 'number' ? t.unread : 0), 0);
+  document.getElementById('wintitle').textContent = unread ? `Tabchat (${unread})` : 'Tabchat';
+  const home = document.getElementById('home'), shot = document.getElementById('shot'), ph = document.getElementById('ph');
+  const t = s.tabs.find(x => x.id === s.active);
+  home.hidden = !!t; shot.hidden = true; ph.hidden = true;
+  let cap = 'cap.home';
+  if (t) {
+    cap = 'cap.' + t.service;
+    if (SHOTS[t.service]) { shot.src = SHOTS[t.service]; shot.alt = t.label; shot.hidden = false; }
+    else {
+      document.getElementById('phBadge').textContent = t.label[0];
+      document.getElementById('phBadge').style.background = t.color;
+      document.getElementById('phName').textContent = t.label;
+      ph.hidden = false;
+    }
+  }
+  document.getElementById('caption').textContent = T(cap);
+}
+
+applyTheme();
+applyText();
+TabchatSim.setSite({ lang, theme });
+TabchatSim.subscribe(renderSim);
+Object.values(SHOTS).filter(Boolean).forEach(src => { new Image().src = src; }); // vooraf laden
 </script>
 </body>
 </html>

@@ -1,0 +1,438 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="theme.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg-1);
+    color: var(--text);
+    font-family: system-ui, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 24px 48px; }
+  h1 { margin: 0 0 4px; font-size: 26px; color: var(--text-strong); }
+  .sub { margin: 0 0 32px; color: var(--text-muted); }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 32px 0 12px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .card {
+    background: var(--bg-0); border-radius: 12px; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .card .top { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center;
+    color: #fff; font-weight: 700; font-size: 17px; flex-shrink: 0;
+  }
+  .name { font-weight: 600; color: var(--text-strong); }
+  .desc { font-size: 13px; color: var(--text-muted); min-height: 34px; }
+
+  button {
+    border: none; border-radius: 8px; padding: 8px 12px;
+    font-size: 14px; cursor: pointer; font-family: inherit;
+  }
+  .add { background: #5865F2; color: #fff; }
+  .add:hover { background: #4752c4; }
+  .remove { background: transparent; color: #f23f43; }
+  .remove:hover { background: var(--danger-bg); }
+
+  .row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg-0); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
+  }
+  .row .name { flex: 1; }
+  .row .sleepsw { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-right: 8px; }
+  select { background: var(--bg-1); color: var(--text); border: 1px solid var(--bg-3); border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 14px; }
+  .empty { color: var(--text-muted); background: var(--bg-0); border-radius: 10px; padding: 16px; }
+
+  .feature { display: flex; align-items: center; gap: 16px; background: var(--bg-0); border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; }
+  .feature .text { flex: 1; }
+  .feature .desc { min-height: 0; margin-top: 2px; }
+  .soon { font-size: 11px; color: var(--text-muted); border: 1px solid var(--bg-3); border-radius: 6px; padding: 2px 6px; margin-left: 8px; }
+
+  header { display: flex; align-items: flex-start; gap: 16px; }
+  header .titles { flex: 1; }
+  .ghost { background: var(--bg-0); color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .ghost:hover { background: var(--bg-2); }
+  .card .top .name { flex: 1; }
+  .card .name u { text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .about { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--bg-0); border-radius: 10px; padding: 14px 16px; }
+  .about .text { flex: 1; min-width: 200px; }
+  .about .ver { color: var(--text-strong); font-weight: 600; }
+  .about .donate { background: none; border: none; padding: 0; margin-top: 4px; font: inherit; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+  .about .donate:hover { color: #db61a2; text-decoration: underline; }
+  .about .st { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .dndrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--bg-0); border-radius: 10px; padding: 12px 16px; }
+  .dndrow .status { flex: 1 1 100%; color: var(--text-muted); font-size: 14px; margin-bottom: 4px; }
+  .dndrow .status b { color: var(--dnd-text); font-weight: 600; }
+  .dndbtn { background: var(--bg-1); color: var(--text); }
+  .dndbtn:hover { background: var(--bg-2); }
+  .dndbtn.off { background: transparent; color: #f23f43; }
+  h2 .hint { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  kbd { background: var(--bg-1); border: 1px solid var(--bg-3); border-bottom-width: 2px; border-radius: 5px; padding: 1px 7px; font-family: inherit; font-size: 13px; color: var(--text); }
+
+  /* sneltoetsen-venster */
+  .wn-sub { color: var(--text-muted); margin: 4px 0 4px; font-size: 14px; }
+  .wn-list { margin: 0; padding-left: 20px; color: var(--text); line-height: 1.6; font-size: 14px; }
+  .wn-foot { display: flex; justify-content: flex-end; margin: 20px 0 12px; }
+  .about .links { display: flex; gap: 14px; margin-top: 4px; }
+  .about .links .donate { margin-top: 0; }
+  #modal, #wn { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
+  #modal.open, #wn.open { display: flex; }
+  .sheet { background: var(--bg-0); border-radius: 14px; width: min(640px, 100%); padding: 24px 24px 12px; box-shadow: 0 16px 48px rgba(0,0,0,.5); }
+  .sheet-head { display: flex; align-items: center; margin-bottom: 4px; }
+  .sheet-head h3 { flex: 1; margin: 0; color: var(--text-strong); font-size: 20px; }
+  .close { background: transparent; color: var(--text-muted); font-size: 20px; padding: 4px 10px; }
+  .close:hover { background: var(--bg-2); color: var(--text-strong); }
+  .sheet h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 20px 0 6px; }
+  .key { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--bg-1); color: var(--text-muted); font-size: 14px; }
+  .key:last-child { border-bottom: none; }
+  .key span:first-child { color: var(--text); }
+  .key .combo { white-space: nowrap; }
+
+  /* schakelaar */
+  .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: var(--slider-off); border-radius: 24px; cursor: pointer; transition: .15s; }
+  .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .15s; }
+  input:checked + .slider { background: #23a55a; }
+  input:checked + .slider::before { transform: translateX(18px); }
+  input:disabled + .slider { opacity: .4; cursor: not-allowed; }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--scroll); border-radius: 5px; border: 2px solid var(--bg-1); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--bg-3); }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
+<script src="mock.js"></script>
+</head>
+<body>
+<main>
+  <header>
+    <div class="titles">
+      <h1>Tabchat</h1>
+      <p class="sub"><span data-i18n="home.subBefore"></span> <kbd>Ctrl</kbd> + <kbd>K</kbd> <span data-i18n="home.subAfter"></span></p>
+    </div>
+    <button class="ghost" id="openKeys" data-i18n="home.allKeys"></button>
+  </header>
+
+  <h2 data-i18n="home.mine"></h2>
+  <div id="mine"></div>
+
+  <h2><span data-i18n="home.add"></span> <span class="hint" data-i18n="home.addHint"></span></h2>
+  <div class="grid" id="catalog"></div>
+
+  <h2><span data-i18n="home.dnd"></span> <span class="hint" data-i18n="home.dndHint"></span></h2>
+  <div class="dndrow" id="dndrow"></div>
+
+  <h2 data-i18n="home.features"></h2>
+  <div id="features"></div>
+
+  <h2 data-i18n="home.about"></h2>
+  <div class="about" id="about"></div>
+
+</main>
+
+<div id="modal">
+  <div class="sheet" role="dialog">
+    <div class="sheet-head"><h3 data-i18n="keys.title"></h3><button class="close" id="closeKeys" data-i18n-title="keys.close">✕</button></div>
+    <div id="keylist"></div>
+  </div>
+</div>
+
+<div id="wn">
+  <div class="sheet" role="dialog">
+    <div class="sheet-head"><h3 data-i18n="wn.title"></h3><button class="close" id="closeWn" data-i18n-title="keys.close">✕</button></div>
+    <p class="wn-sub" id="wnSub"></p>
+    <div id="wnList"></div>
+    <div class="wn-foot"><button class="add" id="okWn" data-i18n="wn.ok"></button></div>
+  </div>
+</div>
+
+<script>
+  // ---------- vertalingen (zie src/main/i18n.js) ----------
+  let L = {};
+  let curLang = null;
+  const T = (k, v = {}) => {
+    let s = L[k] ?? k;
+    for (const [a, b] of Object.entries(v)) s = s.split('{' + a + '}').join(b);
+    return s;
+  };
+  async function loadStrings(lang) {
+    if (lang && lang === curLang) return;
+    const r = await window.tabchat.getStrings();
+    L = r.strings;
+    curLang = r.lang;
+    document.documentElement.lang = r.lang;
+    document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = T(e.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-title]').forEach(e => { e.title = T(e.dataset.i18nTitle); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(e => { e.placeholder = T(e.dataset.i18nPlaceholder); });
+  }
+
+  // Functies: de teksten staan in i18n.js onder f.<key>.name en f.<key>.desc.
+  // options = keuzelijst in plaats van schakelaar.
+  const FEATURES = [
+    { key: 'language', options: [['auto', 'f.language.auto'], ['nl', '!Nederlands'], ['en', '!English']] },
+    { key: 'theme', options: [['system', 'f.theme.system'], ['dark', 'f.theme.dark'], ['light', 'f.theme.light']] },
+    { key: 'openLinks', options: 'links' }, // lijst hangt af van de browsers op deze computer
+    { key: 'spellcheck' },
+    { key: 'stayLoggedIn' },
+    { key: 'shareMicrosoft' },
+    { key: 'autostart', hideInStore: true },
+    { key: 'runInBackground' },
+    { key: 'whiteTray' },
+    { key: 'followSystemDnd', hideInStore: true },
+    { key: 'unreadBadges' },
+    { key: 'sleepEnabled' },
+    { key: 'sleepMinutes', options: [[15, 'f.sleepMinutes.15'], [30, 'f.sleepMinutes.30'], [60, 'f.sleepMinutes.60']] },
+    { key: 'sleepOnStart' },
+    { key: 'autoUpdate', hideInStore: true }
+  ];
+
+  const el = (tag, cls, text) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  };
+
+  const badge = (name, color) => {
+    const b = el('div', 'badge', name[0]);
+    b.style.background = color;
+    return b;
+  };
+
+  // Naam met de sneltoets-letter onderstreept, bv. O<u>n</u>eDrive
+  function nameWithKey(name, key) {
+    const div = el('div', 'name');
+    const i = name.toLowerCase().indexOf(key);
+    if (i < 0) { div.textContent = name; return div; }
+    div.append(name.slice(0, i), el('u', null, name[i]), name.slice(i + 1));
+    return div;
+  }
+
+  // ---------- sneltoetsen-venster ----------
+  const KEYS = [
+    ['keys.general', [
+      [['Ctrl', 'K'], 'keys.search'],
+      [['Alt', 'T'], 'keys.home'],
+      [['Esc'], 'keys.back'],
+      [['Alt', 'W / D / T / O / N'], 'keys.addLetter'],
+      [['F11'], 'keys.fullscreen'],
+      [['Ctrl', 'Q'], 'keys.quit']
+    ]],
+    ['keys.tabs', [
+      [['Alt', '1 – 8'], 'keys.goto'],
+      [['Alt', '9'], 'keys.last'],
+      [['Ctrl', 'Tab'], 'keys.next'],
+      [['Ctrl', 'Shift', 'Tab'], 'keys.prev'],
+      [['Ctrl', 'W'], 'keys.close2'],
+      [['Ctrl', 'Shift', 'T'], 'keys.reopen'],
+      [['Ctrl', 'Shift', 'PageUp / PageDown'], 'keys.move']
+    ]],
+    ['keys.inTab', [
+      [['F5'], 'keys.reload'],
+      [['Alt', 'M'], 'keys.mute'],
+      [['Alt', '← / →'], 'keys.nav'],
+      [['Ctrl', '+'], 'keys.zoomIn'],
+      [['Ctrl', '−'], 'keys.zoomOut'],
+      [['Ctrl', '0'], 'keys.zoomReset']
+    ]]
+  ];
+
+  function buildKeys() {
+    const box = document.getElementById('keylist');
+    box.replaceChildren();
+    for (const [group, rows] of KEYS) {
+      box.append(el('h4', null, T(group)));
+      for (const [combo, what] of rows) {
+        const row = el('div', 'key');
+        const c = el('span', 'combo');
+        combo.forEach((k, i) => {
+          if (i) c.append(' + ');
+          c.append(el('kbd', null, k));
+        });
+        row.append(el('span', null, T(what)), c);
+        box.append(row);
+      }
+    }
+    const tip = el('div', 'key');
+    tip.append(el('span', null, T('keys.tip')));
+    box.append(tip);
+  }
+
+  const modal = document.getElementById('modal');
+  const openKeys = () => modal.classList.add('open');
+  const closeKeys = () => modal.classList.remove('open');
+  document.getElementById('openKeys').onclick = openKeys;
+  document.getElementById('closeKeys').onclick = closeKeys;
+  modal.onclick = (e) => { if (e.target === modal) closeKeys(); };
+  window.tabchat.onShowShortcuts(openKeys);
+
+  // ---------- Wat is er nieuw ----------
+  const wn = document.getElementById('wn');
+  const closeWn = () => { if (!wn.classList.contains('open')) return; wn.classList.remove('open'); window.tabchat.whatsNewClosed(); };
+  document.getElementById('closeWn').onclick = closeWn;
+  document.getElementById('okWn').onclick = closeWn;
+  wn.onclick = (e) => { if (e.target === wn) closeWn(); };
+  window.tabchat.onWhatsNew(async (d) => {
+    await loadStrings(); // taal kan veranderd zijn
+    closeKeys();
+    document.getElementById('wnSub').textContent = d.updated ? T('wn.updated', { v: d.current }) : '';
+    const list = document.getElementById('wnList');
+    list.replaceChildren();
+    for (const e of d.entries) {
+      list.append(el('h4', null, T('wn.version', { v: e.v })));
+      const ul = el('ul', 'wn-list');
+      for (const item of e.items) ul.append(el('li', null, item));
+      list.append(ul);
+    }
+    wn.classList.add('open');
+    document.getElementById('okWn').focus();
+  });
+
+  // Esc: eerst het venster sluiten, anders terug naar je tabblad
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (wn.classList.contains('open')) closeWn();
+    else if (modal.classList.contains('open')) closeKeys();
+    else window.tabchat.back();
+  });
+
+  function render(s) {
+    // Jouw tabbladen
+    const mine = document.getElementById('mine');
+    mine.replaceChildren();
+    if (s.tabs.length === 0) {
+      mine.append(el('div', 'empty', T('home.empty')));
+    }
+    for (const t of s.tabs) {
+      const row = el('div', 'row');
+      const rm = el('button', 'remove', T('home.remove'));
+      rm.onclick = () => {
+        if (confirm(T('home.removeConfirm', { name: t.label }))) window.tabchat.remove(t.id);
+      };
+      // Mag dit tabblad in slaapstand?
+      const sw = el('label', 'sleepsw');
+      const swBox = el('span', 'switch');
+      const inp = document.createElement('input');
+      inp.type = 'checkbox';
+      inp.checked = t.canSleep;
+      inp.onchange = () => window.tabchat.setTabSleep(t.id, inp.checked);
+      swBox.append(inp, el('span', 'slider'));
+      sw.append(T(t.asleep ? 'home.asleepMaySleep' : 'home.maySleep'), swBox);
+      sw.title = T('home.sleepTitle');
+      row.append(badge(t.label, t.color), el('div', 'name', t.label), sw, rm);
+      mine.append(row);
+    }
+
+    // Dienst toevoegen
+    const cat = document.getElementById('catalog');
+    cat.replaceChildren();
+    for (const c of s.catalog) {
+      const card = el('div', 'card');
+      const top = el('div', 'top');
+      top.append(badge(c.name, c.color), nameWithKey(c.name, c.key));
+      card.title = T('home.addTitle', { k: c.key.toUpperCase() });
+      const add = el('button', 'add', T('home.addBtn'));
+      add.onclick = () => window.tabchat.add(c.id);
+      card.append(top, el('div', 'desc', c.desc), add);
+      cat.append(card);
+    }
+
+    // Over Tabchat / updates
+    const about = document.getElementById('about');
+    about.replaceChildren();
+    const u = s.update || {};
+    const info = el('div', 'text');
+    const st = u.state ? T('upd.' + u.state, { v: u.version, p: u.percent || 0, s: u.store }) : '';
+    const don = el('button', 'donate', T('don.link'));
+    don.onclick = () => window.tabchat.openDonate();
+    const news = el('button', 'donate', T('wn.link'));
+    news.onclick = () => window.tabchat.openWhatsNew();
+    const links = el('div', 'links');
+    links.append(news, don);
+    info.append(el('div', 'ver', `Tabchat ${u.current || ''}`), el('div', 'st', st), links);
+    about.append(info);
+    if (u.state === 'ready') {
+      const ib = el('button', 'add', T('upd.install'));
+      ib.onclick = () => window.tabchat.installUpdate();
+      about.append(ib);
+    } else if (u.state !== 'dev' && u.state !== 'store' && u.state !== 'downloading' && u.state !== 'checking') {
+      const cb = el('button', 'dndbtn', T('upd.check'));
+      cb.onclick = () => window.tabchat.checkUpdate();
+      about.append(cb);
+    }
+
+    // Niet storen
+    const dr = document.getElementById('dndrow');
+    dr.replaceChildren();
+    const status = el('div', 'status');
+    if (s.dnd.on) status.append(T('dnd.on') + ' ', el('b', null, s.dnd.label));
+    else status.textContent = T('dnd.off');
+    dr.append(status);
+    const btn = (text, mode, cls = 'dndbtn') => {
+      const b = el('button', cls, text);
+      b.onclick = () => window.tabchat.setDnd(mode);
+      dr.append(b);
+    };
+    btn(T('dnd.1h'), 60);
+    btn(T('dnd.tomorrow'), 'tomorrow');
+    btn(T('dnd.forever'), 'forever');
+    if (s.dnd.manual) btn(T('dnd.turnOff'), null, 'dndbtn off');
+
+    // Functies
+    const feat = document.getElementById('features');
+    feat.replaceChildren();
+    for (const f of FEATURES) {
+      if (f.hideInStore && s.platform && s.platform.storeManaged) continue; // Flathub/Snap regelt dit zelf
+      const row = el('div', 'feature');
+      const text = el('div', 'text');
+      const title = el('div', 'name', T(`f.${f.key}.name`));
+      text.append(title, el('div', 'desc', T(`f.${f.key}.desc`)));
+
+      // Keuzelijst in plaats van schakelaar
+      if (f.options) {
+        const sel = document.createElement('select');
+        const opts = f.options === 'links'
+          ? [['default', 'f.openLinks.default'], ...(s.browsers || []).map(b => [b.id, '!' + b.name]), ['internal', 'f.openLinks.internal']]
+          : f.options;
+        for (const [value, label] of opts) {
+          // '!Tekst' = niet vertalen (taalnamen staan altijd in hun eigen taal)
+          const o = el('option', null, label.startsWith('!') ? label.slice(1) : T(label));
+          o.value = value;
+          if (String(s.settings[f.key]) === String(value)) o.selected = true;
+          sel.append(o);
+        }
+        const numeric = typeof opts[0][0] === 'number';
+        sel.onchange = () => window.tabchat.setSetting(f.key, numeric ? Number(sel.value) : sel.value);
+        row.append(text, sel);
+        feat.append(row);
+        continue;
+      }
+
+      const label = el('label', 'switch');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = !!s.settings[f.key];
+      input.onchange = () => window.tabchat.setSetting(f.key, input.checked);
+      label.append(input, el('span', 'slider'));
+      row.append(text, label);
+      feat.append(row);
+    }
+  }
+
+  // Bij een andere taal: vaste teksten en sneltoetsen opnieuw opbouwen
+  const update = async (s) => {
+    const before = curLang;
+    await loadStrings(s.lang);
+    if (curLang !== before) buildKeys();
+    render(s);
+  };
+  window.tabchat.onState(update);
+  window.tabchat.getState().then(update);
+</script>
+</body>
+</html>
