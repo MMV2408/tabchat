@@ -90,6 +90,11 @@
   </requires>
 
   <releases>
+    <release version="1.12.1" date="2026-10-11">
+      <description>
+        <p>No more endless loading cursor after clicking a notification.</p>
+      </description>
+    </release>
     <release version="1.12.0" date="2026-10-11">
       <description>
         <p>A "What's new" window after every update.</p>

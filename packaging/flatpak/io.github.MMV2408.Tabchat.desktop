@@ -10,4 +10,4 @@ Terminal=false
 Categories=Network;InstantMessaging;Chat;
 Keywords=whatsapp;discord;teams;outlook;onedrive;chat;
 StartupWMClass=Tabchat
-StartupNotify=true
+StartupNotify=false

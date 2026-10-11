@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.12.1',
+    nl: ['Na een klik op een melding blijft de muis niet meer eindeloos laden'],
+    en: ['No more endless loading cursor after clicking a notification']
+  },
+  {
     v: '1.12.0',
     nl: ['Dit scherm: na elke update zie je meteen wat er nieuw is'],
     en: ['This screen: after every update you see right away what is new']

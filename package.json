@@ -1,6 +1,6 @@
 {
   "name": "tabchat",
-  "version": "1.12.0",
+  "version": "1.12.1",
   "description": "WhatsApp, Discord, Teams, Outlook en OneDrive in één venster",
   "main": "src/main/index.js",
   "homepage": "https://github.com/MMV2408/tabchat",
@@ -22,7 +22,12 @@
       "category": "Network",
       "icon": "assets/icon.png",
       "syncDesktopName": true,
-      "synopsis": "WhatsApp, Discord, Teams, Outlook and OneDrive in one window"
+      "synopsis": "WhatsApp, Discord, Teams, Outlook and OneDrive in one window",
+      "desktop": {
+        "entry": {
+          "StartupNotify": "false"
+        }
+      }
     },
     "files": [
       "src/**/*",
