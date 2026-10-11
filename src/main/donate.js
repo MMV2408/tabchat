@@ -39,11 +39,20 @@ function showWhenVisible() {
 }
 
 // kind: 'install' (eerste keer) of 'update'
+let afterUpdate = false;
 function schedule(kind) {
   if (!app.isPackaged || store.config.donateNever) return;
+  // Na een update: pas vragen als "Wat is er nieuw" gesloten is
+  if (kind === 'update') { afterUpdate = true; return; }
   // Eerste keer: eerst rustig diensten toevoegen en inloggen
-  const delay = kind === 'install' ? 3 * 60 * 1000 : 8000;
-  setTimeout(() => { if (store.win) showWhenVisible(); }, delay);
+  setTimeout(() => { if (store.win) showWhenVisible(); }, 3 * 60 * 1000);
 }
 
-module.exports = { open, schedule };
+// "Wat is er nieuw" is gesloten (of er was niets nieuws)
+function afterWhatsNew() {
+  if (!afterUpdate) return;
+  afterUpdate = false;
+  setTimeout(() => { if (store.win) showWhenVisible(); }, 1500);
+}
+
+module.exports = { open, schedule, afterWhatsNew };

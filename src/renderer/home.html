@@ -75,8 +75,13 @@
   kbd { background: var(--bg-1); border: 1px solid var(--bg-3); border-bottom-width: 2px; border-radius: 5px; padding: 1px 7px; font-family: inherit; font-size: 13px; color: var(--text); }
 
   /* sneltoetsen-venster */
-  #modal { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
-  #modal.open { display: flex; }
+  .wn-sub { color: var(--text-muted); margin: 4px 0 4px; font-size: 14px; }
+  .wn-list { margin: 0; padding-left: 20px; color: var(--text); line-height: 1.6; font-size: 14px; }
+  .wn-foot { display: flex; justify-content: flex-end; margin: 20px 0 12px; }
+  .about .links { display: flex; gap: 14px; margin-top: 4px; }
+  .about .links .donate { margin-top: 0; }
+  #modal, #wn { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
+  #modal.open, #wn.open { display: flex; }
   .sheet { background: var(--bg-0); border-radius: 14px; width: min(640px, 100%); padding: 24px 24px 12px; box-shadow: 0 16px 48px rgba(0,0,0,.5); }
   .sheet-head { display: flex; align-items: center; margin-bottom: 4px; }
   .sheet-head h3 { flex: 1; margin: 0; color: var(--text-strong); font-size: 20px; }
@@ -133,6 +138,15 @@
   <div class="sheet" role="dialog">
     <div class="sheet-head"><h3 data-i18n="keys.title"></h3><button class="close" id="closeKeys" data-i18n-title="keys.close">✕</button></div>
     <div id="keylist"></div>
+  </div>
+</div>
+
+<div id="wn">
+  <div class="sheet" role="dialog">
+    <div class="sheet-head"><h3 data-i18n="wn.title"></h3><button class="close" id="closeWn" data-i18n-title="keys.close">✕</button></div>
+    <p class="wn-sub" id="wnSub"></p>
+    <div id="wnList"></div>
+    <div class="wn-foot"><button class="add" id="okWn" data-i18n="wn.ok"></button></div>
   </div>
 </div>
 
@@ -255,10 +269,33 @@
   modal.onclick = (e) => { if (e.target === modal) closeKeys(); };
   window.tabchat.onShowShortcuts(openKeys);
 
+  // ---------- Wat is er nieuw ----------
+  const wn = document.getElementById('wn');
+  const closeWn = () => { if (!wn.classList.contains('open')) return; wn.classList.remove('open'); window.tabchat.whatsNewClosed(); };
+  document.getElementById('closeWn').onclick = closeWn;
+  document.getElementById('okWn').onclick = closeWn;
+  wn.onclick = (e) => { if (e.target === wn) closeWn(); };
+  window.tabchat.onWhatsNew(async (d) => {
+    await loadStrings(); // taal kan veranderd zijn
+    closeKeys();
+    document.getElementById('wnSub').textContent = d.updated ? T('wn.updated', { v: d.current }) : '';
+    const list = document.getElementById('wnList');
+    list.replaceChildren();
+    for (const e of d.entries) {
+      list.append(el('h4', null, T('wn.version', { v: e.v })));
+      const ul = el('ul', 'wn-list');
+      for (const item of e.items) ul.append(el('li', null, item));
+      list.append(ul);
+    }
+    wn.classList.add('open');
+    document.getElementById('okWn').focus();
+  });
+
   // Esc: eerst het venster sluiten, anders terug naar je tabblad
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (modal.classList.contains('open')) closeKeys();
+    if (wn.classList.contains('open')) closeWn();
+    else if (modal.classList.contains('open')) closeKeys();
     else window.tabchat.back();
   });
 
@@ -311,7 +348,11 @@
     const st = u.state ? T('upd.' + u.state, { v: u.version, p: u.percent || 0, s: u.store }) : '';
     const don = el('button', 'donate', T('don.link'));
     don.onclick = () => window.tabchat.openDonate();
-    info.append(el('div', 'ver', `Tabchat ${u.current || ''}`), el('div', 'st', st), don);
+    const news = el('button', 'donate', T('wn.link'));
+    news.onclick = () => window.tabchat.openWhatsNew();
+    const links = el('div', 'links');
+    links.append(news, don);
+    info.append(el('div', 'ver', `Tabchat ${u.current || ''}`), el('div', 'st', st), links);
     about.append(info);
     if (u.state === 'ready') {
       const ib = el('button', 'add', T('upd.install'));

@@ -60,6 +60,8 @@ function register() {
   ipcMain.on('update-check', () => require('./updater').check());
   ipcMain.on('update-install', () => require('./updater').install());
   ipcMain.on('donate-open', () => require('./donate').open());
+  ipcMain.on('whats-new-open', () => require('./whatsnew').show(null));
+  ipcMain.on('whats-new-closed', () => require('./donate').afterWhatsNew());
   // Klik op een melding van een dienst: venster tonen met dat tabblad vooraan
   ipcMain.on('notification-click', (e) => {
     const id = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
