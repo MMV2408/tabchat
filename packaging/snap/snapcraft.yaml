@@ -1,0 +1,63 @@
+name: tabchat
+base: core24
+version: '0.0.0' # wordt door build.sh gelijk gezet aan package.json
+title: Tabchat
+summary: WhatsApp, Discord, Teams, Outlook and OneDrive in one window
+description: |
+  Tabchat puts your chat and work apps in one lightweight window with tabs.
+
+  - Unread counters on every tab, in the tray and on the dock icon
+  - Keeps running in the background with a tray icon
+  - Do not disturb, also following Ubuntu's own Do not disturb
+  - One shared Microsoft sign-in for Teams, Outlook and OneDrive that stays signed in
+  - Tab sleep, quick search (Ctrl+K) and browser-style shortcuts
+  - Screen sharing in Discord and Teams
+  - Light and dark theme, English and Dutch
+
+  Tabchat is an independent project and is not affiliated with WhatsApp, Meta,
+  Discord or Microsoft. It shows the official web versions and collects no data.
+license: MIT
+website: https://github.com/MMV2408/tabchat
+source-code: https://github.com/MMV2408/tabchat
+issues: https://github.com/MMV2408/tabchat/issues
+contact: https://github.com/MMV2408/tabchat/issues
+donation: https://github.com/sponsors/MMV2408
+grade: stable
+confinement: strict
+
+platforms:
+  amd64:
+
+plugs:
+  shmem:
+    interface: shared-memory
+    private: true
+
+apps:
+  tabchat:
+    command: app/tabchat --no-sandbox
+    extensions: [gnome]
+    environment:
+      TMPDIR: $XDG_RUNTIME_DIR
+    plugs:
+      - home
+      - network
+      - browser-support
+      - audio-playback
+      - audio-record
+      - camera
+      - opengl
+      - removable-media
+      - unity7
+      - screen-inhibit-control
+      - shmem
+
+parts:
+  tabchat:
+    plugin: dump
+    source: src/
+    stage-packages:
+      - libnspr4
+      - libnss3
+    prime:
+      - -app/chrome-sandbox

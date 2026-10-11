@@ -13,7 +13,7 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --linux deb AppImage",
-    "dist:snap": "electron-builder --linux snap"
+    "dist:snap": "bash packaging/snap/build.sh"
   },
   "build": {
     "appId": "nl.mmv2408.Tabchat",
@@ -40,18 +40,7 @@
         "owner": "MMV2408",
         "repo": "tabchat"
       }
-    ],
-    "snap": {
-      "summary": "WhatsApp, Discord, Teams, Outlook and OneDrive in one window",
-      "grade": "stable",
-      "confinement": "strict",
-      "plugs": [
-        "default",
-        "camera",
-        "audio-record",
-        "removable-media"
-      ]
-    }
+    ]
   },
   "devDependencies": {
     "electron": "^38.0.0",
