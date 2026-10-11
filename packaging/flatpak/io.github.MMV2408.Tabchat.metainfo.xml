@@ -36,7 +36,7 @@
 
   <launchable type="desktop-id">io.github.MMV2408.Tabchat.desktop</launchable>
 
-  <url type="homepage">https://github.com/MMV2408/tabchat</url>
+  <url type="homepage">https://mmv2408.github.io/tabchat/</url>
   <url type="bugtracker">https://github.com/MMV2408/tabchat/issues</url>
   <url type="vcs-browser">https://github.com/MMV2408/tabchat</url>
   <url type="donation">https://github.com/sponsors/MMV2408</url>
@@ -45,6 +45,14 @@
     <screenshot type="default">
       <caption>WhatsApp, Discord, Outlook, Teams and OneDrive in tabs</caption>
       <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/main.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Discord right next to your other chats</caption>
+      <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/sim/shots/discord.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Outlook in a tab</caption>
+      <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/sim/shots/outlook.png</image>
     </screenshot>
     <screenshot>
       <caption>Quick search with Ctrl+K</caption>

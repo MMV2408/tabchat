@@ -9,5 +9,5 @@ Icon=io.github.MMV2408.Tabchat
 Terminal=false
 Categories=Network;InstantMessaging;Chat;
 Keywords=whatsapp;discord;teams;outlook;onedrive;chat;
-StartupWMClass=Tabchat
+StartupWMClass=tabchat
 StartupNotify=false
