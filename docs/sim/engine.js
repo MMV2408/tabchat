@@ -21,6 +21,43 @@
   let lastTab = active;
   let dnd = null;         // null, 'forever' of een tijdstip (ms)
   let upd = 'idle';
+  let menuHandler = null;
+
+  // Het rechtsklikmenu van een tabblad, net als in de app (src/main/ipc.js)
+  function menuItems(id) {
+    const i = tabs.findIndex(t => t.id === id);
+    if (i < 0) return [];
+    const t = tabs[i];
+    return [
+      { label: T('menu.reload'), key: 'F5', act: 'reload' },
+      { label: T(t.muted ? 'menu.unmute' : 'menu.mute'), key: 'Alt+M', act: 'mute' },
+      null,
+      { label: T('menu.sleepNow'), act: 'sleep', disabled: t.asleep },
+      { label: T('menu.neverSleep'), act: 'never', checked: !t.canSleep },
+      null,
+      { label: T('menu.left'), key: 'Ctrl+Shift+PageUp', act: 'left', disabled: i === 0 },
+      { label: T('menu.right'), key: 'Ctrl+Shift+PageDown', act: 'right', disabled: i === tabs.length - 1 },
+      null,
+      { label: T('menu.close'), key: 'Ctrl+W', act: 'close' }
+    ];
+  }
+  function tabAction(id, act) {
+    const i = tabs.findIndex(t => t.id === id);
+    if (i < 0) return;
+    const t = tabs[i];
+    if (act === 'reload') { t.asleep = false; open(id); return; }
+    if (act === 'mute') t.muted = !t.muted;
+    if (act === 'sleep') { t.asleep = true; if (active === id) active = 'home'; }
+    if (act === 'never') { t.canSleep = !t.canSleep; if (!t.canSleep) t.asleep = false; }
+    if (act === 'left' && i > 0) [tabs[i - 1], tabs[i]] = [tabs[i], tabs[i - 1]];
+    if (act === 'right' && i < tabs.length - 1) [tabs[i + 1], tabs[i]] = [tabs[i], tabs[i + 1]];
+    if (act === 'close') {
+      tabs.splice(i, 1);
+      if (lastTab === id) lastTab = tabs[0] ? tabs[0].id : null;
+      if (active === id) active = lastTab || 'home';
+    }
+    emit();
+  }
 
   const lang = () => settings.language === 'auto' ? siteLang : settings.language;
   const T = (k, v = {}) => {
@@ -93,7 +130,7 @@
         emit();
       },
       back: () => { if (lastTab && tabs.some(t => t.id === lastTab)) open(lastTab); },
-      tabMenu: () => {},
+      tabMenu: (id) => { if (menuHandler) menuHandler(id, f.lastPos); },
       reorder: (id, to) => {
         const from = tabs.findIndex(t => t.id === id);
         if (from < 0) return;
@@ -127,12 +164,16 @@
 
   window.TabchatSim = {
     connect(win) {
-      const f = { win, state: [], keys: [], wn: [] };
+      const f = { win, state: [], keys: [], wn: [], lastPos: null };
       frames.add(f);
+      // Waar is rechts geklikt? (voor het tabblad-menu, dat de website tekent)
+      win.addEventListener('contextmenu', (e) => { f.lastPos = { frame: win, x: e.clientX, y: e.clientY }; }, true);
       win.addEventListener('pagehide', () => frames.delete(f));
       applyTheme(win);
       return api(f);
     },
+    onTabMenu(cb) { menuHandler = cb; },
+    menuItems, tabAction,
     subscribe(cb) { listeners.add(cb); cb(snapshot()); },
     open,
     showShortcuts() { open('home'); for (const f of frames) f.keys.forEach(cb => cb()); },

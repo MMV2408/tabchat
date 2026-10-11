@@ -83,6 +83,15 @@
   .placeholder .badge { width: 72px; height: 72px; border-radius: 18px; display: grid; place-items: center; color: #fff; font: 700 34px system-ui, sans-serif; }
   .placeholder strong { color: #dbdee1; font-size: 22px; }
   .win.light .placeholder strong { color: #313338; }
+  .tabmenu { position: fixed; z-index: 10; min-width: 270px; padding: 6px; border-radius: 12px; background: #2e2e33; color: #f0f0f2;
+             box-shadow: 0 12px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08); font: 15px system-ui, sans-serif; }
+  .tabmenu.light { background: #fff; color: #222; box-shadow: 0 12px 40px rgba(0,0,0,.2), 0 0 0 1px rgba(0,0,0,.08); }
+  .tabmenu button { display: flex; width: 100%; align-items: center; gap: 10px; border: 0; background: none; color: inherit; font: inherit; text-align: left; padding: 8px 10px; border-radius: 7px; cursor: pointer; }
+  .tabmenu button:hover:not(:disabled), .tabmenu button:focus-visible { background: rgba(127,127,140,.22); outline: none; }
+  .tabmenu button:disabled { opacity: .4; cursor: default; }
+  .tabmenu .chk { width: 14px; }
+  .tabmenu .k { margin-left: auto; opacity: .55; font-size: 13px; }
+  .tabmenu hr { border: 0; border-top: 1px solid rgba(127,127,140,.25); margin: 5px 4px; }
   .caption { color: var(--muted); font-size: 16px; margin: 18px 4px 0; min-height: 3.2em; max-width: 70ch; }
 
   /* ---------- secties ---------- */
@@ -317,10 +326,10 @@ const TEXT = {
     'hero.title': 'Your chat apps, in one window.',
     'hero.lead': 'Tabchat puts WhatsApp, Discord, Microsoft Teams, Outlook and OneDrive side by side in tabs. Light on memory, keyboard-friendly and built for Linux.',
     'hero.install': 'Install Tabchat', 'hero.snap': 'Get it from the Snap Store',
-    'sim.try': '<b>Try it:</b> click the tabs, drag them around, or open <b>+</b> to change the real settings.',
+    'sim.try': '<b>Try it:</b> click the tabs, drag them around, right-click one for more, or open <b>+</b> to change the real settings.',
     'sim.soon': 'Screenshot coming soon',
     'cap.whatsapp': 'Unread counters on every tab, so you see at a glance where something new is waiting.',
-    'cap.discord': 'Press Ctrl+K anywhere to jump to a tab or action in a second.',
+    'cap.discord': 'Discord right next to your other chats, with voice, video and screen sharing.',
     'cap.teams': 'Teams, Outlook and OneDrive share one Microsoft sign-in. Sign in once, also with a school or work account.',
     'cap.outlook': 'Your mail and calendar in a tab. Links open where you want: your browser or Tabchat itself.',
     'cap.onedrive': 'Tabs you don\u2019t use fall asleep and free up memory. Click one and it wakes up.',
@@ -367,10 +376,10 @@ const TEXT = {
     'hero.title': 'Je chat-apps, in één venster.',
     'hero.lead': 'Tabchat zet WhatsApp, Discord, Microsoft Teams, Outlook en OneDrive naast elkaar in tabbladen. Zuinig met geheugen, handig met het toetsenbord en gemaakt voor Linux.',
     'hero.install': 'Tabchat installeren', 'hero.snap': 'Download in de Snap Store',
-    'sim.try': '<b>Probeer het:</b> klik op de tabbladen, versleep ze, of open <b>+</b> om de echte instellingen te veranderen.',
+    'sim.try': '<b>Probeer het:</b> klik op de tabbladen, versleep ze, rechtsklik voor meer, of open <b>+</b> om de echte instellingen te veranderen.',
     'sim.soon': 'Screenshot volgt',
     'cap.whatsapp': 'Ongelezen-tellers op elk tabblad, zodat je meteen ziet waar iets nieuws op je wacht.',
-    'cap.discord': 'Druk overal op Ctrl+K om in een seconde naar een tabblad of actie te gaan.',
+    'cap.discord': 'Discord naast je andere chats, met spraak, video en scherm delen.',
     'cap.teams': 'Teams, Outlook en OneDrive delen één Microsoft-login. Eén keer inloggen, ook met een school- of werkaccount.',
     'cap.outlook': 'Je mail en agenda in een tabblad. Links openen waar jij wilt: in je browser of in Tabchat zelf.',
     'cap.onedrive': 'Tabbladen die je niet gebruikt, gaan slapen en maken geheugen vrij. Klik erop en ze worden wakker.',
@@ -418,8 +427,8 @@ const TEXT = {
 const SHOTS = {
   whatsapp: 'sim/shots/whatsapp.png',
   discord: 'sim/shots/discord.png',
-  teams: null,
-  outlook: null,
+  teams: 'sim/shots/teams.png',
+  outlook: 'sim/shots/outlook.png',
   onedrive: 'sim/shots/onedrive.png'
 };
 
@@ -501,6 +510,39 @@ function renderSim(s) {
   }
   document.getElementById('caption').textContent = T(cap);
 }
+
+// ---------- rechtsklikmenu van een tabblad ----------
+let menu = null;
+function closeMenu() { if (menu) { menu.remove(); menu = null; } }
+TabchatSim.onTabMenu((id, pos) => {
+  closeMenu();
+  const items = TabchatSim.menuItems(id);
+  if (!items.length) return;
+  menu = document.createElement('div');
+  menu.className = 'tabmenu' + (win.classList.contains('light') ? ' light' : '');
+  menu.setAttribute('role', 'menu');
+  for (const it of items) {
+    if (!it) { menu.append(document.createElement('hr')); continue; }
+    const b = document.createElement('button');
+    b.setAttribute('role', 'menuitem'); b.disabled = !!it.disabled;
+    b.innerHTML = `<span class="chk">${it.checked ? '✓' : ''}</span><span>${esc(it.label)}</span>` + (it.key ? `<span class="k">${esc(it.key)}</span>` : '');
+    b.onclick = () => { closeMenu(); TabchatSim.tabAction(id, it.act); };
+    menu.append(b);
+  }
+  document.body.append(menu);
+  // Van de plek in het (verkleinde) tabbalk-venster naar de plek op de pagina
+  let x = innerWidth / 2, y = innerHeight / 2;
+  const fr = pos && [...document.querySelectorAll('iframe')].find(f => f.contentWindow === pos.frame);
+  if (fr) { const r = fr.getBoundingClientRect(), k = r.width / fr.offsetWidth; x = r.left + pos.x * k; y = r.top + pos.y * k; }
+  const w = menu.offsetWidth, h = menu.offsetHeight;
+  menu.style.left = Math.max(8, Math.min(x, innerWidth - w - 8)) + 'px';
+  menu.style.top = Math.max(8, Math.min(y, innerHeight - h - 8)) + 'px';
+  menu.querySelector('button:not(:disabled)').focus();
+});
+addEventListener('mousedown', (e) => { if (menu && !menu.contains(e.target)) closeMenu(); });
+addEventListener('blur', () => setTimeout(() => { if (menu && !menu.contains(document.activeElement)) closeMenu(); }, 0));
+addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+addEventListener('scroll', closeMenu, { passive: true });
 
 applyTheme();
 applyText();
