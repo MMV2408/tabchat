@@ -49,7 +49,7 @@ modules:
       - type: git
         dest: src
         url: https://github.com/MMV2408/tabchat.git
-        commit: COMMIT_HIER
+        commit: 4a4b9a53c3a12d2a6857714ddc967a2cf5931557
         x-checker-data:
           type: git
           tag-pattern: ^v([\d.]+)$
