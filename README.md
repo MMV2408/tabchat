@@ -23,7 +23,7 @@
 ---
 
 <p align="center">
-  <img src="docs/screenshots/main.png" alt="Tabchat with WhatsApp open" width="860">
+  <img src="docs/demo.gif" alt="Switching between WhatsApp, Discord, Teams, Outlook and OneDrive in Tabchat" width="860">
 </p>
 
 ## Why Tabchat?
