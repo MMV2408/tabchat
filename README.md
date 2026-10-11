@@ -44,11 +44,12 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 
 **Never miss a message**
 - 🔴 Unread counters on every tab, a red dot on the tray icon and a number on the dock icon
+- 🔔 Click a notification to jump straight to the right tab
 - 🖥️ Keeps running in the background when you close the window, with a tray icon at the top right
 - 🚀 Optionally starts hidden in the tray when you log in
 
 **Peace and quiet**
-- 🌙 Do not disturb for 1 hour, until tomorrow 08:00 or until you turn it off — blocks all notifications and sound
+- 🌙 Do not disturb for 1 hour, until tomorrow 08:00 or until you turn it off — blocks all notifications and sound. Also follows Ubuntu's own Do not disturb
 - 💤 Tab sleep: tabs you have not used for a while are removed from memory and come back with one click. You choose per tab which ones may sleep
 
 **Keyboard first**
@@ -60,6 +61,7 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 - ⚠️ A clear error screen with automatic retry when you are offline
 - 🔄 Automatic updates from GitHub Releases
 - 🇬🇧 🇳🇱 English and Dutch
+- ☀️ Light and dark theme that follows your system
 - 🎨 Colored or white tray icon
 
 <p align="center">

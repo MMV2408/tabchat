@@ -28,6 +28,7 @@ let pending = null; // timer voor het aanmaken van het icoon
 
 // ---------- venster tonen / verbergen ----------
 function showWindow() {
+  if (store.win.isMinimized()) store.win.restore();
   store.win.show();
   store.win.focus();
   views.focusActive();
@@ -100,15 +101,15 @@ function refresh() {
         { label: t('dnd.tomorrow'), click: () => dnd.set('tomorrow') },
         { label: t('dnd.forever'), click: () => dnd.set('forever') },
         { type: 'separator' },
-        { label: t('dnd.turnOff'), enabled: dnd.isOn(), click: () => dnd.set(null) }
+        { label: t('dnd.turnOff'), enabled: dnd.isManual(), click: () => dnd.set(null) }
       ]
     },
-    {
+    ...(require('./platform').storeManaged ? [] : [{
       label: t('tray.autostart'),
       type: 'checkbox',
       checked: !!store.config.settings.autostart,
       click: (item) => actions.setSetting('autostart', item.checked)
-    },
+    }]),
     { type: 'separator' },
     ...(require('./updater').getStatus().state === 'ready'
       ? [{ label: t('tray.update', { v: require('./updater').getStatus().version }), click: () => require('./updater').install() }]

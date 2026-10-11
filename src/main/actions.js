@@ -199,6 +199,8 @@ function setSetting(key, value) {
   if (key === 'unreadBadges') require('./unread').changed();
   if (key === 'autostart') require('./autostart').sync();
   if (key === 'autoUpdate') require('./updater').sync();
+  if (key === 'followSystemDnd') require('./dnd').apply();
+  if (key === 'theme') require('./theme').apply();
   views.broadcast();
 }
 

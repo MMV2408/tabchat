@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<link rel="stylesheet" href="theme.css">
 <style>
   * { box-sizing: border-box; }
   body {
@@ -11,7 +12,7 @@
     align-items: center;
     gap: 6px;
     padding: 0 8px;
-    background: #1e1f22;
+    background: var(--bg-0);
     font-family: system-ui, sans-serif;
     user-select: none;
     overflow-x: auto;
@@ -21,8 +22,8 @@
     border: none;
     border-radius: 8px;
     padding: 0 14px;
-    background: #2b2d31;
-    color: #cfd1d5;
+    background: var(--bg-1);
+    color: var(--tab-text);
     font-size: 14px;
     cursor: pointer;
     display: flex;
@@ -31,8 +32,8 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
-  button:hover { background: #35373c; }
-  button.active { background: #4e5058; color: #fff; }
+  button:hover { background: var(--bg-2); }
+  button.active { background: var(--bg-3); color: var(--text-strong); }
   .dot { width: 9px; height: 9px; border-radius: 50%; }
   .muted { font-size: 12px; opacity: .8; }
   /* ongelezen */
@@ -47,8 +48,8 @@
   #update { background: #1f6f43; color: #fff; font-size: 13px; }
   #update:hover { background: #24834f; }
   /* niet storen */
-  #dnd { margin-left: auto; background: #3b2f5c; color: #e4dcff; font-size: 13px; }
-  #dnd:hover { background: #4a3b73; }
+  #dnd { margin-left: auto; background: var(--dnd-bg); color: var(--dnd-text); font-size: 13px; }
+  #dnd:hover { background: var(--dnd-hover); }
   /* slepen */
   .dragging { opacity: .4; }
   .drop-before { box-shadow: inset 3px 0 0 #5865F2; }
@@ -179,9 +180,16 @@
     if (s.dnd && s.dnd.on) {
       const d = document.createElement('button');
       d.id = 'dnd';
-      d.textContent = T('tabs.dnd', { label: s.dnd.label });
-      d.title = T('tabs.dndTitle');
-      d.onclick = () => window.tabchat.setDnd(null);
+      if (s.dnd.manual) {
+        d.textContent = T('tabs.dnd', { label: s.dnd.label });
+        d.title = T('tabs.dndTitle');
+        d.onclick = () => window.tabchat.setDnd(null);
+      } else {
+        // Via Ubuntu aangezet: uitzetten kan alleen in Ubuntu zelf
+        d.textContent = T('tabs.dndSystem');
+        d.title = T('tabs.dndSystemTitle');
+        d.style.cursor = 'default';
+      }
       if (right) d.style.marginLeft = '0';
       document.body.append(d);
     }

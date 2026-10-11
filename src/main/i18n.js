@@ -15,6 +15,8 @@ const STRINGS = {
     'tabs.updateTitle': 'Tabchat wordt bijgewerkt en opnieuw gestart',
     'tabs.dnd': '🌙 Niet storen {label}  ✕',
     'tabs.dndTitle': 'Klik om Niet storen uit te zetten',
+    'tabs.dndSystem': '🌙 Niet storen via Ubuntu',
+    'tabs.dndSystemTitle': 'Staat aan in Ubuntu. Uitzetten doe je via het menu rechtsboven in Ubuntu.',
 
     // +-scherm
     'home.subBefore': 'Voeg je chat-apps toe en stel Tabchat in. Tip: druk overal op',
@@ -53,6 +55,15 @@ const STRINGS = {
     'dnd.until': 'tot {t}',
     'dnd.untilTomorrow': 'tot morgen {t}',
     'dnd.untilOff': 'tot je het uitzet',
+    'dnd.system': 'via Ubuntu',
+    'f.followSystemDnd.name': 'Niet storen van Ubuntu volgen',
+    'f.followSystemDnd.desc': 'Zet je Niet storen aan in Ubuntu, dan is Tabchat ook stil: geen meldingen en geen geluid.',
+    'f.theme.name': 'Thema',
+    'f.theme.desc': 'Licht of donker. Systeem volgt de instelling van Ubuntu.',
+    'f.theme.system': 'Systeem',
+    'f.theme.dark': 'Donker',
+    'f.theme.light': 'Licht',
+    'upd.store': 'Updates gaan automatisch via {s}.',
 
     // functies
     'f.language.name': 'Taal',
@@ -215,6 +226,8 @@ const STRINGS = {
     'tabs.updateTitle': 'Tabchat will update and restart',
     'tabs.dnd': '🌙 Do not disturb {label}  ✕',
     'tabs.dndTitle': 'Click to turn off Do not disturb',
+    'tabs.dndSystem': '🌙 Do not disturb (system)',
+    'tabs.dndSystemTitle': 'Turned on in your system. Turn it off from the system menu at the top right.',
 
     'home.subBefore': 'Add your chat apps and set up Tabchat. Tip: press',
     'home.subAfter': 'anywhere to search quickly.',
@@ -250,6 +263,15 @@ const STRINGS = {
     'dnd.until': 'until {t}',
     'dnd.untilTomorrow': 'until tomorrow {t}',
     'dnd.untilOff': 'until you turn it off',
+    'dnd.system': 'via your system',
+    'f.followSystemDnd.name': 'Follow system Do not disturb',
+    'f.followSystemDnd.desc': 'When Do not disturb is on in Ubuntu, Tabchat stays quiet too: no notifications and no sound.',
+    'f.theme.name': 'Theme',
+    'f.theme.desc': 'Light or dark. System follows your Ubuntu setting.',
+    'f.theme.system': 'System',
+    'f.theme.dark': 'Dark',
+    'f.theme.light': 'Light',
+    'upd.store': 'Updates are installed automatically by {s}.',
 
     'f.language.name': 'Language',
     'f.language.desc': 'The language of Tabchat. Automatic follows your computer.',

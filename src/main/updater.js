@@ -7,6 +7,7 @@ const path = require('path');
 const store = require('./store');
 const views = require('./views');
 const { t } = require('./i18n');
+const platform = require('./platform');
 
 let autoUpdater = null;
 try {
@@ -21,7 +22,8 @@ let timer = null;
 // Status voor het +-scherm, de tabbalk en het tray-menu
 const status = {
   current: app.getVersion(),
-  state: 'idle',   // idle | checking | latest | downloading | ready | error | dev | off
+  state: 'idle',   // idle | checking | latest | downloading | ready | error | dev | off | store
+  store: platform.storeName, // Flathub / Snap Store: die regelen de updates
   version: null,   // nieuwe versie, als die er is
   percent: 0
 };
@@ -58,6 +60,7 @@ function announceUpdate() {
 
 function init() {
   announceUpdate();
+  if (platform.storeManaged) return set({ state: 'store' }); // updates via de winkel
   if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' }); // npm start: geen updates
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = false; // zelf kiezen wanneer (wachtwoord nodig bij .deb)
@@ -86,7 +89,7 @@ function init() {
 
 // Aan/uit volgens de instelling
 function sync() {
-  if (!app.isPackaged || !autoUpdater) return;
+  if (!app.isPackaged || !autoUpdater || platform.storeManaged) return;
   clearInterval(timer);
   if (!enabled()) return set({ state: 'off' });
   if (status.state === 'off') set({ state: 'idle' });
@@ -96,6 +99,7 @@ function sync() {
 
 // Nu controleren (ook via de knop in het +-scherm)
 function check() {
+  if (platform.storeManaged) return;
   if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' });
   if (status.state === 'downloading' || status.state === 'ready') return;
   autoUpdater.checkForUpdates().catch(() => set({ state: 'error' }));

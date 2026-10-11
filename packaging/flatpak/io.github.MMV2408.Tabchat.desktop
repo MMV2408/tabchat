@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Tabchat
+GenericName=Chat apps in one window
+Comment=WhatsApp, Discord, Teams, Outlook and OneDrive in one window
+Comment[nl]=WhatsApp, Discord, Teams, Outlook en OneDrive in één venster
+Exec=tabchat %U
+Icon=io.github.MMV2408.Tabchat
+Terminal=false
+Categories=Network;InstantMessaging;Chat;
+Keywords=whatsapp;discord;teams;outlook;onedrive;chat;
+StartupWMClass=Tabchat
+StartupNotify=true

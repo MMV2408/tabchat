@@ -1,6 +1,6 @@
 {
   "name": "tabchat",
-  "version": "1.10.2",
+  "version": "1.11.0",
   "description": "WhatsApp, Discord, Teams, Outlook en OneDrive in één venster",
   "main": "src/main/index.js",
   "homepage": "https://github.com/MMV2408/tabchat",
@@ -12,7 +12,8 @@
   "desktopName": "tabchat.desktop",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --linux deb AppImage"
+    "dist": "electron-builder --linux deb AppImage",
+    "dist:snap": "electron-builder --linux snap"
   },
   "build": {
     "appId": "nl.mmv2408.Tabchat",
@@ -20,7 +21,8 @@
     "linux": {
       "category": "Network",
       "icon": "assets/icon.png",
-      "syncDesktopName": true
+      "syncDesktopName": true,
+      "synopsis": "WhatsApp, Discord, Teams, Outlook and OneDrive in one window"
     },
     "files": [
       "src/**/*",
@@ -33,7 +35,18 @@
         "owner": "MMV2408",
         "repo": "tabchat"
       }
-    ]
+    ],
+    "snap": {
+      "summary": "WhatsApp, Discord, Teams, Outlook and OneDrive in one window",
+      "grade": "stable",
+      "confinement": "strict",
+      "plugs": [
+        "default",
+        "camera",
+        "audio-record",
+        "removable-media"
+      ]
+    }
   },
   "devDependencies": {
     "electron": "^38.0.0",

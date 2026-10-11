@@ -1,18 +1,56 @@
 // Niet storen: alle meldingen en geluiden uit, eventueel voor een bepaalde tijd.
 // De meldingen zelf worden tegengehouden in preload/service.js.
+// Staat "Niet storen" van Ubuntu (GNOME) aan, dan doet Tabchat automatisch mee.
+const { app } = require('electron');
+const { spawn, execFile } = require('child_process');
+const platform = require('./platform');
 const store = require('./store');
 const config = require('./config');
 const views = require('./views');
 const i18n = require('./i18n');
 
 let timer = null;
+let systemOn = false; // Niet storen van Ubuntu/GNOME
 
-// Staat Niet storen nu aan?
-function isOn() {
+// Zelf aangezet in Tabchat?
+function isManual() {
   const until = store.config.dndUntil;
   if (!until) return false;
   if (until === 'forever') return true;
   return Date.now() < until;
+}
+
+// Via Ubuntu aangezet (en de instelling staat aan)?
+function isSystem() {
+  return systemOn && store.config.settings.followSystemDnd;
+}
+
+// Staat Niet storen nu aan?
+function isOn() {
+  return isManual() || isSystem();
+}
+
+// ---------- Niet storen van Ubuntu volgen ----------
+// GNOME bewaart dit als "show-banners" (false = Niet storen aan).
+// In Flathub/Snap kan Tabchat daar niet bij; GNOME verbergt de meldingen daar zelf al.
+function setSystem(on) {
+  if (on === systemOn) return;
+  systemOn = on;
+  apply();
+}
+
+function watchSystem() {
+  if (platform.storeManaged) return;
+  const KEY = ['org.gnome.desktop.notifications', 'show-banners'];
+  execFile('gsettings', ['get', ...KEY], (err, out) => {
+    if (!err) setSystem(String(out).trim() === 'false');
+  });
+  try {
+    const p = spawn('gsettings', ['monitor', ...KEY]);
+    p.on('error', () => {}); // geen GNOME: dan niets
+    p.stdout.on('data', (d) => setSystem(/false\s*$/.test(String(d).trim())));
+    app.on('will-quit', () => p.kill());
+  } catch {}
 }
 
 // mode: aantal minuten, 'tomorrow' (tot morgen 08:00), 'forever' of null (uit)
@@ -39,11 +77,11 @@ function apply() {
   const on = isOn();
 
   // Tijd voorbij? Dan opruimen
-  if (!on && store.config.dndUntil) {
+  if (!isManual() && store.config.dndUntil) {
     store.config.dndUntil = null;
     config.save();
   }
-  if (on && store.config.dndUntil !== 'forever') {
+  if (isManual() && store.config.dndUntil !== 'forever') {
     timer = setTimeout(apply, Math.min(store.config.dndUntil - Date.now(), 2 ** 31 - 1));
   }
 
@@ -61,7 +99,7 @@ function applyToView(id, v) {
 
 // Tekst voor tabbalk, tray en Ctrl+K, bv. "tot 19:37" of "tot morgen 08:00"
 function label() {
-  if (!isOn()) return null;
+  if (!isManual()) return isSystem() ? i18n.t('dnd.system') : null;
   const until = store.config.dndUntil;
   if (until === 'forever') return i18n.t('dnd.untilOff');
   const d = new Date(until);
@@ -70,4 +108,4 @@ function label() {
   return i18n.t(today ? 'dnd.until' : 'dnd.untilTomorrow', { t: time });
 }
 
-Object.assign(module.exports, { isOn, set, apply, applyToView, label });
+Object.assign(module.exports, { isOn, isManual, set, apply, applyToView, label, watchSystem });

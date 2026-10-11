@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <title>Tabchat</title>
+<link rel="stylesheet" href="theme.css">
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
   body {
-    background: #2b2d31; color: #dbdee1; font-family: system-ui, sans-serif;
+    background: var(--bg-1); color: var(--text); font-family: system-ui, sans-serif;
     display: grid; place-items: center; padding: 24px;
   }
   .card { max-width: 440px; text-align: center; }
@@ -19,10 +20,10 @@
   .badge .warn {
     position: absolute; right: -6px; bottom: -6px; width: 26px; height: 26px; border-radius: 50%;
     background: #f0b232; color: #1e1f22; font-size: 16px; display: grid; place-items: center;
-    border: 3px solid #2b2d31;
+    border: 3px solid var(--bg-1);
   }
-  h1 { margin: 0 0 8px; font-size: 22px; color: #fff; }
-  p { margin: 0 0 22px; color: #b5bac1; line-height: 1.5; }
+  h1 { margin: 0 0 8px; font-size: 22px; color: var(--text-strong); }
+  p { margin: 0 0 22px; color: var(--text-soft); line-height: 1.5; }
   .buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   button, a.btn {
     border: none; border-radius: 8px; padding: 10px 18px; font: inherit; font-size: 14px;
@@ -30,10 +31,10 @@
   }
   #retry { background: #5865F2; color: #fff; }
   #retry:hover { background: #4752c4; }
-  a.btn { background: #1e1f22; color: #dbdee1; }
-  a.btn:hover { background: #35373c; }
-  .auto { margin-top: 18px; font-size: 13px; color: #80848e; }
-  .code { margin-top: 6px; font-size: 12px; color: #6d6f78; }
+  a.btn { background: var(--bg-0); color: var(--text); }
+  a.btn:hover { background: var(--bg-2); }
+  .auto { margin-top: 18px; font-size: 13px; color: var(--text-faint); }
+  .code { margin-top: 6px; font-size: 12px; color: var(--text-faint); }
 </style>
 </head>
 <body>

@@ -18,7 +18,9 @@ const DEFAULT_SETTINGS = {
   sleepEnabled: false,
   sleepMinutes: 30,
   sleepOnStart: false,
-  autoUpdate: true
+  autoUpdate: true,
+  followSystemDnd: true, // Niet storen van Ubuntu/GNOME volgen
+  theme: 'system'        // 'system', 'dark' of 'light'
 };
 
 function configFile() {

@@ -2,16 +2,17 @@
 <html>
 <head>
 <meta charset="utf-8">
+<link rel="stylesheet" href="theme.css">
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; font-family: system-ui, sans-serif; }
-  #backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); }
+  #backdrop { position: fixed; inset: 0; background: var(--backdrop); }
   #box {
     position: relative;
     width: min(560px, calc(100% - 32px));
     margin: 70px auto 0;
-    background: #2b2d31;
-    border: 1px solid #3f4147;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
     border-radius: 14px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, .5);
     overflow: hidden;
@@ -21,35 +22,36 @@
     border: none;
     outline: none;
     background: transparent;
-    color: #fff;
+    color: var(--text-strong);
     font-size: 17px;
     padding: 16px 18px;
-    border-bottom: 1px solid #3f4147;
+    border-bottom: 1px solid var(--line);
     font-family: inherit;
   }
-  input::placeholder { color: #80848e; }
+  input::placeholder { color: var(--text-faint); }
   ul { list-style: none; margin: 0; padding: 6px; max-height: 380px; overflow-y: auto; }
   li {
     display: flex; align-items: center; gap: 12px;
-    padding: 9px 12px; border-radius: 8px; cursor: pointer; color: #dbdee1;
+    padding: 9px 12px; border-radius: 8px; cursor: pointer; color: var(--text);
   }
-  li.sel { background: #404249; color: #fff; }
+  li.sel { background: var(--bg-sel); color: var(--text-strong); }
   .icon {
     width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
-    display: grid; place-items: center; font-size: 13px; font-weight: 700; color: #fff;
-    background: #3f4147;
+    display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--text-strong);
+    background: var(--bg-2);
   }
+  .icon.colored { color: #fff; }
   .text { flex: 1; min-width: 0; }
   .title { font-size: 14px; }
-  .sub { font-size: 12px; color: #949ba4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sub { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   kbd {
-    font-family: inherit; font-size: 11px; color: #b5bac1;
-    background: #1e1f22; border: 1px solid #4e5058; border-radius: 5px; padding: 2px 6px; white-space: nowrap;
+    font-family: inherit; font-size: 11px; color: var(--text-soft);
+    background: var(--bg-0); border: 1px solid var(--bg-3); border-radius: 5px; padding: 2px 6px; white-space: nowrap;
   }
-  .empty { color: #949ba4; padding: 14px; font-size: 14px; }
-  .foot { display: flex; gap: 14px; padding: 8px 14px; border-top: 1px solid #3f4147; font-size: 12px; color: #80848e; }
+  .empty { color: var(--text-muted); padding: 14px; font-size: 14px; }
+  .foot { display: flex; gap: 14px; padding: 8px 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--text-faint); }
   ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-thumb { background: #4e5058; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
 </style>
 </head>
@@ -161,7 +163,7 @@
       const icon = document.createElement('div');
       icon.className = 'icon';
       icon.textContent = it.icon || it.letter;
-      if (it.color) icon.style.background = it.color;
+      if (it.color) { icon.style.background = it.color; icon.classList.add('colored'); }
       const text = document.createElement('div');
       text.className = 'text';
       const title = document.createElement('div');

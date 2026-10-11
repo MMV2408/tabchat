@@ -40,7 +40,8 @@ function getState() {
       asleep: sleep.isAsleep(t.id),
       canSleep: sleep.canSleep(t)
     })),
-    dnd: { on: dnd.isOn(), label: dnd.label() },
+    dnd: { on: dnd.isOn(), manual: dnd.isManual(), label: dnd.label() },
+    platform: { kind: require('./platform').kind, storeManaged: require('./platform').storeManaged },
     update: require('./updater').getStatus(),
     catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: i18n.t('svc.' + id) })),
     settings: config.settings

@@ -44,11 +44,12 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 
 **Nooit een bericht missen**
 - 🔴 Ongelezen-tellers op elk tabblad, een rode stip op het tray-icoon en een getal op het dock-icoon
+- 🔔 Klik op een melding en je zit meteen in het juiste tabblad
 - 🖥️ Blijft op de achtergrond draaien als je het venster sluit, met een tray-icoon rechtsboven
 - 🚀 Start desgewenst verborgen in de tray zodra je inlogt
 
 **Rust**
-- 🌙 Niet storen voor 1 uur, tot morgen 08:00 of tot je het uitzet — houdt alle meldingen en geluid tegen
+- 🌙 Niet storen voor 1 uur, tot morgen 08:00 of tot je het uitzet — houdt alle meldingen en geluid tegen. Volgt ook Niet storen van Ubuntu zelf
 - 💤 Slaapstand: tabbladen die je een tijd niet gebruikt, gaan uit het geheugen en komen met één klik terug. Per tabblad kies je wat mag slapen
 
 **Toetsenbord eerst**
@@ -60,6 +61,7 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 - ⚠️ Een duidelijk foutscherm dat vanzelf opnieuw probeert als je offline bent
 - 🔄 Automatische updates via GitHub Releases
 - 🇳🇱 🇬🇧 Nederlands en Engels
+- ☀️ Licht en donker thema dat je systeem volgt
 - 🎨 Gekleurd of wit tray-icoon
 
 <p align="center">

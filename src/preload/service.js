@@ -2,6 +2,7 @@
 // 1. Ongelezen: diensten geven hun aantal soms door via de "app-badge"
 //    (navigator.setAppBadge). Die vangen we op en sturen we naar Tabchat.
 // 2. Niet storen: meldingen van de dienst tegenhouden zolang het aanstaat.
+// 3. Klik op een melding: Tabchat openen op dit tabblad.
 const { ipcRenderer, webFrame } = require('electron');
 
 const dndAtStart = ipcRenderer.sendSync('get-dnd') === true;
@@ -24,7 +25,9 @@ webFrame.executeJavaScript(`(() => {
         fake.close = () => {};
         return fake;
       }
-      return new N(title, options);
+      const n = new N(title, options);
+      n.addEventListener('click', () => window.postMessage({ __tabchatClick: true }, '*'));
+      return n;
     };
     Wrapped.prototype = N.prototype;
     Object.defineProperty(Wrapped, 'permission', { get: () => N.permission });
@@ -41,9 +44,11 @@ webFrame.executeJavaScript(`(() => {
   }
 })()`);
 
-// Badge-getal doorsturen naar Tabchat
+// Badge-getal en klik op melding doorsturen naar Tabchat
 window.addEventListener('message', (e) => {
-  if (e.source !== window || !e.data || !('__tabchatBadge' in e.data)) return;
+  if (e.source !== window || !e.data) return;
+  if (e.data.__tabchatClick === true) return ipcRenderer.send('notification-click');
+  if (!('__tabchatBadge' in e.data)) return;
   const n = e.data.__tabchatBadge;
   if (n === 'dot' || (Number.isFinite(n) && n >= 0)) ipcRenderer.send('badge', n);
 });

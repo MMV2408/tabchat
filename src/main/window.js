@@ -10,6 +10,7 @@ const autostart = require('./autostart');
 const dnd = require('./dnd');
 const sleep = require('./sleep');
 const updater = require('./updater');
+const theme = require('./theme');
 
 const PRELOAD = path.join(__dirname, '..', 'preload', 'preload.js');
 const RENDERER = path.join(__dirname, '..', 'renderer');
@@ -17,6 +18,7 @@ const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
 
 function create() {
   store.config = config.load();
+  theme.apply(); // licht/donker vóór het venster verschijnt
   autostart.sync(); // pad in het autostart-bestand bijwerken (bv. na een update)
 
   // Via autostart gestart: verborgen in de tray (alleen als er een tray-icoon is)
@@ -27,7 +29,7 @@ function create() {
     height: 800,
     title: 'Tabchat',
     autoHideMenuBar: true,
-    backgroundColor: '#1e1f22',
+    backgroundColor: theme.background(),
     icon: ICON,
     show: !hidden
   });
@@ -71,6 +73,7 @@ function create() {
   views.layout();
   tray.init(); // tray-icoon + kruisje = verbergen
   dnd.apply(); // Niet storen van vorige keer (bv. "tot morgen") weer toepassen
+  dnd.watchSystem(); // Niet storen van Ubuntu volgen
   sleep.start(); // slaapstand: elke minuut kijken welke tabbladen mogen slapen
   updater.init(); // automatische updates (alleen in de geïnstalleerde versie)
 

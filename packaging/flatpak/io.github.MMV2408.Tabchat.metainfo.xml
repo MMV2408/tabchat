@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.MMV2408.Tabchat</id>
+  <name>Tabchat</name>
+  <summary>WhatsApp, Discord, Teams, Outlook and OneDrive in one window</summary>
+  <developer id="io.github.MMV2408">
+    <name>Mike Vijverberg</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+
+  <description>
+    <p>
+      Tabchat puts your chat and work apps in one lightweight window with tabs,
+      sharing a single browser engine instead of running a separate app for each service.
+    </p>
+    <p>It adds the desktop features the web versions are missing:</p>
+    <ul>
+      <li>Unread counters on every tab, in the tray icon and on the dock icon</li>
+      <li>Keeps running in the background with a tray icon</li>
+      <li>Do not disturb, and it follows the Do not disturb setting of your desktop</li>
+      <li>Clicking a notification opens the right tab</li>
+      <li>One shared Microsoft sign-in for Teams, Outlook and OneDrive that stays signed in</li>
+      <li>Tab sleep: unused tabs are unloaded from memory and return with one click</li>
+      <li>Quick search with Ctrl+K and browser-style keyboard shortcuts</li>
+      <li>Screen sharing in Discord and Teams, also on Wayland</li>
+      <li>Light and dark theme that follows your system</li>
+      <li>English and Dutch</li>
+    </ul>
+    <p>
+      Tabchat is an independent project and is not affiliated with WhatsApp, Meta, Discord or Microsoft.
+      It shows the official web versions of these services and collects no data.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.MMV2408.Tabchat.desktop</launchable>
+
+  <url type="homepage">https://github.com/MMV2408/tabchat</url>
+  <url type="bugtracker">https://github.com/MMV2408/tabchat/issues</url>
+  <url type="vcs-browser">https://github.com/MMV2408/tabchat</url>
+  <url type="donation">https://github.com/sponsors/MMV2408</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>WhatsApp, Discord, Outlook, Teams and OneDrive in tabs</caption>
+      <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/main.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Quick search with Ctrl+K</caption>
+      <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/quick-search.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Services and settings</caption>
+      <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/settings.png</image>
+    </screenshot>
+  </screenshots>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#c7cbf9</color>
+    <color type="primary" scheme_preference="dark">#2b2d6b</color>
+  </branding>
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="social-audio">intense</content_attribute>
+    <content_attribute id="social-contacts">intense</content_attribute>
+  </content_rating>
+
+  <categories>
+    <category>Network</category>
+    <category>InstantMessaging</category>
+    <category>Chat</category>
+  </categories>
+
+  <keywords>
+    <keyword>whatsapp</keyword>
+    <keyword>discord</keyword>
+    <keyword>teams</keyword>
+    <keyword>outlook</keyword>
+    <keyword>messenger</keyword>
+    <keyword>chat</keyword>
+  </keywords>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+
+  <releases>
+    <release version="1.11.0" date="2026-10-11">
+      <description>
+        <ul>
+          <li>Light theme that follows your system</li>
+          <li>Follows the Do not disturb setting of your desktop</li>
+          <li>Clicking a notification opens the right tab</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.10.2" date="2026-10-10">
+      <description>
+        <p>English and Dutch, new screenshots and darker scrollbars.</p>
+      </description>
+    </release>
+  </releases>
+</component>

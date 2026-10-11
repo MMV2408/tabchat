@@ -60,6 +60,13 @@ function register() {
   ipcMain.on('update-check', () => require('./updater').check());
   ipcMain.on('update-install', () => require('./updater').install());
   ipcMain.on('donate-open', () => require('./donate').open());
+  // Klik op een melding van een dienst: venster tonen met dat tabblad vooraan
+  ipcMain.on('notification-click', (e) => {
+    const id = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
+    if (!id) return;
+    require('./tray').showWindow();
+    views.show(id);
+  });
 
   // scherm delen
   ipcMain.on('share-pick', (_e, id) => require('./share').pick(id));

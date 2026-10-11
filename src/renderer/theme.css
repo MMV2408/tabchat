@@ -1,0 +1,50 @@
+/* Kleuren van alle Tabchat-schermen. Donker is standaard;
+   bij een licht systeemthema (of Thema = Licht) gelden de waarden hieronder. */
+:root {
+  color-scheme: dark;
+  --bg-0: #1e1f22;      /* tabbalk, kaarten */
+  --bg-1: #2b2d31;      /* pagina, knoppen */
+  --bg-2: #35373c;      /* hover */
+  --bg-3: #4e5058;      /* actief tabblad, randen */
+  --bg-sel: #404249;    /* geselecteerd in Ctrl+K */
+  --line: #3f4147;
+  --text: #dbdee1;
+  --text-strong: #ffffff;
+  --text-muted: #949ba4;
+  --text-faint: #80848e;
+  --text-soft: #b5bac1;
+  --tab-text: #cfd1d5;
+  --danger-bg: #3a1d1f;
+  --dnd-bg: #3b2f5c;
+  --dnd-hover: #4a3b73;
+  --dnd-text: #e4dcff;
+  --thumb: #111214;
+  --slider-off: #4e5058;
+  --scroll: #1e1f22;
+  --backdrop: rgba(0, 0, 0, .5);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg-0: #ffffff;
+    --bg-1: #f2f3f5;
+    --bg-2: #e3e5e8;
+    --bg-3: #d4d7dc;
+    --bg-sel: #e3e5e8;
+    --line: #dcdee2;
+    --text: #313338;
+    --text-strong: #060607;
+    --text-muted: #5c5e66;
+    --text-faint: #6d6f78;
+    --text-soft: #4e5058;
+    --tab-text: #4e5058;
+    --danger-bg: #fbe2e3;
+    --dnd-bg: #e9e3fb;
+    --dnd-hover: #ddd3fa;
+    --dnd-text: #4a3b8c;
+    --thumb: #e3e5e8;
+    --slider-off: #c4c7cc;
+    --scroll: #c4c7cc;
+    --backdrop: rgba(0, 0, 0, .3);
+  }
+}

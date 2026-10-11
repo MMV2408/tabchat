@@ -5,6 +5,7 @@ const { app } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const store = require('./store');
+const platform = require('./platform');
 
 const configDir = process.env.XDG_CONFIG_HOME || path.join(app.getPath('home'), '.config');
 const FILE = path.join(configDir, 'autostart', 'tabchat.desktop');
@@ -37,6 +38,7 @@ function desktopFile() {
 // Bestand aanmaken of weghalen, volgens de instelling.
 // Ook bij elke start, zodat het pad klopt na een update.
 function sync() {
+  if (platform.storeManaged) return; // map ~/.config/autostart is daar niet bereikbaar
   try {
     if (store.config.settings.autostart) {
       fs.mkdirSync(path.dirname(FILE), { recursive: true });
