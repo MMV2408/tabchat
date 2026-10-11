@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.14.1',
+    nl: ['Ook in de Snap Store-versie laadt de muis niet meer na een klik op een melding'],
+    en: ['The Snap Store version no longer shows a loading cursor after clicking a notification either']
+  },
+  {
     v: '1.14.0',
     nl: ['Na een klik op een melding blijft de muis niet meer 15 seconden laden: meldingen gaan nu via Ubuntu zelf'],
     en: ['No more 15-second loading cursor after clicking a notification: notifications now go through Ubuntu itself']

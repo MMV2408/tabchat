@@ -99,6 +99,11 @@
   </requires>
 
   <releases>
+    <release version="1.14.1" date="2026-10-11">
+      <description>
+        <p>The Snap Store version no longer shows a loading cursor after clicking a notification.</p>
+      </description>
+    </release>
     <release version="1.14.0" date="2026-10-11">
       <description>
         <p>No more loading cursor after clicking a notification.</p>

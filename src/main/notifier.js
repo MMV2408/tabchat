@@ -6,7 +6,7 @@
 // GNOME koppelt ze dan aan geen enkele app en start niets. De klik komt via het
 // hulpprogramma bij ons binnen en dan halen we zelf het venster en het juiste tabblad naar voren.
 //
-// Lukt dat niet, of in Flathub/Snap, dan gebruikt Tabchat gewoon de meldingen van Electron.
+// Lukt dat niet, of in Flathub, dan gebruikt Tabchat gewoon de meldingen van Electron.
 const { nativeImage, Notification } = require('electron');
 const { fork } = require('child_process');
 const fs = require('fs');
@@ -26,7 +26,7 @@ const items = new Map();   // D-Bus-id -> { onClick, onClose, file }
 function isAvailable() {
   if (available !== null) return available;
   available = false;
-  if (platform.storeManaged || process.platform !== 'linux' || !process.env.DBUS_SESSION_BUS_ADDRESS) return available;
+  if (platform.kind === 'flatpak' || process.platform !== 'linux' || !process.env.DBUS_SESSION_BUS_ADDRESS) return available;
   try {
     child = fork(path.join(__dirname, 'notify-helper.js'), [], {
       env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
