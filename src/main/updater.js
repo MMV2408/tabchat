@@ -57,13 +57,10 @@ function announceUpdate() {
   // (versies van vóór 1.9.1 onthielden hun versienummer nog niet)
   if (!before && store.config.tabs.length === 0) return require('./donate').schedule('install');
   require('./donate').schedule('update');
-  if (Notification.isSupported()) {
-    new Notification({
-      title: t('upd.doneTitle', { v: now }),
-      body: before ? t('upd.doneBodyFrom', { v: before }) : t('upd.doneBody'),
-      icon: ICON
-    }).show();
-  }
+  require('./notify').notify({
+    title: t('upd.doneTitle', { v: now }),
+    body: before ? t('upd.doneBodyFrom', { v: before }) : t('upd.doneBody')
+  });
 }
 
 function init() {
@@ -79,13 +76,12 @@ function init() {
   autoUpdater.on('download-progress', (p) => set({ percent: Math.round(p.percent) }));
   autoUpdater.on('update-downloaded', (info) => {
     set({ state: 'ready', version: info.version });
-    if (Notification.isSupported()) {
-      new Notification({
-        title: t('upd.readyTitle', { v: info.version }),
-        body: t('upd.readyBody'),
-        icon: ICON
-      }).show();
-    }
+    // Klik op de melding: naar "Over Tabchat" met de knop Nu installeren
+    require('./notify').notify({
+      title: t('upd.readyTitle', { v: info.version }),
+      body: t('upd.readyBody'),
+      onClick: showUpdate
+    });
   });
   autoUpdater.on('error', (err) => {
     console.error('Update-fout:', err && err.message);
@@ -111,6 +107,15 @@ function check() {
   if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' });
   if (status.state === 'downloading' || status.state === 'ready') return;
   autoUpdater.checkForUpdates().catch(() => set({ state: 'error' }));
+}
+
+// Venster tonen op het +-scherm, gescrold naar de update-knop
+function showUpdate() {
+  require('./tray').showWindow();
+  views.show('home');
+  store.home.webContents.executeJavaScript(
+    "document.getElementById('about').scrollIntoView({ behavior: 'smooth', block: 'center' })"
+  ).catch(() => {});
 }
 
 // Installeren en Tabchat opnieuw starten

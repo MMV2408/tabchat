@@ -92,7 +92,10 @@
   <releases>
     <release version="1.11.3" date="2026-10-11">
       <description>
-        <p>Choosing a tab from the tray menu now always brings Tabchat to the front.</p>
+        <ul>
+          <li>Choosing a tab from the tray menu now always brings Tabchat to the front</li>
+          <li>Clicking the update notification opens the install button</li>
+        </ul>
       </description>
     </release>
     <release version="1.11.2" date="2026-10-11">

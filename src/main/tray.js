@@ -134,11 +134,7 @@ function onClose(event) {
     store.config.trayNoticeShown = true;
     config.save();
     if (Notification.isSupported()) {
-      new Notification({
-        title: t('tray.noticeTitle'),
-        body: t('tray.noticeBody'),
-        icon: ICON
-      }).show();
+      require('./notify').notify({ title: t('tray.noticeTitle'), body: t('tray.noticeBody') });
     }
   }
 }
