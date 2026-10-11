@@ -90,6 +90,11 @@
   </requires>
 
   <releases>
+    <release version="1.11.2" date="2026-10-11">
+      <description>
+        <p>Fixed a wrong "updated" notification.</p>
+      </description>
+    </release>
     <release version="1.11.1" date="2026-10-11">
       <description>
         <p>Services switch to the new theme right away, without a manual reload.</p>

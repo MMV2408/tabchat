@@ -37,14 +37,22 @@ function enabled() {
   return store.config.settings.autoUpdate;
 }
 
+// Is versie a nieuwer dan b? (bv. '1.11.1' > '1.11.0')
+function newer(a, b) {
+  const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0);
+  return false;
+}
+
 // Na een update: eenmalig laten weten dat het gelukt is
 function announceUpdate() {
+  if (!app.isPackaged) return; // npm start: niets onthouden en niets melden
   const now = app.getVersion();
   const before = store.config.lastVersion;
   if (before === now) return;
   store.config.lastVersion = now;
   require('./config').save();
-  if (!app.isPackaged) return; // npm start: geen melding
+  if (before && newer(before, now)) return; // oudere versie gestart: geen "bijgewerkt"-melding
   // Geen vorige versie bekend? Dan alleen melden als Tabchat al eerder gebruikt is
   // (versies van vóór 1.9.1 onthielden hun versienummer nog niet)
   if (!before && store.config.tabs.length === 0) return require('./donate').schedule('install');
