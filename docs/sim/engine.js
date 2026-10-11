@@ -11,10 +11,11 @@
   const settings = { ...D.settings };
   const tab = (service, extra = {}) => ({ id: 't' + nextId++, service, canSleep: !D.catalog[service].awake, asleep: false, unread: 0, muted: false, ...extra });
   let tabs = [
-    tab('whatsapp', { unread: 12 }),
+    // Zelfde aantallen als op de screenshots (sim/shots)
+    tab('whatsapp', { unread: 45 }),
     tab('discord', { unread: 'dot' }),
-    tab('teams'),
-    tab('outlook', { unread: 3 }),
+    tab('teams', { unread: 2 }),
+    tab('outlook'),
     tab('onedrive', { asleep: true, canSleep: true })
   ];
   let active = tabs[0].id;
