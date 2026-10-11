@@ -16,9 +16,9 @@ function send(from) {
 }
 
 // Via een klik (melding of link): venster naar voren halen
-function show(from) {
+function show(from, force = false) {
   require('./palette').hide();
-  require('./tray').showWindow();
+  require('./tray').showWindow({ force });
   send(from);
 }
 

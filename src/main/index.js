@@ -28,7 +28,11 @@ process.on('unhandledRejection', logError);
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on('second-instance', () => require('./tray').showWindow());
+  app.on('second-instance', (_e, argv) => {
+    // Klik op een melding (zie notifier.js): het venster is dan al naar voren gehaald
+    if (require('./notifier').handleArgv(argv)) return;
+    require('./tray').showWindow();
+  });
 
   ipc.register();
 

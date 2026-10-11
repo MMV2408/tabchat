@@ -27,14 +27,15 @@ let tray = null;
 let pending = null; // timer voor het aanmaken van het icoon
 
 // ---------- venster tonen / verbergen ----------
-function showWindow() {
+function showWindow(opts = {}) {
   if (!store.alive()) return;
   const win = store.win;
   if (win.isMinimized()) win.restore();
   // Ubuntu (GNOME) weigert soms een venster naar voren te halen en toont dan
   // "Tabchat is gereed". Een venster dat opnieuw verschijnt krijgt wél voorrang,
   // dus als Tabchat open staat maar achter iets anders zit: even verbergen en weer tonen.
-  if (win.isVisible() && !win.isFocused()) win.hide();
+  // force (klik op melding): altijd, zodat Ubuntu's toegangsbewijs zeker gebruikt wordt
+  if (win.isVisible() && (opts.force || !win.isFocused())) win.hide();
   win.show();
   win.focus();
   views.focusActive();

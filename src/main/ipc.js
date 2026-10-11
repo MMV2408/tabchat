@@ -63,6 +63,27 @@ function register() {
   ipcMain.on('whats-new-open', () => require('./whatsnew').show(null));
   ipcMain.on('whats-new-closed', () => require('./donate').afterWhatsNew());
   // Klik op een melding van een dienst: venster tonen met dat tabblad vooraan
+  // Meldingen van diensten via Ubuntu (zie notifier.js)
+  ipcMain.on('notify-available', (e) => { e.returnValue = require('./notifier').isAvailable(); });
+  const shown = new Map(); // tabblad + pagina-id -> D-Bus-id
+  ipcMain.on('web-notify', (e, n) => {
+    const tabId = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
+    if (!tabId || !n) return;
+    const wc = e.sender;
+    const key = tabId + ':' + n.id;
+    const send = (type) => { if (!wc.isDestroyed()) wc.send('notify-event', { id: n.id, type }); };
+    require('./notifier').show({
+      title: n.title, body: n.body, image: n.image,
+      onClick: () => { shown.delete(key); require('./tray').showWindow(); views.show(tabId); send('click'); },
+      onClose: () => { shown.delete(key); send('close'); }
+    }, (dbusId) => { if (dbusId) shown.set(key, dbusId); });
+  });
+  ipcMain.on('web-notify-close', (e, id) => {
+    const tabId = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
+    const key = tabId + ':' + id;
+    if (shown.has(key)) { require('./notifier').close(shown.get(key)); shown.delete(key); }
+  });
+
   ipcMain.on('notification-click', (e) => {
     const id = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
     if (!id) return;

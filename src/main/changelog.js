@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.14.0',
+    nl: ['Na een klik op een melding blijft de muis niet meer 15 seconden laden: meldingen gaan nu via Ubuntu zelf'],
+    en: ['No more 15-second loading cursor after clicking a notification: notifications now go through Ubuntu itself']
+  },
+  {
     v: '1.13.0',
     nl: ['Kies waar links openen: je standaardbrowser, een andere browser (Firefox, Chrome, ...) of Tabchat zelf (+ scherm → Links openen in)',
          'Links in Outlook-mails openen nu altijd'],
