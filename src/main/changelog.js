@@ -2,6 +2,13 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.13.0',
+    nl: ['Kies waar links openen: je standaardbrowser, een andere browser (Firefox, Chrome, ...) of Tabchat zelf (+ scherm → Links openen in)',
+         'Links in Outlook-mails openen nu altijd'],
+    en: ['Choose where links open: your default browser, another browser (Firefox, Chrome, ...) or Tabchat itself (+ screen → Open links in)',
+         'Links in Outlook mails now always open']
+  },
+  {
     v: '1.12.2',
     nl: ['Installatie van een update geannuleerd? Geen foutmelding meer, de update staat de volgende keer weer klaar',
          'Geen foutvenster meer tijdens het afsluiten'],

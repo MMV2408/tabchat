@@ -20,7 +20,8 @@ const DEFAULT_SETTINGS = {
   sleepOnStart: false,
   autoUpdate: true,
   followSystemDnd: true, // Niet storen van Ubuntu/GNOME volgen
-  theme: 'system'        // 'system', 'dark' of 'light'
+  theme: 'system',       // 'system', 'dark' of 'light'
+  openLinks: 'default'   // 'default', 'internal' of een browser-id (bv. 'firefox')
 };
 
 function configFile() {

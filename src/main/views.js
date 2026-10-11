@@ -41,6 +41,7 @@ function getState() {
       canSleep: sleep.canSleep(t)
     })),
     dnd: { on: dnd.isOn(), manual: dnd.isManual(), label: dnd.label() },
+    browsers: require('./links').browsers().map(b => ({ id: b.id, name: b.name })),
     platform: { kind: require('./platform').kind, storeManaged: require('./platform').storeManaged },
     update: require('./updater').getStatus(),
     catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: i18n.t('svc.' + id) })),
@@ -97,13 +98,19 @@ function createServiceView(tab) {
     microsoft.watchLogin(tab, v);
   }
 
-  // Inlogvensters in de app, andere links in de gewone browser
+  // Inlogvensters in de app; andere links volgens "Links openen in" (zie links.js)
+  const links = require('./links');
   v.webContents.setWindowOpenHandler(({ url }) => {
     let host = '';
     try { host = new URL(url).hostname; } catch {}
     if (LOGIN_HOSTS.includes(host)) return { action: 'allow' };
-    if (url.startsWith('http')) shell.openExternal(url);
+    if (/^https?:/.test(url)) { links.open(url, ses); return { action: 'deny' }; }
+    // Leeg venster (Outlook doet dat): verborgen openen en het adres opvangen
+    if (!url || url === 'about:blank') return { action: 'allow', overrideBrowserWindowOptions: { show: false } };
     return { action: 'deny' };
+  });
+  v.webContents.on('did-create-window', (child, { url }) => {
+    if (!url || url === 'about:blank') links.catchBlank(child, ses);
   });
 
   // Foutscherm als de dienst niet laadt (geen internet, storing) of vastloopt

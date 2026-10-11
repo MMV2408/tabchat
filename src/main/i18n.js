@@ -63,6 +63,10 @@ const STRINGS = {
     'f.theme.system': 'Systeem',
     'f.theme.dark': 'Donker',
     'f.theme.light': 'Licht',
+    'f.openLinks.name': 'Links openen in',
+    'f.openLinks.desc': 'Waar links uit je chats en mails openen.',
+    'f.openLinks.default': 'Standaardbrowser',
+    'f.openLinks.internal': 'Tabchat zelf (nieuw venster)',
     'upd.store': 'Updates gaan automatisch via {s}.',
 
     // functies
@@ -276,6 +280,10 @@ const STRINGS = {
     'f.theme.system': 'System',
     'f.theme.dark': 'Dark',
     'f.theme.light': 'Light',
+    'f.openLinks.name': 'Open links in',
+    'f.openLinks.desc': 'Where links from your chats and mails open.',
+    'f.openLinks.default': 'Default browser',
+    'f.openLinks.internal': 'Tabchat itself (new window)',
     'upd.store': 'Updates are installed automatically by {s}.',
 
     'f.language.name': 'Language',

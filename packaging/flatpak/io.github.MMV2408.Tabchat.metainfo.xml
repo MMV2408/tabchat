@@ -25,6 +25,7 @@
       <li>Quick search with Ctrl+K and browser-style keyboard shortcuts</li>
       <li>Screen sharing in Discord and Teams, also on Wayland</li>
       <li>Light and dark theme that follows your system</li>
+      <li>Choose where links open: your default browser, a specific browser or Tabchat itself</li>
       <li>English and Dutch</li>
     </ul>
     <p>
@@ -90,6 +91,14 @@
   </requires>
 
   <releases>
+    <release version="1.13.0" date="2026-10-11">
+      <description>
+        <ul>
+          <li>Choose where links open: default browser, a specific browser or Tabchat itself</li>
+          <li>Links in Outlook mails open reliably</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.12.2" date="2026-10-11">
       <description>
         <ul>

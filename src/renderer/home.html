@@ -175,6 +175,7 @@
   const FEATURES = [
     { key: 'language', options: [['auto', 'f.language.auto'], ['nl', '!Nederlands'], ['en', '!English']] },
     { key: 'theme', options: [['system', 'f.theme.system'], ['dark', 'f.theme.dark'], ['light', 'f.theme.light']] },
+    { key: 'openLinks', options: 'links' }, // lijst hangt af van de browsers op deze computer
     { key: 'spellcheck' },
     { key: 'stayLoggedIn' },
     { key: 'shareMicrosoft' },
@@ -394,14 +395,17 @@
       // Keuzelijst in plaats van schakelaar
       if (f.options) {
         const sel = document.createElement('select');
-        for (const [value, label] of f.options) {
+        const opts = f.options === 'links'
+          ? [['default', 'f.openLinks.default'], ...(s.browsers || []).map(b => [b.id, '!' + b.name]), ['internal', 'f.openLinks.internal']]
+          : f.options;
+        for (const [value, label] of opts) {
           // '!Tekst' = niet vertalen (taalnamen staan altijd in hun eigen taal)
           const o = el('option', null, label.startsWith('!') ? label.slice(1) : T(label));
           o.value = value;
           if (String(s.settings[f.key]) === String(value)) o.selected = true;
           sel.append(o);
         }
-        const numeric = typeof f.options[0][0] === 'number';
+        const numeric = typeof opts[0][0] === 'number';
         sel.onchange = () => window.tabchat.setSetting(f.key, numeric ? Number(sel.value) : sel.value);
         row.append(text, sel);
         feat.append(row);

@@ -62,6 +62,7 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 - 🔄 Automatische updates via GitHub Releases
 - 🇳🇱 🇬🇧 Nederlands en Engels
 - ☀️ Licht en donker thema dat je systeem volgt
+- 🔗 Kies waar links openen: je standaardbrowser, een andere browser of Tabchat zelf
 - 🎨 Gekleurd of wit tray-icoon
 
 <p align="center">

@@ -62,6 +62,7 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 - 🔄 Automatic updates from GitHub Releases
 - 🇬🇧 🇳🇱 English and Dutch
 - ☀️ Light and dark theme that follows your system
+- 🔗 Choose where links open: your default browser, another browser or Tabchat itself
 - 🎨 Colored or white tray icon
 
 <p align="center">
