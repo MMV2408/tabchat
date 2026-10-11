@@ -1,6 +1,7 @@
 #!/bin/bash
 # Bouwt de snap: eerst de app met electron-builder, dan inpakken met snapcraft.
 # Nodig (eenmalig): sudo snap install snapcraft --classic, en LXD (zie README.md).
+# Met --stage-only wordt alleen dist/snap-stage klaargezet (gebruikt door GitHub Actions).
 set -e
 cd "$(dirname "$0")/../.."
 
@@ -16,6 +17,9 @@ sed "s/^version: .*/version: '$VERSION'/" packaging/snap/snapcraft.yaml > "$STAG
 # snap/gui/ = snelkoppeling en icoon voor het app-menu
 cp packaging/snap/tabchat.desktop "$STAGE/snap/gui/"
 cp assets/icon.png "$STAGE/snap/gui/tabchat.png"
+
+# Alleen klaarzetten (GitHub Actions pakt de map daarna zelf in)
+if [ "$1" = "--stage-only" ]; then echo "Klaargezet: $STAGE"; exit 0; fi
 
 cd "$STAGE"
 rm -f ./*.snap
