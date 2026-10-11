@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabchat — your chat apps in one window, for Linux</title>
+<meta name="description" content="Tabchat puts WhatsApp, Discord, Microsoft Teams, Outlook and OneDrive in one lightweight window with tabs. Free and open source, made for Linux.">
+<meta property="og:title" content="Tabchat">
+<meta property="og:description" content="WhatsApp, Discord, Teams, Outlook and OneDrive in one window. Free and open source, made for Linux.">
+<meta property="og:image" content="https://mmv2408.github.io/tabchat/banner.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1b1320;        /* aubergine-zwart, knipoog naar Ubuntu */
+    --surface: #271d2e;
+    --line: #3a2e43;
+    --text: #f4eff7;
+    --muted: #b8acc3;
+    --lilac: #c9b6ff;     /* links en focus */
+    --wa: #25d366; --dc: #5865f2; --tm: #6264a7; --ol: #0f78d4; --od: #0364b8;
+    --display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 18px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+  img { max-width: 100%; display: block; }
+  a { color: var(--lilac); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--lilac); outline-offset: 3px; border-radius: 6px; }
+  .wrap { width: min(1120px, 100% - 40px); margin-inline: auto; }
+
+  /* ---------- kop ---------- */
+  header.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font: 700 22px var(--display); }
+  .brand img { width: 34px; height: 34px; }
+  nav.top a { color: var(--muted); text-decoration: none; margin-left: 22px; font-size: 16px; }
+  nav.top a:hover { color: var(--text); }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 48px 0 24px; }
+  .hero h1 { font: 800 clamp(40px, 6.4vw, 78px)/1.02 var(--display); letter-spacing: -0.02em; margin: 0 0 22px; max-width: 15ch; }
+  .hero p.lead { font-size: 21px; color: var(--muted); max-width: 58ch; margin: 0 0 30px; }
+  .get { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 12px; font: 700 17px var(--body); text-decoration: none; }
+  .btn.primary { background: var(--text); color: var(--bg); }
+  .btn.primary:hover { background: #fff; }
+  .btn.ghost { color: var(--text); border: 1.5px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--muted); }
+  .btn small { font-weight: 400; color: inherit; opacity: .7; }
+
+  /* ---------- tabbladen-demo: het herkenbare element ---------- */
+  .demo { margin-top: 56px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; background: #121014; border-radius: 14px 14px 0 0; width: fit-content; max-width: 100%; }
+  .tab { display: inline-flex; align-items: center; gap: 8px; border: 0; cursor: pointer; padding: 9px 14px; border-radius: 9px; background: #2a2730; color: #cfccd6; font: 600 15px var(--body); }
+  .tab:hover { background: #34303b; }
+  .tab[aria-selected="true"] { background: #4b4655; color: #fff; }
+  .tab .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+  .tab .count { background: #f23f43; color: #fff; font-size: 11px; font-weight: 700; border-radius: 9px; padding: 1px 6px; }
+  .tab .zz { font-size: 13px; opacity: .8; }
+  .tab.asleep { color: #8d8996; }
+  .stage { position: relative; background: #121014; border-radius: 0 14px 14px 14px; padding: 6px; }
+  .stage img { width: 100%; border-radius: 10px; }
+  .caption { color: var(--muted); font-size: 16px; margin: 14px 4px 0; min-height: 1.6em; }
+
+  /* ---------- functies ---------- */
+  section { padding: 96px 0 0; }
+  h2 { font: 800 clamp(30px, 4vw, 46px)/1.1 var(--display); letter-spacing: -0.015em; margin: 0 0 18px; max-width: 20ch; }
+  .intro { color: var(--muted); max-width: 60ch; margin: 0 0 40px; }
+  .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 44px 48px; }
+  .group h3 { font: 700 22px/1.25 var(--display); margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+  .group h3 i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
+  .group ul { margin: 0; padding: 0; list-style: none; }
+  .group li { padding: 9px 0; border-top: 1px solid var(--line); color: #e5ddec; }
+  .group li:last-child { border-bottom: 1px solid var(--line); }
+
+  .split { display: grid; grid-template-columns: 1fr 230px; gap: 56px; align-items: center; }
+  .split .tray { filter: drop-shadow(0 20px 40px rgba(0,0,0,.45)); }
+
+  /* ---------- installeren ---------- */
+  .install { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .way { background: var(--surface); border-radius: 18px; padding: 26px; }
+  .way h3 { font: 700 22px var(--display); margin: 0 0 6px; }
+  .way p { color: var(--muted); margin: 0 0 16px; font-size: 16px; }
+  pre { margin: 0 0 16px; background: #120d16; border-radius: 10px; padding: 14px 16px; overflow-x: auto; font: 15px/1.5 ui-monospace, 'DejaVu Sans Mono', monospace; color: #efe8f5; }
+
+  .privacy { background: var(--surface); border-radius: 22px; padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .privacy p { margin: 0; color: #e5ddec; }
+
+  footer { padding: 96px 0 48px; color: var(--muted); font-size: 15px; }
+  footer .row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; border-top: 1px solid var(--line); padding-top: 24px; }
+
+  @media (max-width: 760px) {
+    body { font-size: 17px; }
+    nav.top a:not(.gh) { display: none; }
+    .split, .privacy { grid-template-columns: 1fr; }
+    .split .tray { max-width: 260px; }
+    .privacy { padding: 26px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#"><img src="icon.png" alt="">Tabchat</a>
+    <nav class="top">
+      <a href="#features">Features</a>
+      <a href="#install">Install</a>
+      <a class="gh" href="https://github.com/MMV2408/tabchat">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1>Your chat apps, in one window.</h1>
+      <p class="lead">Tabchat puts WhatsApp, Discord, Microsoft Teams, Outlook and OneDrive side by side in tabs. Light on memory, keyboard-friendly and built for Linux.</p>
+      <div class="get">
+        <a class="btn primary" href="https://snapcraft.io/tabchat">Get it from the Snap Store</a>
+        <a class="btn ghost" href="https://github.com/MMV2408/tabchat/releases/latest">.deb or AppImage <small>for any Linux</small></a>
+      </div>
+
+      <div class="demo" aria-label="Screenshots">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true" data-shot="main" style="--c: var(--wa)"><span class="dot"></span>WhatsApp<span class="count">45</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-shot="quick-search" style="--c: var(--dc)"><span class="dot"></span>Discord</button>
+          <button class="tab" role="tab" aria-selected="false" data-shot="onedrive" style="--c: var(--od)"><span class="dot"></span>OneDrive</button>
+          <button class="tab asleep" role="tab" aria-selected="false" data-shot="settings" style="--c: var(--tm)"><span class="dot"></span>Teams<span class="zz" aria-label="asleep">💤</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-shot="features" style="--c: #8b8794"><span class="dot"></span>Settings</button>
+        </div>
+        <div class="stage"><img id="shot" src="screenshots/main.png" alt="Tabchat with WhatsApp open" width="1623" height="1089"></div>
+        <p class="caption" id="caption">Unread counters on every tab, so you see at a glance where something new is waiting.</p>
+      </div>
+    </div>
+
+    <section id="features">
+      <h2>Everything the web versions are missing.</h2>
+      <p class="intro">Tabchat shows the official web versions of your apps, and adds what you expect from a real desktop app.</p>
+      <div class="groups">
+        <div class="group" style="--c: var(--wa)">
+          <h3><i></i>Never miss a message</h3>
+          <ul>
+            <li>Unread counters on tabs, the tray icon and the dock</li>
+            <li>Keeps running in the background when you close the window</li>
+            <li>Click a notification to jump straight to that chat</li>
+            <li>Starts hidden when you log in, if you want</li>
+          </ul>
+        </div>
+        <div class="group" style="--c: var(--tm)">
+          <h3><i></i>Made for school and work</h3>
+          <ul>
+            <li>One shared Microsoft sign-in for Teams, Outlook and OneDrive</li>
+            <li>Stays signed in after a restart, also with school accounts</li>
+            <li>Several accounts of the same service, side by side</li>
+            <li>Screen sharing in Discord and Teams</li>
+          </ul>
+        </div>
+        <div class="group" style="--c: var(--dc)">
+          <h3><i></i>Quiet when you need it</h3>
+          <ul>
+            <li>Do not disturb for an hour, until tomorrow or until you turn it off</li>
+            <li>Follows Ubuntu's own Do not disturb</li>
+            <li>Tabs you don't use go to sleep and free up memory</li>
+            <li>Light and dark theme that follows your system</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="split">
+        <div>
+          <h2>Fast with the keyboard.</h2>
+          <p class="intro">Press <strong>Ctrl+K</strong> to jump to any tab or action. Switch tabs with <strong>Alt+1–9</strong> or <strong>Ctrl+Tab</strong>, close one with <strong>Ctrl+W</strong> and bring it back with <strong>Ctrl+Shift+T</strong>, just like in your browser.</p>
+          <p class="intro">Everything else is one click away in the tray menu, right next to your clock.</p>
+        </div>
+        <img class="tray" src="screenshots/tray.png" alt="The Tabchat tray menu with all tabs, Do not disturb and settings" width="276" height="740" loading="lazy">
+      </div>
+    </section>
+
+    <section>
+      <div class="privacy">
+        <h2>Your chats stay yours.</h2>
+        <div>
+          <p>Tabchat collects nothing: no analytics, no tracking and no account. Your sign-ins stay on your own computer, and the code is open for anyone to check.</p>
+          <p style="margin-top:14px">Tabchat is free and open source under the MIT license. It is an independent project, not affiliated with WhatsApp, Meta, Discord or Microsoft.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>Install Tabchat.</h2>
+      <p class="intro">Pick whatever suits your Linux. All versions update themselves.</p>
+      <div class="install">
+        <div class="way">
+          <h3>Snap Store</h3>
+          <p>Ubuntu and most other distributions. Search for Tabchat in the App Center, or run:</p>
+          <pre>sudo snap install tabchat</pre>
+          <a class="btn ghost" href="https://snapcraft.io/tabchat">Open in the Snap Store</a>
+        </div>
+        <div class="way">
+          <h3>.deb package</h3>
+          <p>Ubuntu, Debian, Linux Mint and Pop!_OS. Download it, then double-click, or run:</p>
+          <pre>sudo apt install ./tabchat_*_amd64.deb</pre>
+          <a class="btn ghost" href="https://github.com/MMV2408/tabchat/releases/latest">Download .deb</a>
+        </div>
+        <div class="way">
+          <h3>AppImage</h3>
+          <p>Any distribution, no installation needed.</p>
+          <pre>chmod +x Tabchat-*.AppImage
+./Tabchat-*.AppImage</pre>
+          <a class="btn ghost" href="https://github.com/MMV2408/tabchat/releases/latest">Download AppImage</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="row">
+      <span>Made by <a href="https://github.com/MMV2408">MMV2408</a>. Like Tabchat? <a href="https://github.com/sponsors/MMV2408">Support its development</a>.</span>
+      <span><a href="https://github.com/MMV2408/tabchat">Source code</a> · <a href="https://github.com/MMV2408/tabchat/issues">Report a problem</a></span>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // Tabbladen wisselen de screenshot, net als in Tabchat zelf
+  const shots = {
+    'main': ['Tabchat with WhatsApp open', 'Unread counters on every tab, so you see at a glance where something new is waiting.'],
+    'quick-search': ['Quick search with Ctrl+K on top of Discord', 'Ctrl+K finds any tab or action in a second.'],
+    'onedrive': ['OneDrive in Tabchat', 'Teams, Outlook and OneDrive share one Microsoft sign-in, so you sign in once.'],
+    'settings': ['The Tabchat start screen with all tabs', 'Teams is asleep: tabs you don’t use free up memory and wake up with one click.'],
+    'features': ['Tabchat settings', 'Language, theme, where links open and more, all in one place.']
+  };
+  const img = document.getElementById('shot'), cap = document.getElementById('caption');
+  const tabs = [...document.querySelectorAll('.tab')];
+  function select(tab) {
+    tabs.forEach(t => t.setAttribute('aria-selected', t === tab));
+    const k = tab.dataset.shot; img.src = `screenshots/${k}.png`; img.alt = shots[k][0]; cap.textContent = shots[k][1];
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => select(t));
+    t.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]; n.focus(); select(n);
+    });
+  });
+  Object.keys(shots).forEach(k => { const p = new Image(); p.src = `screenshots/${k}.png`; }); // vooraf laden
+</script>
+</body>
+</html>
