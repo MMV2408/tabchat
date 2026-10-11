@@ -90,6 +90,11 @@
   </requires>
 
   <releases>
+    <release version="1.11.4" date="2026-10-11">
+      <description>
+        <p>Clicking the update notification opens the install button.</p>
+      </description>
+    </release>
     <release version="1.11.3" date="2026-10-11">
       <description>
         <ul>

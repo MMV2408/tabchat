@@ -1,6 +1,6 @@
 {
   "name": "tabchat",
-  "version": "1.11.3",
+  "version": "1.11.4",
   "description": "WhatsApp, Discord, Teams, Outlook en OneDrive in één venster",
   "main": "src/main/index.js",
   "homepage": "https://github.com/MMV2408/tabchat",
