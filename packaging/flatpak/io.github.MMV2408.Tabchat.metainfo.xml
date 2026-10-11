@@ -90,6 +90,14 @@
   </requires>
 
   <releases>
+    <release version="1.12.2" date="2026-10-11">
+      <description>
+        <ul>
+          <li>Cancelling an update installation no longer causes an error; the update stays ready</li>
+          <li>No more error window while closing</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.12.1" date="2026-10-11">
       <description>
         <p>No more endless loading cursor after clicking a notification.</p>

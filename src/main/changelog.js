@@ -2,6 +2,13 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.12.2',
+    nl: ['Installatie van een update geannuleerd? Geen foutmelding meer, de update staat de volgende keer weer klaar',
+         'Geen foutvenster meer tijdens het afsluiten'],
+    en: ['Cancelled an update installation? No more error, the update is ready again next time',
+         'No more error window while closing']
+  },
+  {
     v: '1.12.1',
     nl: ['Na een klik op een melding blijft de muis niet meer eindeloos laden'],
     en: ['No more endless loading cursor after clicking a notification']

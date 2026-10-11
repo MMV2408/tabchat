@@ -8,6 +8,21 @@ const actions = require('./actions');
 // Minder geheugen voor JavaScript per tabblad
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=256');
 
+// Vangnet: een onverwachte fout komt in een logbestand in plaats van in een foutvenster.
+// Zo ziet een gebruiker nooit "A JavaScript error occurred", en kunnen we het toch terugvinden.
+function logError(err) {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const file = path.join(app.getPath('userData'), 'error.log');
+    const line = `${new Date().toISOString()} ${app.getVersion()} ${(err && err.stack) || err}\n`;
+    fs.appendFileSync(file, line);
+  } catch {}
+  console.error(err);
+}
+process.on('uncaughtException', logError);
+process.on('unhandledRejection', logError);
+
 // Maar één Tabchat tegelijk. Start je hem nog een keer terwijl hij op de
 // achtergrond draait, dan komt het bestaande venster tevoorschijn.
 if (!app.requestSingleInstanceLock()) {

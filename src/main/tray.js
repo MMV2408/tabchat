@@ -28,6 +28,7 @@ let pending = null; // timer voor het aanmaken van het icoon
 
 // ---------- venster tonen / verbergen ----------
 function showWindow() {
+  if (!store.alive()) return;
   const win = store.win;
   if (win.isMinimized()) win.restore();
   // Ubuntu (GNOME) weigert soms een venster naar voren te halen en toont dan
@@ -73,7 +74,7 @@ function destroy() {
 
 // Menu opnieuw opbouwen (na elke verandering van tabbladen of zichtbaarheid)
 function refresh() {
-  if (!tray) return;
+  if (!tray || !store.alive()) return;
 
   // Icoon en tooltip: rode stip bij ongelezen berichten
   const total = unread.total();

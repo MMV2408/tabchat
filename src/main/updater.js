@@ -82,6 +82,8 @@ function init() {
   });
   autoUpdater.on('error', (err) => {
     console.error('Update-fout:', err && err.message);
+    // Fout tijdens installeren (bv. wachtwoord geweigerd): update blijft klaarstaan
+    if (installing) { installing = false; return set({ state: 'ready' }); }
     set({ state: 'error' });
   });
 
@@ -116,12 +118,21 @@ function showUpdate() {
 }
 
 // Installeren en Tabchat opnieuw starten
+// Lukt het niet (bv. wachtwoord-venster weggeklikt), dan blijft Tabchat gewoon draaien
+// en staat de update de volgende keer weer klaar.
+let installing = false;
 async function install() {
-  if (status.state !== 'ready' || !autoUpdater) return;
+  if (status.state !== 'ready' || !autoUpdater || installing) return;
+  installing = true;
   await require('./actions').flushLogins(); // logins eerst opslaan
-  store.quitting = true;
-  require('./tray').destroy();
+  // Afsluiten (tray weg, venster dicht) gebeurt pas via 'before-quit' als de installatie gelukt is
   autoUpdater.quitAndInstall(false, true); // false = niet stil, true = daarna opnieuw starten
+  // Nog steeds hier na een paar seconden? Dan is het afgebroken: knop weer tonen
+  setTimeout(() => {
+    if (store.quitting) return;
+    installing = false;
+    set({ state: 'ready' });
+  }, 3000);
 }
 
 function getStatus() {

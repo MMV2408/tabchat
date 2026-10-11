@@ -73,6 +73,7 @@ function any() {
 
 // ---------- alles bijwerken ----------
 function changed() {
+  if (!store.alive()) return; // venster is al dicht (bv. tijdens afsluiten)
   const t = total();
   app.setBadgeCount(t);                                  // getal op het dock-icoon
   store.win.setTitle(t ? `Tabchat (${t})` : 'Tabchat');  // venstertitel (Alt+Tab)

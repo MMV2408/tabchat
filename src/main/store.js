@@ -15,5 +15,10 @@ module.exports = {
   shareOpen: false,
   mutedTabs: new Set(),   // gedempte tabbladen (alleen deze sessie)
   closedTabs: [],         // gesloten tabbladen, voor Ctrl+Shift+T
-  quitting: false         // true zodra de app echt afsluit (dan niet naar de tray)
+  quitting: false,        // true zodra de app echt afsluit (dan niet naar de tray)
+
+  // Bestaat het venster nog? (tijdens afsluiten kunnen tabbladen nog even signalen sturen)
+  alive() {
+    return !!this.win && !this.win.isDestroyed();
+  }
 };

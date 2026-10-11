@@ -49,6 +49,7 @@ function getState() {
 }
 
 function broadcast() {
+  if (!store.alive()) return;
   const s = getState();
   store.bar.webContents.send('state', s);
   store.home.webContents.send('state', s);
@@ -193,6 +194,7 @@ function reloadView(id) {
 
 // ---------- tonen ----------
 function layout() {
+  if (!store.alive()) return;
   const { win, bar, home, palette: pal, views, active, paletteOpen } = store;
   const { width, height } = win.getContentBounds();
   const area = { x: 0, y: BAR, width, height: height - BAR };
