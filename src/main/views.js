@@ -224,6 +224,7 @@ function show(id) {
   sleep.seen(id);
   store.active = id;
   if (id !== 'home') store.lastTab = id;
+  require('./theme').flush(id); // tabbladen met een nieuw thema herladen zodra je wegklikt
   layout();
   broadcast();
   if (!store.paletteOpen && !store.shareOpen) focusActive();

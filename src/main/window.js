@@ -74,6 +74,7 @@ function create() {
   tray.init(); // tray-icoon + kruisje = verbergen
   dnd.apply(); // Niet storen van vorige keer (bv. "tot morgen") weer toepassen
   dnd.watchSystem(); // Niet storen van Ubuntu volgen
+  theme.init(); // bij een ander thema de diensten herladen
   sleep.start(); // slaapstand: elke minuut kijken welke tabbladen mogen slapen
   updater.init(); // automatische updates (alleen in de geïnstalleerde versie)
 
