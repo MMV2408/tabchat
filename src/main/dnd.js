@@ -10,9 +10,8 @@ const views = require('./views');
 const i18n = require('./i18n');
 
 let timer = null;
-let systemOn = false; // Do not disturb of Ubuntu/GNOME
+let systemOn = false;
 
-// Turned on in Tabchat itself?
 function isManual() {
   const until = store.config.dndUntil;
   if (!until) return false;
@@ -25,7 +24,6 @@ function isSystem() {
   return systemOn && store.config.settings.followSystemDnd;
 }
 
-// Is Do not disturb on right now?
 function isOn() {
   return isManual() || isSystem();
 }
@@ -51,7 +49,7 @@ function watchSystem() {
     p.stdout.on('data', (d) => setSystem(/false\s*$/.test(String(d).trim())));
     app.on('will-quit', () => p.kill());
   } catch (e) {
-    require('./log').info('gsettings monitor not available:', e.message); // not GNOME
+    require('./log').info('gsettings monitor not available:', e.message);
   }
 }
 
@@ -78,7 +76,6 @@ function apply() {
   clearTimeout(timer);
   const on = isOn();
 
-  // Time's up? Then clean up
   if (!isManual() && store.config.dndUntil) {
     store.config.dndUntil = null;
     config.save();
@@ -89,7 +86,7 @@ function apply() {
 
   for (const [id, v] of Object.entries(store.views)) {
     applyToView(id, v);
-    v.webContents.send('dnd', on); // block notifications in the tab
+    v.webContents.send('dnd', on);
   }
   views.broadcast();
 }

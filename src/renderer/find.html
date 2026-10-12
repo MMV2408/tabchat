@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="theme.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; font-family: system-ui, sans-serif; color: var(--text); }
+  #bar { height: 100%; display: flex; align-items: center; gap: 6px; padding: 0 8px; background: var(--bg-1); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); }
+  input { flex: 1; min-width: 0; background: var(--bg-0); border: 1px solid #5865F2; border-radius: 6px; color: var(--text-strong); padding: 6px 8px; font: inherit; font-size: 13px; outline: none; }
+  #count { font-size: 12px; opacity: .7; min-width: 44px; text-align: center; white-space: nowrap; }
+  #count.none { color: #e5484d; opacity: 1; }
+  button { width: 26px; height: 26px; border: none; border-radius: 5px; background: transparent; color: var(--text); font-size: 14px; cursor: pointer; }
+  button:hover { background: var(--bg-2); }
+</style>
+</head>
+<body>
+<div id="bar">
+  <input id="q" spellcheck="false">
+  <span id="count"></span>
+  <button id="prev">↑</button>
+  <button id="next">↓</button>
+  <button id="close">✕</button>
+</div>
+<script>
+  const q = document.getElementById('q');
+  const count = document.getElementById('count');
+  let T = (k) => k;
+  window.tabchat.getStrings().then(({ strings }) => {
+    T = (k) => strings[k] || k;
+    q.placeholder = T('find.placeholder');
+    document.getElementById('prev').title = T('find.prev');
+    document.getElementById('next').title = T('find.next');
+    document.getElementById('close').title = T('find.close');
+  });
+  // New text: search from the start; Enter = next, Shift+Enter = previous, Esc = close
+  q.addEventListener('input', () => window.tabchat.findSearch(q.value, false, false));
+  q.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); window.tabchat.findSearch(q.value, true, e.shiftKey); }
+    if (e.key === 'Escape') { e.preventDefault(); window.tabchat.findClose(); }
+  });
+  document.getElementById('next').onclick = () => window.tabchat.findSearch(q.value, true, false);
+  document.getElementById('prev').onclick = () => window.tabchat.findSearch(q.value, true, true);
+  document.getElementById('close').onclick = () => window.tabchat.findClose();
+  window.tabchat.onFindOpen((text) => {
+    if (text && !q.value) q.value = text;
+    q.focus();
+    q.select();
+    if (q.value) window.tabchat.findSearch(q.value, false, false);
+  });
+  window.tabchat.onFindResult((active, total) => {
+    count.className = q.value && !total ? 'none' : '';
+    count.textContent = q.value ? (total ? `${active} / ${total}` : T('find.none')) : '';
+  });
+</script>
+</body>
+</html>

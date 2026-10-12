@@ -37,7 +37,7 @@ const status = {
   current: app.getVersion(),
   state: 'idle',   // idle | checking | latest | downloading | ready | failed | error | dev | off | store
   store: platform.storeName, // Flathub / Snap Store: they handle updates
-  version: null,   // new version, if there is one
+  version: null,
   percent: 0
 };
 
@@ -105,7 +105,6 @@ function init() {
   sync();
 }
 
-// On/off according to the setting
 function sync() {
   if (!app.isPackaged || !autoUpdater || platform.storeManaged) return;
   clearInterval(timer);

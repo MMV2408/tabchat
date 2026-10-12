@@ -52,6 +52,7 @@ function create() {
   }
   store.active = store.config.tabs.length ? store.config.tabs[0].id : 'home';
   if (store.active !== 'home') store.lastTab = store.active;
+  require('./split').restore(); // split view from last time: wake the other half
 
   win.on('resize', views.layout);
   // Maximize: update the icon of the □ button
@@ -63,7 +64,7 @@ function create() {
   views.watchEdge(); // auto-hide tab bar: watch the top edge
   tray.init(); // tray icon + close button = hide
   dnd.apply(); // re-apply Do not disturb from last time (e.g. "until tomorrow")
-  dnd.watchSystem(); // follow Ubuntu's Do not disturb
+  dnd.watchSystem();
   theme.init(); // reload services when the theme changes
   sleep.start(); // tab sleep: check every minute which tabs may sleep
   updater.init(); // automatic updates (installed version only)

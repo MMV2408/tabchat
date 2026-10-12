@@ -346,6 +346,8 @@
       [['Ctrl', 'Shift', 'Tab'], 'keys.prev'],
       [['Ctrl', 'W'], 'keys.close2'],
       [['Ctrl', 'Shift', 'T'], 'keys.reopen'],
+      [['Ctrl', '\\'], 'keys.split'],
+      [['Ctrl', 'F'], 'keys.find'],
       [['Ctrl', 'Shift', 'PageUp / PageDown'], 'keys.move']
     ]],
     ['keys.inTab', [
@@ -659,7 +661,6 @@
   });
 
   function render(s) {
-    // Your tabs
     const mine = document.getElementById('mine');
     mine.replaceChildren();
     if (s.tabs.length === 0) {
@@ -671,7 +672,6 @@
       rm.onclick = () => {
         if (confirm(T('home.removeConfirm', { name: t.label }))) window.tabchat.remove(t.id);
       };
-      // May this tab sleep?
       const sw = el('label', 'sleepsw');
       const swBox = el('span', 'switch');
       const inp = document.createElement('input');
@@ -686,7 +686,6 @@
       mine.append(row);
     }
 
-    // Add a service
     const cat = document.getElementById('catalog');
     cat.replaceChildren();
     lastState = s;
@@ -734,7 +733,6 @@
     const cols = n <= 2 ? n : Math.min(4, Math.ceil(n / 2));
     cat.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
 
-    // About Tabchat / updates
     const about = document.getElementById('about');
     about.replaceChildren();
     const u = s.update || {};
@@ -760,7 +758,6 @@
       about.append(cb);
     }
 
-    // Do not disturb
     const dr = document.getElementById('dndrow');
     dr.replaceChildren();
     const status = el('div', 'status');
@@ -777,7 +774,6 @@
     btn(T('dnd.forever'), 'forever');
     if (s.dnd.manual) btn(T('dnd.turnOff'), null, 'dndbtn off');
 
-    // Features
     const feat = document.getElementById('features');
     feat.replaceChildren();
     const ftabs = document.getElementById('featTabs');
@@ -800,7 +796,6 @@
       const title = el('div', 'name', T(`f.${f.key}.name`));
       text.append(title, el('div', 'desc', T(`f.${f.key}.desc`)));
 
-      // Dropdown instead of a switch
       if (f.options) {
         const sel = document.createElement('select');
         const opts = f.options === 'links'

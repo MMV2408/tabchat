@@ -39,6 +39,9 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 - 👥 Multiple accounts of the same service, each with its own sign-in
 - ↔️ Drag tabs to reorder them, right-click for more options
 - 🔐 One shared Microsoft sign-in for Teams, Outlook and OneDrive (school and work accounts too), and it **stays signed in** after a restart
+- 🪟 **Split view**: two tabs side by side, with a divider you can drag
+- 🧭 Back, forward, reload and home buttons on the active tab, find on page (`Ctrl+F`), and downloads go straight to your Downloads folder
+- 👯 Duplicate a tab with the same sign-in (right-click)
 - 🌐 **Your own websites** as tabs (name, icon and color), or open one once in **incognito**
 - 🧩 Hide the built-in services you don't use and drag the cards into your own order
 - 🎓 **Brightspace** from your school (any school: you enter its address), signed in with the same school account as Teams and Outlook
@@ -127,7 +130,9 @@ Everything else — language, tab sleep, start at login, white tray icon — is 
 | `Ctrl+Shift+PageUp` / `PageDown` | Move tab left / right |
 | `F5` | Reload |
 | `Alt+M` | Mute / unmute tab |
-| `Alt+←` / `Alt+→` | Back / forward |
+| `Alt+←` / `Alt+→` | Back / forward (also the side buttons on your mouse) |
+| `Ctrl+F` | Find on page |
+| `Ctrl+\` | Two tabs side by side (on/off) |
 | `Ctrl` + `+` / `-` / `0` | Zoom in / out / reset (saved per tab) |
 | `F11` | Full screen |
 | `Ctrl+Q` | Really quit Tabchat |

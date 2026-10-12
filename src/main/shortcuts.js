@@ -42,6 +42,8 @@ function handler(source) {
     if (ctrl && !alt) {
       if (key === 'Tab') return run(() => actions.cycle(shift ? -1 : 1));
       if (!shift && key === 'w') return run(() => actions.closeTab());
+      if (!shift && key === '\\') return run(() => require('./split').toggle());
+      if (!shift && key === 'f' && source === 'tab') return run(() => require('./find').open());
       if (shift && key === 't') return run(actions.reopenTab);
       if (shift && key === 'PageUp') return run(() => actions.moveTab(store.active, -1));
       if (shift && key === 'PageDown') return run(() => actions.moveTab(store.active, 1));
@@ -51,6 +53,7 @@ function handler(source) {
     }
 
     if (!ctrl && !alt && !shift) {
+      if (key === 'Escape' && store.findOpen) return run(() => require('./find').close());
       if (key === 'F5') return run(() => actions.reload());
       if (key === 'F11') return run(actions.toggleFullScreen);
     }

@@ -31,7 +31,6 @@ function isAvailable() {
   return available;
 }
 
-// Start the helper if it isn't running
 let stopping = false;
 function start() {
   if (child) return true;
@@ -110,7 +109,6 @@ function runClick(id) {
 // Old (from an earlier approach); kept so index.js doesn't have to change
 function handleArgv() { return false; }
 
-// ---------- showing ----------
 const markup = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // Fallback: a regular Electron notification

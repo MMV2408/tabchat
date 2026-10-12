@@ -2,6 +2,21 @@
 // New version? Add a block at the top (and in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.22.0',
+    nl: ['Gesplitst scherm: twee tabbladen naast elkaar (rechtsklik → Naast elkaar openen, of Ctrl+\\). Sleep de lijn om te verdelen, ✕ om te stoppen',
+         'Terug, vooruit, herladen en startpagina bij het actieve tabblad, en de zijknoppen van je muis werken',
+         'Zoeken op de pagina met Ctrl+F',
+         'Rechtsklik op een tabblad: dupliceren met dezelfde login, adres kopiëren en openen in browser',
+         'Downloads gaan direct naar je map Downloads, met een melding om de map te openen',
+         'Bij een automatisch verborgen tabbalk blijft de balk open terwijl je een tabblad sleept'],
+    en: ['Split view: two tabs side by side (right-click → Open side by side, or Ctrl+\\). Drag the line to resize, ✕ to stop',
+         'Back, forward, reload and start page on the active tab, and the side buttons on your mouse work',
+         'Find on page with Ctrl+F',
+         'Right-click a tab: duplicate with the same sign-in, copy address and open in browser',
+         'Downloads go straight to your Downloads folder, with a notification to open the folder',
+         'With an auto-hidden tab bar, the bar stays open while you drag a tab']
+  },
+  {
     v: '1.21.0',
     nl: ['Fouten waar Tabchat zelf mee verder kan, worden nu bijgehouden in ~/.config/tabchat/tabchat.log in plaats van stil genegeerd. Handig om mee te sturen als er iets niet werkt',
          'Opgeruimde code: commentaar in het Engels, zodat anderen makkelijker kunnen meelezen en bijdragen'],

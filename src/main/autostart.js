@@ -10,14 +10,13 @@ const platform = require('./platform');
 const configDir = process.env.XDG_CONFIG_HOME || path.join(app.getPath('home'), '.config');
 const FILE = path.join(configDir, 'autostart', 'tabchat.desktop');
 
-// Was this start triggered by autostart?
 const startedHidden = process.argv.includes('--hidden');
 
 // How Tabchat should be started (installed, AppImage or during development)
 function command() {
   if (process.env.APPIMAGE) return `"${process.env.APPIMAGE}" --hidden`;
   if (app.isPackaged) return `"${process.execPath}" --hidden`;
-  return `"${process.execPath}" "${app.getAppPath()}" --hidden`; // npm start
+  return `"${process.execPath}" "${app.getAppPath()}" --hidden`;
 }
 
 function desktopFile() {

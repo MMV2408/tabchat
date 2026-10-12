@@ -6,7 +6,7 @@ const { net } = require('electron');
 const { CATALOG, normalizeUrl, hostOf } = require('./catalog');
 const log = require('./log');
 
-const MAX_ICON = 150 * 1024; // icons larger than this are not stored
+const MAX_ICON = 150 * 1024;
 
 // Add one of your own websites to CATALOG as a service
 function register(c) {
@@ -99,7 +99,6 @@ async function check(input) {
   }
 }
 
-// Cleaned-up data from the form
 function clean(data) {
   const url = normalizeUrl(data && data.url);
   if (!url) return null;

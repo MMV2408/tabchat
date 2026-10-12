@@ -28,14 +28,12 @@ function enabled() {
   return store.config.settings.unreadBadges;
 }
 
-// Start watching a tab
 function watch(tab, view) {
   view.webContents.on('page-title-updated', (_e, title) => {
     update(fromTitle, tab.id, parse(title));
   });
 }
 
-// Badge count of a tab (via ipc.js)
 function setBadge(id, n) {
   update(fromBadge, id, n);
 }
@@ -46,7 +44,6 @@ function update(map, id, n) {
   if (value(id) !== before) changed();
 }
 
-// Tab closed: drop its counter
 function forget(id) {
   const had = value(id);
   delete fromTitle[id];
@@ -54,7 +51,6 @@ function forget(id) {
   if (had) changed();
 }
 
-// ---------- reading ----------
 function get(id) {
   return enabled() ? value(id) : 0;
 }

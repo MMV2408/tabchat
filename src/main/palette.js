@@ -27,7 +27,6 @@ const ACTIONS = {
   dndOff: () => dnd.set(null)
 };
 
-// Put the window on top of all tabs
 function bringToFront() {
   if (!store.palette) return;
   store.win.contentView.removeChildView(store.palette);
@@ -59,7 +58,6 @@ function toggle() {
   if (store.paletteOpen) hide(); else open();
 }
 
-// Run the chosen item
 function run(item) {
   hide();
   if (!item) return;

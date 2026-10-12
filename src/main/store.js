@@ -6,6 +6,8 @@ module.exports = {
   home: null,
   palette: null,
   share: null,
+  find: null,
+  findOpen: false,
   config: null,   // saved settings and tabs (see config.js)
 
   views: {},              // tab id -> view of that service

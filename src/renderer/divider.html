@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="theme.css">
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+  /* The visible line; while dragging the view covers the whole area and the line follows the mouse */
+  #line { position: absolute; top: 0; bottom: 0; left: 0; width: 10px; background: var(--bg-0); cursor: col-resize; }
+  #line::after { content: ''; position: absolute; top: 0; bottom: 0; left: 4px; width: 2px; background: var(--bg-2); }
+  #line:hover::after, body.dragging #line::after { background: #5865F2; }
+  /* ✕ in the middle: close the split view */
+  #close { position: absolute; top: 50%; left: 0; width: 10px; height: 30px; margin-top: -15px; border: none; padding: 0; border-radius: 5px;
+           background: var(--bg-3); color: var(--text-strong); font-size: 11px; line-height: 30px; cursor: pointer; z-index: 1; }
+  #close:hover { background: #e5484d; color: #fff; }
+  body.dragging #close { display: none; }
+  body.dragging { cursor: col-resize; }
+</style>
+</head>
+<body>
+<div id="line" title=""><button id="close">×</button></div>
+<script>
+  // Drag to resize, double-click = equal halves, right-click = menu
+  const line = document.getElementById('line');
+  let down = false;
+  const closeBtn = document.getElementById('close');
+  closeBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+  closeBtn.addEventListener('click', () => window.tabchat.splitClose());
+  window.tabchat.getStrings().then(({ strings }) => { closeBtn.title = strings['menu.unsplit'] || ''; });
+  line.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    down = true;
+    window.tabchat.splitDrag('start', e.screenX);
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!down) return;
+    line.style.left = (e.clientX - 4) + 'px';
+    window.tabchat.splitDrag('move', e.screenX);
+  });
+  window.addEventListener('pointerup', (e) => {
+    if (!down) return;
+    down = false;
+    window.tabchat.splitDrag('end', e.screenX);
+  });
+  line.addEventListener('dblclick', () => window.tabchat.splitEven());
+  line.addEventListener('contextmenu', (e) => { e.preventDefault(); window.tabchat.splitMenu(); });
+  window.tabchat.onSplitDragging((on, offset) => {
+    document.body.classList.toggle('dragging', on);
+    line.style.left = on ? offset + 'px' : '0px';
+  });
+</script>
+</body>
+</html>

@@ -48,7 +48,13 @@
   }
   button:hover .pill { background: var(--bg-2); }
   button.active .pill { background: var(--bg-3); color: var(--text-strong); }
+  button.insplit:not(.focused) .pill { background: color-mix(in srgb, var(--bg-3) 55%, transparent); }
   .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .nav { display: flex; gap: 2px; margin-left: 2px; padding-left: 6px; border-left: 1px solid rgba(127, 127, 140, .35); }
+  .navbtn { width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; font-size: 13px; }
+  .navbtn:hover { background: rgba(127, 127, 140, .3); }
+  .navbtn.off { opacity: .35; }
+  .navbtn.off:hover { background: transparent; }
   .muted { font-size: 12px; opacity: .8; }
   /* unread */
   .count { background: #f23f43; color: #fff; font-size: 11px; font-weight: 700; border-radius: 9px; padding: 1px 6px; min-width: 18px; text-align: center; }
@@ -169,7 +175,8 @@
       pill.className = 'pill';
       b.append(pill);
       b.title = (i < 8 ? 'Alt+' + (i + 1) + ' · ' : '') + T('tabs.hint');
-      if (s.active === t.id) b.classList.add('active');
+      if (s.active === t.id) b.classList.add('active', 'focused');
+      if (s.split && (s.split.left === t.id || s.split.right === t.id)) b.classList.add('active', 'insplit');
       if (t.asleep) { b.classList.add('asleep'); b.title = T('tabs.asleep') + ' · ' + b.title; }
       b.classList.add('tab');
       if (compact) {
@@ -204,6 +211,20 @@
         z.className = 'zz';
         z.textContent = '💤';
         pill.append(z);
+      }
+      // ← → ⟳ ⌂ on the active tab (not in compact mode)
+      if (s.active === t.id && t.nav && !compact) {
+        const nav = document.createElement('span');
+        nav.className = 'nav';
+        for (const [what, icon, key, ok] of [['back', '←', 'nav.back', t.nav.back], ['forward', '→', 'nav.forward', t.nav.forward], ['reload', '⟳', 'nav.reload', true], ['home', '⌂', 'nav.home', true]]) {
+          const n = document.createElement('span');
+          n.className = 'navbtn' + (ok ? '' : ' off');
+          n.textContent = icon;
+          n.title = T(key);
+          n.onmousedown = (e) => { e.stopPropagation(); if (e.button === 0 && ok) window.tabchat.tabNav(t.id, what); };
+          nav.append(n);
+        }
+        pill.append(nav);
       }
       if (t.muted && !compact) {
         const m = document.createElement('span');
@@ -287,7 +308,7 @@
   let lastKey = '';
   const update = async (s) => {
     await loadStrings(s.lang);
-    const key = JSON.stringify([s.lang, s.active, s.tabs, s.update && s.update.state, s.update && s.update.version, s.dnd, s.maximized, s.settings && s.settings.tabBar]);
+    const key = JSON.stringify([s.lang, s.active, s.split, s.tabs, s.update && s.update.state, s.update && s.update.version, s.dnd, s.maximized, s.settings && s.settings.tabBar]);
     if (key === lastKey) return;
     lastKey = key;
     render(s);

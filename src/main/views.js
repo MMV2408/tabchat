@@ -23,8 +23,8 @@ const ERROR_PAGE = path.join(__dirname, '..', 'renderer', 'error.html');
 // Each screen is its own process of ~100 MB. They're loaded when you open them and
 // cleaned up when you haven't used them for a while.
 const PRELOAD = path.join(__dirname, '..', 'preload', 'preload.js');
-const PAGES = { home: 'home.html', palette: 'palette.html', share: 'share.html' };
-const STACK = ['home', 'bar', 'palette', 'share']; // bottom to top (above the tabs)
+const PAGES = { home: 'home.html', palette: 'palette.html', share: 'share.html', find: 'find.html' };
+const STACK = ['home', 'bar', 'find', 'palette', 'share']; // bottom to top (above the tabs)
 const dropTimers = {};
 
 function page(name) {
@@ -33,7 +33,7 @@ function page(name) {
   if (store[name]) return store[name];
   const v = new WebContentsView({ webPreferences: { preload: PRELOAD } });
   if (name !== 'home') v.setBackgroundColor('#00000000'); // transparent, the app stays visible behind it
-  if (name !== 'share') v.webContents.on('before-input-event', shortcuts.handler(name));
+  if (name !== 'share' && name !== 'find') v.webContents.on('before-input-event', shortcuts.handler(name));
   if (name === 'home') {
     v.webContents.on('focus', () => {
       if (store.active !== 'home' || store.paletteOpen || store.shareOpen) setImmediate(focusActive);
@@ -66,7 +66,7 @@ function dropLater(name, ms) {
 function drop(name) {
   const v = store[name];
   if (!v || !store.alive()) return;
-  if ((name === 'home' && store.active === 'home') || (name === 'palette' && store.paletteOpen) || (name === 'share' && store.shareOpen)) return;
+  if ((name === 'home' && store.active === 'home') || (name === 'palette' && store.paletteOpen) || (name === 'share' && store.shareOpen) || (name === 'find' && store.findOpen)) return;
   store[name] = null;
   try { store.win.contentView.removeChildView(v); } catch (e) { log.warn('remove view:', name, e); }
   v.webContents.close();
@@ -94,6 +94,7 @@ function getState() {
   return {
     lang: i18n.lang(),
     active,
+    split: require('./split').isShown() ? (({ left, right }) => ({ left, right }))(require('./split').pair()) : null,
     activeIsTab: !!views[active],
     activeMuted: mutedTabs.has(active),
     canReopen: closedTabs.length > 0,
@@ -107,7 +108,8 @@ function getState() {
       muted: mutedTabs.has(t.id),
       unread: unread.get(t.id), // count, 'dot' or 0
       asleep: sleep.isAsleep(t.id),
-      canSleep: sleep.canSleep(t)
+      canSleep: sleep.canSleep(t),
+      nav: navState(t.id) // back/forward for the ← → buttons (only for visible tabs)
     })),
     dnd: { on: dnd.isOn(), manual: dnd.isManual(), label: dnd.label() },
     browsers: require('./links').browsers().map(b => ({ id: b.id, name: b.name })),
@@ -123,6 +125,14 @@ function getState() {
     restartNeeded: config.settings.hardwareAcceleration !== false ? !store.hwAtStart : !!store.hwAtStart, // hardware acceleration changed
     maximized: store.win ? store.win.isMaximized() : false
   };
+}
+
+// Can this tab go back / forward? Only for tabs you can see, the rest doesn't need buttons
+function navState(id) {
+  const v = store.views[id];
+  if (!v || v.webContents.isDestroyed() || !require('./split').visible(id)) return null;
+  const h = v.webContents.navigationHistory;
+  return { back: h.canGoBack(), forward: h.canGoForward() };
 }
 
 function broadcast() {
@@ -169,9 +179,27 @@ function createServiceView(tab) {
     if (tab.id === store.active && store.win.isFocused()) focusActive();
   });
 
+  // New page in a visible tab: update the ← → buttons (debounced, chat apps navigate a lot)
+  let navTimer = null;
+  const navChanged = () => {
+    if (!require('./split').visible(tab.id)) return;
+    clearTimeout(navTimer);
+    navTimer = setTimeout(broadcast, 150);
+  };
+  v.webContents.on('did-navigate', navChanged);
+  require('./find').watch(v.webContents); // Ctrl+F results
+  require('./downloads').watch(v.webContents.session); // downloads go to ~/Downloads, with a notification
+  v.webContents.on('did-navigate-in-page', navChanged);
+
   // A hidden tab (e.g. Outlook loading in the background) can "steal" the focus.
   // Then the shortcuts stop working, so we put the focus straight back.
   v.webContents.on('focus', () => {
+    // Split view: clicking the other half makes that tab the active one
+    if (tab.id !== store.active && !store.paletteOpen && !store.shareOpen && require('./split').isShown() && require('./split').has(tab.id)) {
+      store.active = tab.id;
+      sleep.seen(tab.id);
+      return broadcast();
+    }
     if (tab.id !== store.active || store.paletteOpen || store.shareOpen) setImmediate(focusActive);
   });
 
@@ -354,18 +382,33 @@ function layout() {
   bar.setBounds({ x: 0, y: 0, width, height: h });
   bar.setVisible(barMode() !== 'autohide' || store.barRevealed);
   if (home) { home.setBounds(area); home.setVisible(active === 'home'); }
+  const halves = require('./split').place(area); // split view: two tabs side by side
   for (const [id, v] of Object.entries(views)) {
-    v.setBounds(area);
-    v.setVisible(id === active);
+    const half = halves && halves[id];
+    v.setBounds(half || area);
+    v.setVisible(half ? true : id === active);
+  }
+  if (store.find) {
+    const f = store.findOpen && store.views[active];
+    if (f) store.find.setBounds(require('./find').bounds());
+    store.find.setVisible(!!f);
   }
   if (pal) { pal.setBounds({ x: 0, y: 0, width, height }); pal.setVisible(paletteOpen); }
   if (store.share) { store.share.setBounds({ x: 0, y: 0, width, height }); store.share.setVisible(store.shareOpen); }
+}
+
+// The area below the tab bar where tabs are shown (window coordinates)
+function contentArea() {
+  const { width, height } = store.win.getContentBounds();
+  const top = barMode() === 'autohide' ? 0 : barHeight();
+  return { x: 0, y: top, width, height: height - top };
 }
 
 // Keyboard to the right screen, so the shortcuts always work
 function focusActive() {
   if (store.shareOpen && store.share) return store.share.webContents.focus();
   if (store.paletteOpen && store.palette) return store.palette.webContents.focus();
+  if (store.findOpen && store.find && store.views[store.active]) return store.find.webContents.focus();
   const target = store.active === 'home' ? page('home') : store.views[store.active];
   (target || store.bar).webContents.focus();
 }
@@ -375,7 +418,16 @@ function show(id) {
   if (microsoft.waiting.has(id)) microsoft.loadTab(id); // opened by the user: load it anyway
   sleep.seen(store.active); // previous tab: just viewed
   sleep.seen(id);
+  if (store.active !== id && store.active !== 'home') store.prevTab = store.active;
+  if (store.findOpen && id !== store.active) require('./find').close(); // other tab: close the find bar
   store.active = id;
+  const split = require('./split');
+  if (split.has(id)) { // split view: the other half has to be awake too
+    const s = split.pair();
+    const other = s.left === id ? s.right : s.left;
+    if (sleep.isAsleep(other)) sleep.wake(other);
+    sleep.seen(other);
+  }
   if (id !== 'home') store.lastTab = id;
   if (id !== 'home' && store.home) dropLater('home', 3 * 60 * 1000); // + screen unused for 3 minutes: clean it up
   require('./theme').flush(id); // reload tabs with a new theme once you leave them
@@ -386,6 +438,6 @@ function show(id) {
 
 Object.assign(module.exports, {
   revealBar, hideBarSoon, holdBar, watchEdge,
-  page, whenReady, dropLater,
+  page, whenReady, dropLater, contentArea,
   getState, broadcast, createServiceView, destroyView, removeForSleep, reloadView, layout, focusActive, show
 });

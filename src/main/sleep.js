@@ -24,7 +24,6 @@ function isAsleep(id) {
   return asleep.has(id);
 }
 
-// Remember when a tab was viewed
 function seen(id) {
   if (id && id !== 'home') lastSeen[id] = Date.now();
 }
@@ -33,7 +32,7 @@ function seen(id) {
 // (e.g. a call) or a Microsoft tab still waiting to sign in.
 function sleep(id) {
   const v = store.views[id];
-  if (!v || id === store.active) return false;
+  if (!v || require('./split').visible(id)) return false;
   if (v.webContents.isCurrentlyAudible()) return false;
   if (microsoft.waiting.has(id)) return false;
   asleep.add(id);
@@ -60,7 +59,6 @@ function shouldStartAsleep(tab) {
   return s.sleepEnabled && s.sleepOnStart && canSleep(tab);
 }
 
-// Tab closed or removed
 function forget(id) {
   asleep.delete(id);
   delete lastSeen[id];
@@ -73,7 +71,7 @@ function check() {
   const limit = (s.sleepMinutes || 30) * 60 * 1000;
   const now = Date.now();
   for (const tab of store.config.tabs) {
-    if (!canSleep(tab) || !store.views[tab.id] || tab.id === store.active) continue;
+    if (!canSleep(tab) || !store.views[tab.id] || require('./split').visible(tab.id)) continue;
     if (now - (lastSeen[tab.id] || started) >= limit) sleep(tab.id);
   }
 }
@@ -83,7 +81,6 @@ function start() {
   timer = setInterval(check, 60 * 1000);
 }
 
-// Set per tab whether it may sleep
 function setAllowed(id, allowed) {
   const tab = store.config.tabs.find(t => t.id === id);
   if (!tab) return;

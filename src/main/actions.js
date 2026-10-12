@@ -104,6 +104,7 @@ function closeTab(id = store.active) {
   if (i < 0) return;
   const closing = tabs[i];
   if (!closing.temp) store.closedTabs.push({ tab: { ...closing }, index: i });
+  require('./split').forget(id);
   tabs.splice(i, 1);
   config.save();
   views.destroyView(id);
@@ -153,6 +154,7 @@ async function removeTab(id) {
   if (i < 0) return;
   const part = microsoft.partitionFor(tabs[i]);
   const removed = tabs[i];
+  require('./split').forget(id);
   tabs.splice(i, 1);
   config.save();
   views.destroyView(id);
@@ -242,6 +244,27 @@ function navigate(dir, id = store.active) {
   if (!h) return;
   if (dir < 0 && h.canGoBack()) h.goBack();
   if (dir > 0 && h.canGoForward()) h.goForward();
+}
+
+// Right-click: copy the page address / open it in a real browser
+function copyAddress(id = store.active) {
+  const v = store.views[id];
+  if (v) require('electron').clipboard.writeText(v.webContents.getURL());
+}
+function openInBrowser(id = store.active) {
+  const v = store.views[id];
+  if (!v) return;
+  const url = v.webContents.getURL();
+  if (!/^https?:/.test(url)) return;
+  // "Open links in: Tabchat" would open it here again, so then use the default browser
+  if (store.config.settings.openLinks === 'internal') require('electron').shell.openExternal(url);
+  else require('./links').open(url);
+}
+
+// Back to the service's start page (the ⌂ button)
+function goHome(id = store.active) {
+  const tab = store.config.tabs.find(t => t.id === id);
+  if (tab && store.views[id]) store.views[id].webContents.loadURL(urlFor(tab));
 }
 
 // ---------- tab sleep ----------
@@ -339,7 +362,7 @@ function relaunch() {
 }
 
 Object.assign(module.exports, {
-  relaunch, duplicateTab,
+  relaunch, duplicateTab, goHome, copyAddress, openInBrowser,
   addTab, closeTab, reopenTab, removeTab, addCustom, updateCustom, removeCustom,
   moveTab, reorderTab, cycle, goToIndex,
   reload, reloadAll, toggleMute, zoom, navigate, sleepNow,

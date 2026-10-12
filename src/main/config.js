@@ -57,7 +57,8 @@ function load() {
       firstUse: c.firstUse || null,
       feedback: c.feedback || null,
       custom: Array.isArray(c.custom) ? c.custom : [],
-      icons: c.icons && typeof c.icons === 'object' ? c.icons : {}
+      icons: c.icons && typeof c.icons === 'object' ? c.icons : {},
+      split: c.split && typeof c.split === 'object' ? c.split : null
     };
   } catch {
     // No file or a broken one: start with an empty app

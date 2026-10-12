@@ -6,6 +6,13 @@
 // 4. Notifications go through Ubuntu itself when possible, see main/notifier.js.
 const { ipcRenderer, webFrame } = require('electron');
 
+// Back/forward buttons on the mouse (buttons 3 and 4), like in a browser
+window.addEventListener('mouseup', (e) => {
+  if (e.button !== 3 && e.button !== 4) return;
+  e.preventDefault();
+  ipcRenderer.send('mouse-nav', e.button === 3 ? -1 : 1);
+}, { capture: true });
+
 // Mouse at the top edge: show the hidden tab bar (only if that setting is on; the app decides)
 let lastEdge = 0;
 window.addEventListener('mousemove', (e) => {

@@ -13,14 +13,22 @@ const { t } = i18n;
 
 // Right-click menu on a tab
 function showTabMenu(id) {
+  const split = require('./split');
   const tabs = store.config.tabs;
   const i = tabs.findIndex(t => t.id === id);
   if (i < 0) return;
   Menu.buildFromTemplate([
     { label: t('menu.reload'), accelerator: 'F5', click: () => actions.reload(id) },
     { label: t('menu.duplicate'), click: () => actions.duplicateTab(id) },
-    { label: t(store.mutedTabs.has(id) ? 'menu.unmute' : 'menu.mute'), accelerator: 'Alt+M', click: () => actions.toggleMute(id) },
+    split.has(id) && split.isShown()
+      ? { label: t('menu.unsplit'), accelerator: 'Ctrl+\\', click: () => split.close() }
+      : { label: t('menu.split'), accelerator: 'Ctrl+\\', enabled: tabs.length > 1 && (id !== store.active ? !!store.views[store.active] : true),
+          click: () => (id === store.active ? split.toggle() : split.open(store.active, id)) },
     { type: 'separator' },
+    { label: t('menu.copyAddress'), enabled: !!store.views[id], click: () => actions.copyAddress(id) },
+    { label: t('menu.openInBrowser'), enabled: !!store.views[id], click: () => actions.openInBrowser(id) },
+    { type: 'separator' },
+    { label: t(store.mutedTabs.has(id) ? 'menu.unmute' : 'menu.mute'), accelerator: 'Alt+M', click: () => actions.toggleMute(id) },
     { label: t('menu.sleepNow'), enabled: !sleep.isAsleep(id), click: () => actions.sleepNow(id) },
     { label: t('menu.neverSleep'), type: 'checkbox', checked: !sleep.canSleep(tabs[i]), click: (item) => sleep.setAllowed(id, !item.checked) },
     { type: 'separator' },
@@ -48,6 +56,26 @@ function register() {
   // Auto-hide tab bar: mouse at the top edge / off the bar
   ipcMain.on('bar-edge', () => views.revealBar(true));
   ipcMain.on('bar-hover', (_e, inside) => { if (inside) views.revealBar(true); else views.hideBarSoon(); });
+  ipcMain.on('split-drag', (_e, phase, x) => require('./split').drag(phase, x));
+  ipcMain.on('split-even', () => require('./split').even());
+  ipcMain.on('split-menu', () => require('./split').menu());
+  ipcMain.on('split-close', () => require('./split').close());
+  // Find in page (Ctrl+F)
+  ipcMain.on('find-search', (_e, text, next, back) => require('./find').search(String(text || ''), next, back));
+  ipcMain.on('find-close', () => require('./find').close());
+  // ← → ⟳ ⌂ in the tab bar
+  ipcMain.on('tab-nav', (_e, id, what) => {
+    if (!store.views[id]) return;
+    if (what === 'back') actions.navigate(-1, id);
+    else if (what === 'forward') actions.navigate(1, id);
+    else if (what === 'reload') actions.reload(id);
+    else if (what === 'home') actions.goHome(id);
+  });
+  // Back/forward buttons on the mouse, from inside a service
+  ipcMain.on('mouse-nav', (e, dir) => {
+    const id = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
+    if (id) actions.navigate(dir, id);
+  });
   ipcMain.on('bar-hold', (_e, on) => views.holdBar(on)); // keep the auto-hidden bar open while dragging a tab
   ipcMain.handle('check-url', (_e, url) => require('./brightspace').check(url));
   ipcMain.handle('check-site', (_e, url) => require('./custom').check(url));

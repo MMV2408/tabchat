@@ -39,6 +39,9 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 - 👥 Meerdere accounts van dezelfde dienst, elk met een eigen login
 - ↔️ Tabbladen verslepen, rechtsklik voor meer opties
 - 🔐 Eén gedeelde Microsoft-login voor Teams, Outlook en OneDrive (ook voor school- en werkaccounts), en je **blijft ingelogd** na een herstart
+- 🪟 **Gesplitst scherm**: twee tabbladen naast elkaar, met een scheidingslijn die je kunt slepen
+- 🧭 Terug-, vooruit-, herlaad- en startknoppen bij het actieve tabblad, zoeken op de pagina (`Ctrl+F`), en downloads gaan direct naar je map Downloads
+- 👯 Een tabblad dupliceren met dezelfde login (rechtsklik)
 - 🌐 **Eigen websites** als tabblad (naam, icoon en kleur), of open er één keer een **incognito**
 - 🧩 Verberg de vaste diensten die je niet gebruikt en sleep de kaarten in je eigen volgorde
 - 🎓 **Brightspace** van je school (elke school: je vult het adres in), ingelogd met hetzelfde schoolaccount als Teams en Outlook
@@ -127,7 +130,9 @@ Al het andere — taal, slaapstand, starten bij inloggen, wit tray-icoon — sta
 | `Ctrl+Shift+PageUp` / `PageDown` | Tabblad naar links / rechts |
 | `F5` | Herladen |
 | `Alt+M` | Tabblad dempen / geluid aan |
-| `Alt+←` / `Alt+→` | Terug / vooruit |
+| `Alt+←` / `Alt+→` | Terug / vooruit (ook de zijknoppen van je muis) |
+| `Ctrl+F` | Zoeken op de pagina |
+| `Ctrl+\` | Twee tabbladen naast elkaar (aan/uit) |
 | `Ctrl` + `+` / `-` / `0` | Inzoomen / uitzoomen / herstellen (per tabblad onthouden) |
 | `F11` | Volledig scherm |
 | `Ctrl+Q` | Tabchat echt afsluiten |

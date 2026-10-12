@@ -87,7 +87,6 @@
   document.getElementById('letter').textContent = name[0];
   document.getElementById('browser').href = url;
 
-  // Pick the right message
   let title, text;
   let host = '';
   try { host = new URL(url).hostname; } catch { host = ''; } // no valid address: show no host

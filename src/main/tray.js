@@ -24,7 +24,7 @@ function trayImage(withDot) {
 }
 
 let tray = null;
-let pending = null; // timer for creating the icon
+let pending = null;
 
 // ---------- show / hide the window ----------
 function showWindow(opts = {}) {
@@ -127,7 +127,7 @@ function refresh() {
 
 // ---------- close button ----------
 function onClose(event) {
-  if (store.quitting || !store.config.settings.runInBackground) return; // just quit
+  if (store.quitting || !store.config.settings.runInBackground) return;
   event.preventDefault();
   store.win.hide();
 

@@ -27,7 +27,6 @@ async function request(callback) {
   open(sources);
 }
 
-// ---------- picker ----------
 function open(sources) {
   store.shareOpen = true;
   const v = views.page('share'); // only load it when needed
@@ -54,7 +53,6 @@ function close() {
   views.dropLater('share', 5000);
 }
 
-// Chosen: share
 function pick(id) {
   if (!pending) return;
   const source = pending.sources.find(s => s.id === id);
@@ -63,7 +61,6 @@ function pick(id) {
   close();
 }
 
-// Cancel: share nothing
 function cancel() {
   if (!pending) return;
   pending.callback({});
