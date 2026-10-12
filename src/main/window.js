@@ -37,24 +37,11 @@ function create() {
     show: !hidden
   });
 
-  // De drie eigen schermen
-  const prefs = { preload: PRELOAD };
-  const bar = store.bar = new WebContentsView({ webPreferences: prefs });
-  const home = store.home = new WebContentsView({ webPreferences: prefs });
-  const palette = store.palette = new WebContentsView({ webPreferences: prefs });
-  palette.setBackgroundColor('#00000000'); // doorzichtig, zodat de app erachter zichtbaar blijft
-  const share = store.share = new WebContentsView({ webPreferences: prefs }); // scherm delen
-  share.setBackgroundColor('#00000000');
-
+  // De tabbalk. Het +-scherm, Ctrl+K en scherm delen laden pas als je ze opent (zie views.page)
+  const bar = store.bar = new WebContentsView({ webPreferences: { preload: PRELOAD } });
   win.contentView.addChildView(bar);
-  win.contentView.addChildView(home);
   bar.webContents.on('before-input-event', shortcuts.handler('bar'));
-  home.webContents.on('before-input-event', shortcuts.handler('home'));
-  palette.webContents.on('before-input-event', shortcuts.handler('palette'));
   bar.webContents.loadFile(path.join(RENDERER, 'tabs.html'));
-  home.webContents.loadFile(path.join(RENDERER, 'home.html'));
-  palette.webContents.loadFile(path.join(RENDERER, 'palette.html'));
-  share.webContents.loadFile(path.join(RENDERER, 'share.html'));
 
   // De opgeslagen tabbladen. Het eerste tabblad wordt altijd geladen (dat zie je meteen);
   // de rest mag slapend opstarten als dat aanstaat.
@@ -63,8 +50,6 @@ function create() {
     if (tab.id !== firstId && sleep.shouldStartAsleep(tab)) sleep.startAsleep(tab.id);
     else views.createServiceView(tab);
   }
-  win.contentView.addChildView(palette); // bovenop alles
-  win.contentView.addChildView(share);
   store.active = store.config.tabs.length ? store.config.tabs[0].id : 'home';
   if (store.active !== 'home') store.lastTab = store.active;
 
@@ -74,9 +59,6 @@ function create() {
   win.on('unmaximize', views.broadcast);
   win.on('blur', () => views.revealBar(false));
   win.on('focus', views.focusActive);
-  home.webContents.on('focus', () => {
-    if (store.active !== 'home' || store.paletteOpen || store.shareOpen) setImmediate(views.focusActive);
-  });
   views.layout();
   views.watchEdge(); // tabbalk automatisch verbergen: bovenrand in de gaten houden
   tray.init(); // tray-icoon + kruisje = verbergen
@@ -89,11 +71,11 @@ function create() {
   // Sneltoetsen direct laten werken bij het opstarten:
   // eerst de tabbalk (laadt meteen), daarna het tabblad zodra dat klaar is
   bar.webContents.once('did-finish-load', () => {
-    const target = store.active === 'home' ? home : store.views[store.active];
+    const target = store.active === 'home' ? store.home : store.views[store.active];
     if (target && target.webContents.isLoading()) bar.webContents.focus();
     else views.focusActive();
   });
-  const first = store.active === 'home' ? home : store.views[store.active];
+  const first = store.active === 'home' ? store.home : store.views[store.active];
   if (first) first.webContents.once('dom-ready', () => views.focusActive());
 }
 

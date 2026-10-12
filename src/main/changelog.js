@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.19.2',
+    nl: ['Zuiniger met geheugen: het +-scherm, snelzoeken (Ctrl+K), scherm delen en de meldingen laden pas als je ze nodig hebt en ruimen zichzelf weer op (ongeveer 300 MB minder)'],
+    en: ['Uses less memory: the + screen, quick search (Ctrl+K), screen sharing and notifications load only when needed and clean up after themselves (about 300 MB less)']
+  },
+  {
     v: '1.19.1',
     nl: ['Functies in het +-scherm netjes verdeeld over tabjes: Algemeen, Accounts, Meldingen, Opstarten en Geheugen'],
     en: ['Features on the + screen neatly split into tabs: General, Accounts, Notifications, Startup and Memory']

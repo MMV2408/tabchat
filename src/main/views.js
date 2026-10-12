@@ -18,6 +18,59 @@ const barMode = () => (store.config && store.config.settings.tabBar) || 'normal'
 const barHeight = () => 44;
 const ERROR_PAGE = path.join(__dirname, '..', 'renderer', 'error.html');
 
+// ---------- eigen schermen (+-scherm, Ctrl+K, scherm delen): pas laden als je ze nodig hebt ----------
+// Elk scherm is een eigen proces van ~100 MB. Ze worden geladen als je ze opent en weer
+// opgeruimd als je ze een tijdje niet gebruikt.
+const PRELOAD = path.join(__dirname, '..', 'preload', 'preload.js');
+const PAGES = { home: 'home.html', palette: 'palette.html', share: 'share.html' };
+const STACK = ['home', 'bar', 'palette', 'share']; // van onder naar boven (boven de tabbladen)
+const dropTimers = {};
+
+function page(name) {
+  clearTimeout(dropTimers[name]);
+  dropTimers[name] = null;
+  if (store[name]) return store[name];
+  const v = new WebContentsView({ webPreferences: { preload: PRELOAD } });
+  if (name !== 'home') v.setBackgroundColor('#00000000'); // doorzichtig, de app blijft erachter zichtbaar
+  if (name !== 'share') v.webContents.on('before-input-event', shortcuts.handler(name));
+  if (name === 'home') {
+    v.webContents.on('focus', () => {
+      if (store.active !== 'home' || store.paletteOpen || store.shareOpen) setImmediate(focusActive);
+    });
+  }
+  v.webContents.loadFile(path.join(__dirname, '..', 'renderer', PAGES[name]));
+  v.setVisible(false);
+  const cv = store.win.contentView;
+  cv.addChildView(v);
+  store[name] = v;
+  // Wat boven dit scherm hoort, weer bovenop leggen
+  for (const other of STACK.slice(STACK.indexOf(name) + 1)) {
+    if (store[other]) { cv.removeChildView(store[other]); cv.addChildView(store[other]); }
+  }
+  return v;
+}
+
+// fn(view) zodra het scherm geladen is (het +-scherm krijgt nog even om zijn teksten op te halen)
+function whenReady(name, fn) {
+  const v = page(name);
+  const go = () => setTimeout(() => { if (store[name] === v) fn(v); }, name === 'home' ? 250 : 0);
+  if (v.webContents.isLoading()) v.webContents.once('did-finish-load', go);
+  else fn(v);
+}
+
+function dropLater(name, ms) {
+  clearTimeout(dropTimers[name]);
+  dropTimers[name] = setTimeout(() => { dropTimers[name] = null; drop(name); }, ms);
+}
+function drop(name) {
+  const v = store[name];
+  if (!v || !store.alive()) return;
+  if ((name === 'home' && store.active === 'home') || (name === 'palette' && store.paletteOpen) || (name === 'share' && store.shareOpen)) return;
+  store[name] = null;
+  try { store.win.contentView.removeChildView(v); } catch {}
+  v.webContents.close();
+}
+
 // ---------- status naar de schermen ----------
 function labelFor(tab) {
   const same = store.config.tabs.filter(t => t.service === tab.service);
@@ -74,7 +127,7 @@ function broadcast() {
   if (!store.alive()) return;
   const s = getState();
   store.bar.webContents.send('state', s);
-  store.home.webContents.send('state', s);
+  if (store.home) store.home.webContents.send('state', s);
   require('./tray').refresh(); // tabbladen in het tray-menu bijwerken
 }
 
@@ -146,7 +199,7 @@ function createServiceView(tab) {
     if (!url.startsWith('file:') || !url.includes('#tabchat-fix-url')) return;
     const key = CATALOG[tab.service].settingUrl;
     show('home');
-    if (key) store.home.webContents.send('focus-setting', key);
+    if (key) whenReady('home', (h) => h.webContents.send('focus-setting', key));
   });
 
   // Foutscherm als de dienst niet laadt (geen internet, storing) of vastloopt
@@ -248,7 +301,7 @@ function revealBar(on) {
   if (on) {
     // Balk bovenop de dienst leggen (snelzoeken en scherm delen blijven daarboven)
     const cv = store.win.contentView;
-    for (const v of [store.bar, store.palette, store.share]) { cv.removeChildView(v); cv.addChildView(v); }
+    for (const v of [store.bar, store.palette, store.share]) if (v) { cv.removeChildView(v); cv.addChildView(v); }
   }
   layout();
 }
@@ -285,6 +338,7 @@ function watchEdge() {
 // ---------- tonen ----------
 function layout() {
   if (!store.alive()) return;
+  if (store.active === 'home') page('home');
   const { win, bar, home, palette: pal, views, active, paletteOpen } = store;
   const { width, height } = win.getContentBounds();
   const h = barHeight();
@@ -292,23 +346,20 @@ function layout() {
   const area = { x: 0, y: top, width, height: height - top };
   bar.setBounds({ x: 0, y: 0, width, height: h });
   bar.setVisible(barMode() !== 'autohide' || store.barRevealed);
-  home.setBounds(area);
-  home.setVisible(active === 'home');
+  if (home) { home.setBounds(area); home.setVisible(active === 'home'); }
   for (const [id, v] of Object.entries(views)) {
     v.setBounds(area);
     v.setVisible(id === active);
   }
-  pal.setBounds({ x: 0, y: 0, width, height });
-  pal.setVisible(paletteOpen);
-  store.share.setBounds({ x: 0, y: 0, width, height });
-  store.share.setVisible(store.shareOpen);
+  if (pal) { pal.setBounds({ x: 0, y: 0, width, height }); pal.setVisible(paletteOpen); }
+  if (store.share) { store.share.setBounds({ x: 0, y: 0, width, height }); store.share.setVisible(store.shareOpen); }
 }
 
 // Toetsenbord naar het juiste scherm, zodat de sneltoetsen altijd werken
 function focusActive() {
-  if (store.shareOpen) return store.share.webContents.focus();
-  if (store.paletteOpen) return store.palette.webContents.focus();
-  const target = store.active === 'home' ? store.home : store.views[store.active];
+  if (store.shareOpen && store.share) return store.share.webContents.focus();
+  if (store.paletteOpen && store.palette) return store.palette.webContents.focus();
+  const target = store.active === 'home' ? page('home') : store.views[store.active];
   (target || store.bar).webContents.focus();
 }
 
@@ -319,6 +370,7 @@ function show(id) {
   sleep.seen(id);
   store.active = id;
   if (id !== 'home') store.lastTab = id;
+  if (id !== 'home' && store.home) dropLater('home', 3 * 60 * 1000); // +-scherm 3 minuten niet gebruikt: opruimen
   require('./theme').flush(id); // tabbladen met een nieuw thema herladen zodra je wegklikt
   layout();
   broadcast();
@@ -327,5 +379,6 @@ function show(id) {
 
 Object.assign(module.exports, {
   revealBar, hideBarSoon, watchEdge,
+  page, whenReady, dropLater,
   getState, broadcast, createServiceView, destroyView, removeForSleep, reloadView, layout, focusActive, show
 });

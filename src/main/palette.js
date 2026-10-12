@@ -29,16 +29,22 @@ const ACTIONS = {
 
 // Het venster bovenop alle tabbladen leggen
 function bringToFront() {
+  if (!store.palette) return;
   store.win.contentView.removeChildView(store.palette);
   store.win.contentView.addChildView(store.palette);
+  if (store.share) { store.win.contentView.removeChildView(store.share); store.win.contentView.addChildView(store.share); }
 }
 
 function open() {
   store.paletteOpen = true;
+  views.page('palette'); // pas laden als je hem nodig hebt
   bringToFront();
   views.layout();
-  store.palette.webContents.send('palette-open', views.getState());
-  store.palette.webContents.focus();
+  views.whenReady('palette', (v) => {
+    if (!store.paletteOpen) return;
+    v.webContents.send('palette-open', views.getState());
+    v.webContents.focus();
+  });
 }
 
 function hide() {
@@ -46,6 +52,7 @@ function hide() {
   store.paletteOpen = false;
   views.layout();
   views.focusActive();
+  views.dropLater('palette', 60 * 1000); // een minuut niet gebruikt: uit het geheugen
 }
 
 function toggle() {

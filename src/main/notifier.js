@@ -23,25 +23,48 @@ let nextKey = 1;
 const pending = new Map(); // key -> { opts, file, cb }
 const items = new Map();   // D-Bus-id -> { onClick, onClose, file }
 
+// Kan het via Ubuntu? (start het hulpprogramma nog niet: dat gebeurt pas bij de eerste melding)
 function isAvailable() {
   if (available !== null) return available;
-  available = false;
-  if (platform.kind === 'flatpak' || process.platform !== 'linux' || !process.env.DBUS_SESSION_BUS_ADDRESS) return available;
+  available = platform.kind !== 'flatpak' && process.platform === 'linux' && !!process.env.DBUS_SESSION_BUS_ADDRESS;
+  return available;
+}
+
+// Het hulpprogramma starten als het nog niet draait
+let stopping = false;
+function start() {
+  if (child) return true;
   try {
+    stopping = false;
     child = fork(path.join(__dirname, 'notify-helper.js'), [], {
       env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
       stdio: ['ignore', 'ignore', 'ignore', 'ipc']
     });
     child.on('message', onMessage);
     child.on('exit', () => {
-      available = false; child = null;
+      if (!stopping) available = false; // onverwacht gestopt: verder via Electron
+      child = null;
       for (const p of pending.values()) failed(p); // nog niet getoond: alsnog via Electron
       pending.clear();
+      items.clear();
     });
     child.on('error', () => {});
-    available = true;
-  } catch { available = false; child = null; }
-  return available;
+    return true;
+  } catch { available = false; child = null; return false; }
+}
+
+// Geen meldingen meer open? Dan na 10 minuten het hulpprogramma afsluiten (scheelt ~90 MB)
+const IDLE = 10 * 60 * 1000;
+let idleTimer = null;
+function idleCheck() {
+  clearTimeout(idleTimer);
+  idleTimer = null;
+  if (!child || pending.size || items.size) return;
+  idleTimer = setTimeout(() => {
+    if (!child || pending.size || items.size) return;
+    stopping = true;
+    try { child.kill(); } catch {}
+  }, IDLE);
 }
 
 function onMessage(m) {
@@ -49,7 +72,7 @@ function onMessage(m) {
     const p = pending.get(m.key);
     if (!p) return;
     pending.delete(m.key);
-    if (!m.id) return failed(p);
+    if (!m.id) { failed(p); return idleCheck(); }
     items.set(m.id, { onClick: p.opts.onClick, onClose: p.opts.onClose, file: p.file });
     if (p.cb) p.cb(m.id);
   } else if (m.type === 'click') {
@@ -71,6 +94,7 @@ function forget(id, notifyClose) {
   items.delete(id);
   if (it.file) fs.rm(it.file, { force: true }, () => {});
   if (notifyClose && it.onClose) it.onClose();
+  idleCheck();
 }
 
 function runClick(id) {
@@ -97,7 +121,8 @@ function fallback({ title, body, onClick }) {
 // image: data-URL (mag leeg zijn). cb(id) met het D-Bus-id, of null.
 function show(opts, cb) {
   const { title, body, image, onClick, onClose } = opts;
-  if (!isAvailable()) { fallback(opts); return cb && cb(null); }
+  if (!isAvailable() || !start()) { fallback(opts); return cb && cb(null); }
+  clearTimeout(idleTimer);
   let file = '';
   try {
     if (image && image.startsWith('data:')) {

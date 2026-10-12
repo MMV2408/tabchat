@@ -115,9 +115,9 @@ function check() {
 function showUpdate() {
   require('./tray').showWindow();
   views.show('home');
-  store.home.webContents.executeJavaScript(
+  views.whenReady('home', (h) => h.webContents.executeJavaScript(
     "document.getElementById('about').scrollIntoView({ behavior: 'smooth', block: 'center' })"
-  ).catch(() => {});
+  ).catch(() => {}));
 }
 
 // Installeren en Tabchat opnieuw starten

@@ -30,22 +30,28 @@ async function request(callback) {
 // ---------- keuzevenster ----------
 function open(sources) {
   store.shareOpen = true;
-  store.win.contentView.removeChildView(store.share); // bovenop alles leggen
-  store.win.contentView.addChildView(store.share);
+  const v = views.page('share'); // pas laden als je hem nodig hebt
+  store.win.contentView.removeChildView(v); // bovenop alles leggen
+  store.win.contentView.addChildView(v);
   views.layout();
-  store.share.webContents.send('share-open', sources.map(s => ({
+  const list = sources.map(s => ({
     id: s.id,
     name: s.name,
     type: s.id.startsWith('screen') ? 'screen' : 'window',
     thumb: s.thumbnail.isEmpty() ? null : s.thumbnail.toDataURL()
-  })));
-  store.share.webContents.focus();
+  }));
+  views.whenReady('share', (w) => {
+    if (!store.shareOpen) return;
+    w.webContents.send('share-open', list);
+    w.webContents.focus();
+  });
 }
 
 function close() {
   store.shareOpen = false;
   views.layout();
   views.focusActive();
+  views.dropLater('share', 5000);
 }
 
 // Gekozen: delen

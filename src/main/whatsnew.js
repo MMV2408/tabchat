@@ -12,7 +12,7 @@ function data(from) {
 
 function send(from) {
   views.show('home');
-  store.home.webContents.send('whats-new', data(from));
+  views.whenReady('home', (h) => h.webContents.send('whats-new', data(from)));
 }
 
 // Via een klik (melding of link): venster naar voren halen
@@ -27,8 +27,7 @@ function showAfterUpdate(from) {
   if (!changelog.since(from, 'en').length) return require('./donate').afterWhatsNew();
   const go = () => setTimeout(() => send(from), 1200);
   const whenVisible = () => (store.win.isVisible() ? go() : store.win.once('show', go));
-  if (store.home.webContents.isLoading()) store.home.webContents.once('did-finish-load', whenVisible);
-  else whenVisible();
+  whenVisible();
 }
 
 module.exports = { show, showAfterUpdate };

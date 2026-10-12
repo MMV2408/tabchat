@@ -28,7 +28,7 @@ function addTab(service, url, opts = {}) {
     const saved = svc.settingUrl ? normalizeUrl(store.config.settings[svc.settingUrl]) : null;
     if (!given && !saved) {
       views.show('home');
-      store.home.webContents.send('ask-url', service);
+      views.whenReady('home', (h) => h.webContents.send('ask-url', service));
       return;
     }
     // Ingevuld en nog niets bewaard? Dan onthouden voor de volgende keer
@@ -250,7 +250,7 @@ function toggleFullScreen() {
 function showShortcuts() {
   require('./palette').hide();
   views.show('home');
-  store.home.webContents.send('show-shortcuts');
+  views.whenReady('home', (h) => h.webContents.send('show-shortcuts'));
 }
 
 function setSetting(key, value) {
