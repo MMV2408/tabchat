@@ -1,2 +1,5 @@
 node_modules/
 dist/
+packaging/flatpak/repo/
+packaging/flatpak/build/
+packaging/flatpak/.flatpak-builder/
