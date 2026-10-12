@@ -1,12 +1,12 @@
-/* Kleuren van alle Tabchat-schermen. Donker is standaard;
-   bij een licht systeemthema (of Thema = Licht) gelden de waarden hieronder. */
+/* Colors of all Tabchat screens. Dark is the default;
+   with a light system theme (or Theme = Light) the values below apply. */
 :root {
   color-scheme: dark;
-  --bg-0: #1e1f22;      /* tabbalk, kaarten */
-  --bg-1: #2b2d31;      /* pagina, knoppen */
+  --bg-0: #1e1f22;      /* tab bar, cards */
+  --bg-1: #2b2d31;      /* page, buttons */
   --bg-2: #35373c;      /* hover */
-  --bg-3: #4e5058;      /* actief tabblad, randen */
-  --bg-sel: #404249;    /* geselecteerd in Ctrl+K */
+  --bg-3: #4e5058;      /* active tab, borders */
+  --bg-sel: #404249;    /* selected in Ctrl+K */
   --line: #3f4147;
   --text: #dbdee1;
   --text-strong: #ffffff;
@@ -22,7 +22,7 @@
   --slider-off: #4e5058;
   --scroll: #1e1f22;
   --backdrop: rgba(0, 0, 0, .5);
-  --personal-bg: #2c4a37;   /* privé-account (Microsoft) */
+  --personal-bg: #2c4a37;   /* personal account (Microsoft) */
   --personal-hover: #355a43;
   --personal-text: #bff0cf;
 }

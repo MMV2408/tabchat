@@ -1,14 +1,15 @@
-// Alles wat je met tabbladen en de app kunt doen.
-// Wordt gebruikt door sneltoetsen, Ctrl+K, het rechtsklikmenu en de schermen.
+// Everything you can do with tabs and the app.
+// Used by shortcuts, Ctrl+K, the right-click menu and the screens.
 const { app, session } = require('electron');
 const store = require('./store');
 const config = require('./config');
 const { CATALOG, urlFor } = require('./catalog');
 const views = require('./views');
+const log = require('./log');
 const microsoft = require('./microsoft');
 
-// ---------- tabbladen toevoegen en weghalen ----------
-// Eerste keer "whatsapp", tweede keer "whatsapp-2" enz. (eigen login per tabblad)
+// ---------- adding and removing tabs ----------
+// First time "whatsapp", second time "whatsapp-2" etc. (own login per tab)
 function nextId(service) {
   let id = service;
   let n = 2;
@@ -22,7 +23,7 @@ function addTab(service, url, opts = {}) {
   if (opts.temp) tab.temp = true;
   const svc = CATALOG[service];
   if (svc.askUrl) {
-    // Adres verschilt per school: het adres uit de instellingen, anders eerst vragen
+    // Address differs per school: the address from the settings, otherwise ask first
     const { normalizeUrl } = require('./catalog');
     const given = normalizeUrl(url);
     const saved = svc.settingUrl ? normalizeUrl(store.config.settings[svc.settingUrl]) : null;
@@ -31,7 +32,7 @@ function addTab(service, url, opts = {}) {
       views.whenReady('home', (h) => h.webContents.send('ask-url', service));
       return;
     }
-    // Ingevuld en nog niets bewaard? Dan onthouden voor de volgende keer
+    // Entered and nothing saved yet? Then remember it for next time
     if (given && svc.settingUrl && !saved) store.config.settings[svc.settingUrl] = given;
     else if (given && given !== saved) tab.url = given;
   }
@@ -42,13 +43,13 @@ function addTab(service, url, opts = {}) {
   if (CATALOG[service].group && !store.config.loginNoticeShown) microsoft.showLoginNotice();
 }
 
-// ---------- eigen websites (zie custom.js) ----------
+// ---------- your own websites (see custom.js) ----------
 function addCustom(data, temp) {
   const custom = require('./custom');
   const c = custom.clean(data);
   if (!c) return;
   if (temp) {
-    // Incognito: alleen dit ene tabblad, niets bewaren
+    // Incognito: just this one tab, save nothing
     const id = custom.newId('temp');
     custom.register({ id, ...c, school: false, temp: true });
     return addTab(id, null, { temp: true });
@@ -72,7 +73,7 @@ function updateCustom(id, data) {
   config.save();
   for (const tab of store.config.tabs) {
     if (tab.service !== id || !store.views[tab.id]) continue;
-    if (schoolChanged) { views.destroyView(tab.id); views.createServiceView(tab); } // andere login
+    if (schoolChanged) { views.destroyView(tab.id); views.createServiceView(tab); } // different login
     else if (urlChanged) store.views[tab.id].webContents.loadURL(c.url);
   }
   views.layout();
@@ -88,21 +89,21 @@ async function removeCustom(id) {
   views.broadcast();
 }
 
-// Incognito-tabblad dicht: dienst en tijdelijke opslag opruimen
+// Incognito tab closed: clean up the service and its temporary storage
 function forgetTemp(tab) {
   if (!tab.temp) return;
   if (store.config.tabs.some(t => t.service === tab.service)) return;
   require('./custom').unregister(tab.service);
-  session.fromPartition(microsoft.partitionFor(tab)).clearStorageData().catch(() => {});
+  session.fromPartition(microsoft.partitionFor(tab)).clearStorageData().catch(e => log.warn('clear incognito data:', e));
 }
 
-// Sluiten: tabblad weg, maar login blijft bewaard (dus snel weer toe te voegen)
+// Close: tab gone, but the login is kept (so it's quick to add again)
 function closeTab(id = store.active) {
   const tabs = store.config.tabs;
   const i = tabs.findIndex(t => t.id === id);
   if (i < 0) return;
   const closing = tabs[i];
-  if (!closing.temp) store.closedTabs.push({ tab: { ...closing }, index: i }); // incognito komt niet terug
+  if (!closing.temp) store.closedTabs.push({ tab: { ...closing }, index: i }); // incognito doesn't come back
   tabs.splice(i, 1);
   config.save();
   views.destroyView(id);
@@ -127,7 +128,7 @@ function reopenTab() {
   views.show(tab.id);
 }
 
-// Verwijderen (in het +-scherm): tabblad weg én uitloggen
+// Remove (on the + screen): tab gone and signed out
 async function removeTab(id) {
   const tabs = store.config.tabs;
   const i = tabs.findIndex(t => t.id === id);
@@ -139,7 +140,7 @@ async function removeTab(id) {
   views.destroyView(id);
   forgetTemp(removed);
   if (store.lastTab === id) store.lastTab = null;
-  // Login wissen, tenzij een ander tabblad dezelfde login gebruikt
+  // Clear the login, unless another tab uses the same login
   if (!tabs.some(t => microsoft.partitionFor(t) === part)) {
     await session.fromPartition(part).clearStorageData();
   }
@@ -147,7 +148,7 @@ async function removeTab(id) {
   views.show(store.active);
 }
 
-// ---------- volgorde ----------
+// ---------- order ----------
 function moveTab(id, dir) {
   const tabs = store.config.tabs;
   const i = tabs.findIndex(t => t.id === id);
@@ -158,12 +159,12 @@ function moveTab(id, dir) {
   views.broadcast();
 }
 
-// Slepen: tabblad naar een nieuwe plek (index) verplaatsen
+// Drag: move a tab to a new position (index)
 function reorderTab(id, to) {
   const tabs = store.config.tabs;
   const from = tabs.findIndex(t => t.id === id);
   if (from < 0 || typeof to !== 'number') return;
-  if (from < to) to--; // na het weghalen schuift alles één plek op
+  if (from < to) to--; // after removing, everything shifts one place
   to = Math.max(0, Math.min(to, tabs.length - 1));
   if (from === to) return;
   const [tab] = tabs.splice(from, 1);
@@ -182,17 +183,17 @@ function cycle(dir) {
 
 function goToIndex(i) {
   const tabs = store.config.tabs;
-  if (i === -1) i = tabs.length - 1; // -1 = laatste tabblad
+  if (i === -1) i = tabs.length - 1; // -1 = last tab
   if (tabs[i]) views.show(tabs[i].id);
 }
 
-// ---------- binnen een tabblad ----------
+// ---------- inside a tab ----------
 function reload(id = store.active) {
   views.reloadView(id);
 }
 
-// Alle tabbladen herladen (voor als een dienst vastloopt).
-// Tabbladen die nog wachten op een Microsoft-login slaan we over.
+// Reload all tabs (for when a service gets stuck).
+// Tabs still waiting for a Microsoft sign-in are skipped.
 function reloadAll() {
   const waiting = require('./microsoft').waiting;
   for (const [id, v] of Object.entries(store.views)) {
@@ -225,8 +226,8 @@ function navigate(dir, id = store.active) {
   if (dir > 0 && h.canGoForward()) h.goForward();
 }
 
-// ---------- slaapstand ----------
-// Nu laten slapen. Is het het tabblad dat je bekijkt? Dan eerst naar een ander.
+// ---------- tab sleep ----------
+// Sleep now. Is it the tab you're viewing? Then switch to another one first.
 function sleepNow(id = store.active) {
   const tabs = store.config.tabs;
   const i = tabs.findIndex(t => t.id === id);
@@ -264,7 +265,7 @@ function setSetting(key, value) {
     for (const v of Object.values(store.views)) v.webContents.session.setSpellCheckerEnabled(value);
   }
   if (key === 'shareMicrosoft') {
-    // Microsoft-tabbladen opnieuw laden met de nieuwe opslag
+    // Reload Microsoft tabs with the new storage
     for (const tab of store.config.tabs) {
       if (!CATALOG[tab.service].group || require('./sleep').isAsleep(tab.id)) continue;
       views.destroyView(tab.id);
@@ -273,7 +274,7 @@ function setSetting(key, value) {
     views.layout();
   }
   if (key === 'brightspaceUrl') {
-    // Nieuw adres: alle Brightspace-tabbladen gaan naar het nieuwe adres
+    // New address: all Brightspace tabs go to the new address
     const clean = require('./catalog').normalizeUrl(value) || '';
     store.config.settings.brightspaceUrl = clean;
     config.save();
@@ -282,7 +283,7 @@ function setSetting(key, value) {
       delete tab.url;
       if (store.views[tab.id]) store.views[tab.id].webContents.loadURL(urlFor(tab));
     }
-    require('./icons').refresh(); // logo van de nieuwe school
+    require('./icons').refresh(); // logo of the new school
   }
   if (key === 'tabBar') { store.barRevealed = false; views.layout(); views.watchEdge(); }
   if (key === 'runInBackground') require('./tray').sync();
@@ -294,17 +295,17 @@ function setSetting(key, value) {
   views.broadcast();
 }
 
-// Alle logins (cookies) naar schijf schrijven (bij afsluiten en voor een update)
+// Write all logins (cookies) to disk (on quit and before an update)
 async function flushLogins() {
   const parts = new Set([...store.config.tabs.map(microsoft.partitionFor), ...microsoft.keptSessions]);
   await Promise.all([...parts].map(p =>
-    session.fromPartition(p).cookies.flushStore().catch(() => {})
+    session.fromPartition(p).cookies.flushStore().catch(e => log.warn('save logins:', p, e))
   ));
 }
 
 let flushing = false;
 async function quit() {
-  store.quitting = true; // kruisje-gedrag uit: venster mag nu echt dicht
+  store.quitting = true; // close-button behavior off: the window may really close now
   if (flushing) return;
   flushing = true;
   await flushLogins();
@@ -312,9 +313,9 @@ async function quit() {
   app.quit();
 }
 
-// Opnieuw starten (bv. na het aan/uitzetten van hardwareversnelling)
+// Restart (e.g. after toggling hardware acceleration)
 function relaunch() {
-  // AppImage: het programma zelf staat in $APPIMAGE (de uitgepakte map verdwijnt bij afsluiten)
+  // AppImage: the program itself is in $APPIMAGE (the extracted folder disappears on quit)
   app.relaunch(process.env.APPIMAGE ? { execPath: process.env.APPIMAGE } : undefined);
   quit();
 }

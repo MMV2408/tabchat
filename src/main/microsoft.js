@@ -1,33 +1,34 @@
-// Alles rond inloggen bij Microsoft (Teams, Outlook, OneDrive):
-// - één gedeelde login
-// - tabbladen na elkaar laten inloggen (anders dubbele tweestapsverificatie)
-// - ingelogd blijven na afsluiten
+// Everything around signing in to Microsoft (Teams, Outlook, OneDrive):
+// - one shared sign-in
+// - tabs sign in one after another (otherwise double two-step verification)
+// - staying signed in after quitting
 const { dialog } = require('electron');
 const store = require('./store');
 const config = require('./config');
-const { CATALOG, isMsAppHost, urlFor, isOwnHost } = require('./catalog');
-// De dienst zelf (Microsoft, of bv. de Brightspace van je school) en geen inlogscherm
+const { CATALOG, isMsAppHost, urlFor, isOwnHost, hostOf } = require('./catalog');
+const log = require('./log');
+// The service itself (Microsoft, or e.g. your school's Brightspace) and not a sign-in page
 const isAppHost = (tab, host) => isMsAppHost(host) || isOwnHost(tab, host);
 const views = require('./views');
 const { t } = require('./i18n');
 
-// ---------- welke opslag (login) een tabblad gebruikt ----------
-// Met "Eén Microsoft-account" delen Teams, Outlook en OneDrive dezelfde opslag.
-// Tweede accounts (bv. "outlook-2") delen met "onedrive-2" enz.
+// ---------- which storage (login) a tab uses ----------
+// With "One Microsoft account", Teams, Outlook and OneDrive share the same storage.
+// Second accounts (e.g. "outlook-2") share with "onedrive-2" etc.
 function partitionFor(tab) {
-  if (tab.temp) return 'temp-' + tab.id; // incognito: alleen in het geheugen, weg na sluiten
+  if (tab.temp) return 'temp-' + tab.id; // incognito: in memory only, gone after closing
   const group = CATALOG[tab.service].group;
   if (group && store.config.settings.shareMicrosoft) {
-    const suffix = tab.id.slice(tab.service.length); // '' of '-2'
+    const suffix = tab.id.slice(tab.service.length); // '' or '-2'
     return 'persist:' + group + suffix;
   }
   return 'persist:' + tab.id;
 }
 
-// ---------- na elkaar inloggen ----------
-// Het eerste tabblad laadt direct; de rest wacht tot dat tabblad ingelogd is.
-const msReady = new Set(); // logins (partities) die deze sessie al ingelogd zijn
-const waiting = new Set(); // tabbladen die nog wachten met laden
+// ---------- signing in one after another ----------
+// The first tab loads right away; the rest waits until that tab is signed in.
+const msReady = new Set(); // logins (partitions) already signed in this session
+const waiting = new Set(); // tabs still waiting to load
 
 function shouldWait(tab) {
   const part = partitionFor(tab);
@@ -44,25 +45,23 @@ function loadTab(id) {
 
 function onLoggedIn(tab) {
   const part = partitionFor(tab);
-  // 2 seconden wachten zodat Microsoft alle login-cookies heeft opgeslagen
+  // wait 2 seconds so Microsoft has stored all login cookies
   setTimeout(() => {
     for (const t of store.config.tabs) {
       if (t.id === tab.id || partitionFor(t) !== part || !store.views[t.id]) continue;
       if (waiting.has(t.id)) { loadTab(t.id); continue; }
-      // Staat het andere tabblad nog op een inlogscherm? Dan opnieuw laden.
-      let host = '';
-      try { host = new URL(store.views[t.id].webContents.getURL()).hostname; } catch {}
+      // Is the other tab still on a sign-in page? Then reload it.
+      const host = hostOf(store.views[t.id].webContents.getURL());
       if (host && !isAppHost(t, host)) loadTab(t.id);
     }
   }, 2000);
 }
 
-// Merken wanneer een tabblad van het inlogscherm terug naar de dienst gaat
+// Notice when a tab goes from the sign-in page back to the service
 function watchLogin(tab, view) {
   let onLogin = false;
   view.webContents.on('did-navigate', (_e, url) => {
-    let host = '';
-    try { host = new URL(url).hostname; } catch {}
+    const host = hostOf(url);
     if (!host) return;
     const part = partitionFor(tab);
     if (!isAppHost(tab, host)) {
@@ -75,9 +74,9 @@ function watchLogin(tab, view) {
   });
 }
 
-// ---------- ingelogd blijven ----------
-// Microsoft en schoolaccounts gebruiken "sessie-cookies" die verdwijnen als je de app
-// sluit. Hier maken we die cookies 14 dagen geldig, net als "Aangemeld blijven".
+// ---------- staying signed in ----------
+// Microsoft and school accounts use "session cookies" that disappear when you close the app.
+// Here we make those cookies valid for 14 days, just like "Stay signed in".
 const keptSessions = new Set();
 function keepLogin(ses, part) {
   if (keptSessions.has(part)) return;
@@ -96,11 +95,11 @@ function keepLogin(ses, part) {
       expirationDate: Date.now() / 1000 + 14 * 24 * 3600
     };
     if (!cookie.hostOnly) details.domain = cookie.domain;
-    ses.cookies.set(details).catch(() => {});
+    ses.cookies.set(details).catch(e => log.warn('keep login cookie:', cookie.name, e.message));
   });
 }
 
-// ---------- eenmalige uitleg bij het eerste Microsoft-tabblad ----------
+// ---------- one-time explanation on the first Microsoft tab ----------
 async function showLoginNotice() {
   const { response } = await dialog.showMessageBox(store.win, {
     type: 'info',

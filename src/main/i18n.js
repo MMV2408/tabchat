@@ -1,13 +1,13 @@
-// Alle teksten van Tabchat in het Nederlands en Engels.
-// Een nieuwe taal toevoegen = een nieuw blok hieronder (zelfde sleutels) en
-// de taal toevoegen aan de keuzelijst in home.html.
-// {naam} in een tekst wordt vervangen, bv. t('home.removeConfirm', { name: 'WhatsApp' }).
+// All Tabchat texts in Dutch and English.
+// Adding a language = a new block below (same keys) and
+// adding the language to the dropdown in home.html.
+// {name} in a text is replaced, e.g. t('home.removeConfirm', { name: 'WhatsApp' }).
 const { app } = require('electron');
 const store = require('./store');
 
 const STRINGS = {
   nl: {
-    // tabbalk
+    // tab bar
     'tabs.hint': 'sleep om te verplaatsen · rechtsklik voor meer',
     'tabs.asleep': 'Slaapt · klik om te laden',
     'tabs.plus': 'Diensten toevoegen en instellingen (Alt+T)',
@@ -18,7 +18,7 @@ const STRINGS = {
     'tabs.dndSystem': '🌙 Niet storen via Ubuntu',
     'tabs.dndSystemTitle': 'Staat aan in Ubuntu. Uitzetten doe je via het menu rechtsboven in Ubuntu.',
 
-    // +-scherm
+    // + screen
     'home.subBefore': 'Voeg je chat-apps toe en stel Tabchat in. Tip: druk overal op',
     'home.subAfter': 'om snel te zoeken.',
     'home.allKeys': '⌨ Alle sneltoetsen',
@@ -38,7 +38,7 @@ const STRINGS = {
     'home.addTitle': 'Alt+{k}: toevoegen',
     'home.addBtn': '+ Toevoegen',
 
-    // diensten
+    // services
     'svc.whatsapp': 'Chatten met je telefoonnummer',
     'svc.discord': 'Servers, vrienden en spraak',
     'svc.teams': 'Chatten en vergaderen',
@@ -114,7 +114,7 @@ const STRINGS = {
     'home.addWorkTitle': 'Voor school- en werkaccounts (Microsoft 365){k}',
     'home.addPersonalTitle': 'Voor privé-accounts: Outlook.com, Hotmail en Live',
 
-    // niet storen
+    // do not disturb
     'dnd.on': '🌙 Staat aan',
     'dnd.off': 'Staat uit. Zet aan voor:',
     'dnd.1h': '1 uur',
@@ -138,7 +138,7 @@ const STRINGS = {
     'f.openLinks.internal': 'Tabchat zelf (nieuw venster)',
     'upd.store': 'Updates gaan automatisch via {s}.',
 
-    // functies
+    // features
     'f.language.name': 'Taal',
     'f.language.desc': 'De taal van Tabchat. Automatisch volgt de taal van je computer.',
     'f.language.auto': 'Automatisch',
@@ -208,7 +208,7 @@ const STRINGS = {
     'upd.doneBodyFrom': 'Je had versie {v}. Alles staat weer klaar.',
     'upd.doneBody': 'Alles staat weer klaar.',
 
-    // sneltoetsen-venster
+    // shortcuts window
     'keys.title': 'Sneltoetsen',
     'keys.close': 'Sluiten (Esc)',
     'keys.general': 'Algemeen',
@@ -235,7 +235,7 @@ const STRINGS = {
     'keys.zoomReset': 'Zoom herstellen',
     'keys.tip': 'Rechtsklik op een tabblad voor herladen, dempen, slaapstand, verplaatsen en sluiten.',
 
-    // snelzoeken (Ctrl+K)
+    // quick search (Ctrl+K)
     'pal.placeholder': 'Zoek een dienst of actie…',
     'pal.choose': '↑↓ kiezen',
     'pal.open': 'Enter openen',
@@ -264,7 +264,7 @@ const STRINGS = {
     'pal.shortcuts': 'Alle sneltoetsen',
     'pal.quit': 'Tabchat afsluiten',
 
-    // scherm delen
+    // screen sharing
     'share.title': 'Wat wil je delen?',
     'share.sub': 'Kies een scherm of venster. Geluid delen kan op Linux niet.',
     'share.screens': 'Schermen',
@@ -289,7 +289,7 @@ const STRINGS = {
     'tray.noticeTitle': 'Tabchat draait op de achtergrond',
     'tray.noticeBody': 'Je krijgt nog steeds berichten. Open Tabchat via het icoon rechtsboven. Echt afsluiten: Ctrl+Q of "Afsluiten" in dat menu.',
 
-    // rechtsklikmenu op een tabblad
+    // right-click menu on a tab
     'menu.reload': 'Herladen',
     'menu.mute': 'Geluid dempen',
     'menu.unmute': 'Geluid aanzetten',
@@ -299,7 +299,7 @@ const STRINGS = {
     'menu.right': 'Naar rechts',
     'menu.close': 'Tabblad sluiten',
 
-    // Microsoft-login
+    // Microsoft sign-in
     'ms.title': 'Ingelogd blijven bij Microsoft',
     'ms.message': 'Tabchat kan je Microsoft-login onthouden',
     'ms.detail': 'Microsoft en scholen gebruiken cookies die normaal verdwijnen zodra je de app sluit. Tabchat kan die cookies 14 dagen bewaren, zodat je niet elke keer opnieuw hoeft in te loggen.\n\nDeze cookies blijven alleen op deze computer. Tabchat stuurt niets naar de maker of naar anderen.\n\nGebruik je een gedeelde computer? Kies dan "Niet onthouden". Je kunt dit later altijd wijzigen in het +-scherm.',
@@ -597,7 +597,7 @@ const STRINGS = {
   }
 };
 
-// Huidige taal: eigen keuze, of de taal van de computer (Nederlands of anders Engels)
+// Current language: own choice, or the computer's language (Dutch, otherwise English)
 function lang() {
   const chosen = store.config && store.config.settings.language;
   if (chosen && chosen !== 'auto' && STRINGS[chosen]) return chosen;
@@ -610,7 +610,7 @@ function t(key, vars = {}) {
   return s;
 }
 
-// Alle teksten van de huidige taal (voor de schermen, via preload)
+// All texts of the current language (for the screens, via preload)
 function strings() {
   return { lang: lang(), strings: STRINGS[lang()] };
 }

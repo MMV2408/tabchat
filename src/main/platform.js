@@ -1,5 +1,5 @@
-// Hoe Tabchat geïnstalleerd is. Bij Flathub en de Snap Store regelt de winkel
-// de updates, en werkt starten bij inloggen anders; die opties verbergen we dan.
+// How Tabchat was installed. With Flathub and the Snap Store the store handles
+// updates and start-at-login works differently, so we hide those options there.
 const { app } = require('electron');
 const fs = require('fs');
 

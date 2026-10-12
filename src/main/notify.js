@@ -1,14 +1,14 @@
-// Meldingen van Tabchat zelf (updates, tray-uitleg).
-// Een klik op de melding opent Tabchat; zonder klik-actie lijkt Ubuntu te "laden" en gebeurt er niets.
+// Notifications from Tabchat itself (updates, tray explanation).
+// Clicking opens Tabchat; without a click action Ubuntu seems to "load" and nothing happens.
 const { Notification } = require('electron');
 const path = require('path');
 
 const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
-const live = new Set(); // vasthouden, anders ruimt Node de melding op en werkt klikken niet
+const live = new Set(); // keep a reference, otherwise Node garbage-collects the notification and clicks stop working
 
 function notify({ title, body, onClick }) {
   const notifier = require('./notifier');
-  if (notifier.isAvailable()) { // via Ubuntu: geen ladende muis na een klik (valt zelf terug op Electron)
+  if (notifier.isAvailable()) { // via Ubuntu: no loading cursor after a click (falls back to Electron by itself)
     return notifier.show({ title, body, onClick: onClick || (() => require('./tray').showWindow()) });
   }
   if (!Notification.isSupported()) return;

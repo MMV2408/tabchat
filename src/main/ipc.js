@@ -1,5 +1,5 @@
-// Berichten van de schermen (tabbalk, +-scherm, Ctrl+K) naar de app.
-// Elke knop in een .html-bestand komt via preload.js hier uit.
+// Messages from the screens (tab bar, + screen, Ctrl+K) to the app.
+// Every button in an .html file ends up here via preload.js.
 const { ipcMain, Menu } = require('electron');
 const store = require('./store');
 const views = require('./views');
@@ -11,7 +11,7 @@ const sleep = require('./sleep');
 const i18n = require('./i18n');
 const { t } = i18n;
 
-// Rechtsklikmenu op een tabblad
+// Right-click menu on a tab
 function showTabMenu(id) {
   const tabs = store.config.tabs;
   const i = tabs.findIndex(t => t.id === id);
@@ -32,24 +32,24 @@ function showTabMenu(id) {
 
 function register() {
   ipcMain.handle('get-state', () => views.getState());
-  ipcMain.handle('get-strings', () => i18n.strings()); // teksten in de gekozen taal
+  ipcMain.handle('get-strings', () => i18n.strings()); // texts in the chosen language
 
-  // tabbladen
+  // tabs
   ipcMain.on('open', (_e, id) => { if (id === 'home' || store.config.tabs.some(t => t.id === id)) views.show(id); });
   ipcMain.on('tab-sleep', (_e, id, allowed) => sleep.setAllowed(id, allowed));
   ipcMain.on('add', (_e, service, url) => actions.addTab(service, url));
-  // Eigen titelbalk: − □ ✕
+  // Custom title bar: − □ ✕
   ipcMain.on('win-control', (_e, action) => {
     if (!store.alive()) return;
     if (action === 'minimize') store.win.minimize();
     else if (action === 'maximize') store.win.isMaximized() ? store.win.unmaximize() : store.win.maximize();
-    else if (action === 'close') store.win.close(); // met tray: verbergen (zie tray.js)
+    else if (action === 'close') store.win.close(); // with tray: hide (see tray.js)
   });
-  // Tabbalk automatisch verbergen: muis aan de bovenrand / van de balk af
+  // Auto-hide tab bar: mouse at the top edge / off the bar
   ipcMain.on('bar-edge', () => views.revealBar(true));
   ipcMain.on('bar-hover', (_e, inside) => { if (inside) views.revealBar(true); else views.hideBarSoon(); });
   ipcMain.handle('check-url', (_e, url) => require('./brightspace').check(url));
-  // Eigen websites
+  // Your own websites
   ipcMain.handle('check-site', (_e, url) => require('./custom').check(url));
   ipcMain.on('custom-add', (_e, data, temp) => actions.addCustom(data, temp));
   ipcMain.on('custom-update', (_e, id, data) => actions.updateCustom(id, data));
@@ -59,17 +59,17 @@ function register() {
   ipcMain.on('reorder', (_e, id, to) => actions.reorderTab(id, to));
   ipcMain.on('tab-menu', (_e, id) => showTabMenu(id));
 
-  // instellingen
+  // settings
   ipcMain.on('set-setting', (_e, key, value) => actions.setSetting(key, value));
 
-  // ongelezen: badge-getal van een dienst (zie preload/service.js)
+  // unread: badge count of a service (see preload/service.js)
   ipcMain.on('badge', (e, n) => {
     const id = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
     if (id) unread.setBadge(id, n);
   });
 
-  // niet storen
-  ipcMain.on('get-dnd', (e) => { e.returnValue = dnd.isOn(); }); // vraag van preload/service.js
+  // do not disturb
+  ipcMain.on('get-dnd', (e) => { e.returnValue = dnd.isOn(); }); // asked by preload/service.js
   ipcMain.on('set-dnd', (_e, mode) => dnd.set(mode));
 
   // updates
@@ -79,10 +79,10 @@ function register() {
   ipcMain.on('feedback-open', () => require('./feedback').open());
   ipcMain.on('whats-new-open', () => require('./whatsnew').show(null));
   ipcMain.on('whats-new-closed', () => require('./donate').afterWhatsNew());
-  // Klik op een melding van een dienst: venster tonen met dat tabblad vooraan
-  // Meldingen van diensten via Ubuntu (zie notifier.js)
+  // Click on a service notification: show the window with that tab in front
+  // Service notifications via Ubuntu (see notifier.js)
   ipcMain.on('notify-available', (e) => { e.returnValue = require('./notifier').isAvailable(); });
-  const shown = new Map(); // tabblad + pagina-id -> D-Bus-id
+  const shown = new Map(); // tab + page id -> D-Bus id
   ipcMain.on('web-notify', (e, n) => {
     const tabId = Object.keys(store.views).find(k => store.views[k].webContents === e.sender);
     if (!tabId || !n) return;
@@ -108,11 +108,11 @@ function register() {
     views.show(id);
   });
 
-  // scherm delen
+  // screen sharing
   ipcMain.on('share-pick', (_e, id) => require('./share').pick(id));
   ipcMain.on('share-cancel', () => require('./share').cancel());
 
-  // snelzoeken
+  // quick search
   ipcMain.on('palette-close', () => palette.hide());
   ipcMain.on('relaunch', () => actions.relaunch());
   ipcMain.on('palette-run', (_e, item) => palette.run(item));

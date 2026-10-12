@@ -1,13 +1,13 @@
-// Opslaan en laden van tabbladen en instellingen in ~/.config/Tabchat/config.json
+// Saving and loading tabs and settings in ~/.config/tabchat/config.json
 const { app } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const store = require('./store');
 const { CATALOG } = require('./catalog');
 
-// Een nieuwe instelling = één regel hier (plus een schakelaar in home.html)
+// A new setting = one line here (plus a switch in home.html)
 const DEFAULT_SETTINGS = {
-  language: 'auto', // 'auto', 'nl' of 'en'
+  language: 'auto', // 'auto', 'nl' or 'en'
   spellcheck: false,
   shareMicrosoft: true,
   stayLoggedIn: true,
@@ -19,17 +19,17 @@ const DEFAULT_SETTINGS = {
   sleepMinutes: 30,
   sleepOnStart: false,
   autoUpdate: true,
-  followSystemDnd: true, // Niet storen van Ubuntu/GNOME volgen
-  theme: 'system',       // 'system', 'dark' of 'light'
-  openLinks: 'default',  // 'default', 'internal' of een browser-id (bv. 'firefox')
-  brightspaceUrl: '',    // Brightspace van je school (één keer invullen in het +-scherm)
-  tabBar: 'normal',      // 'normal', 'compact' (alleen icoontjes) of 'autohide' (verschijnt bovenaan bij de muis)
-  hiddenServices: [],    // vaste diensten die je uit het +-scherm hebt gehaald
-  cardOrder: [],         // volgorde van de kaarten in het +-scherm (versleept)
-  hardwareAcceleration: true // uit = hulp bij beeldproblemen, werkt na herstart
+  followSystemDnd: true, // follow Do not disturb of Ubuntu/GNOME
+  theme: 'system',       // 'system', 'dark' or 'light'
+  openLinks: 'default',  // 'default', 'internal' or a browser id (e.g. 'firefox')
+  brightspaceUrl: '',    // your school's Brightspace (entered once on the + screen)
+  tabBar: 'normal',      // 'normal', 'compact' (icons only) or 'autohide' (appears at the top near the mouse)
+  hiddenServices: [],    // built-in services hidden from the + screen
+  cardOrder: [],         // order of the cards on the + screen (dragged)
+  hardwareAcceleration: true // off = fix for display problems, takes effect after a restart
 };
 
-// Eén instelling lezen vóór de app klaar is (bv. hardwareversnelling moet je vóór het starten kiezen)
+// Read one setting before the app is ready (e.g. hardware acceleration must be chosen before startup)
 function peekSetting(key) {
   try {
     const s = JSON.parse(require('fs').readFileSync(configFile(), 'utf8')).settings || {};
@@ -44,7 +44,7 @@ function configFile() {
 function load() {
   try {
     const c = JSON.parse(fs.readFileSync(configFile(), 'utf8'));
-    require('./custom').registerAll(c.custom); // eigen websites eerst, anders vallen hun tabbladen weg
+    require('./custom').registerAll(c.custom); // your own websites first, otherwise their tabs would be dropped
     return {
       tabs: Array.isArray(c.tabs) ? c.tabs.filter(t => CATALOG[t.service]) : [],
       settings: { ...DEFAULT_SETTINGS, ...(c.settings || {}) },
@@ -60,18 +60,18 @@ function load() {
       icons: c.icons && typeof c.icons === 'object' ? c.icons : {}
     };
   } catch {
-    // Geen of kapot bestand: met een lege app beginnen
+    // No file or a broken one: start with an empty app
     return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null, lastVersion: null, donateNever: false, custom: [], icons: {} };
   }
 }
 
 function save() {
   try {
-    // Incognito-tabbladen worden nooit bewaard
+    // Incognito tabs are never saved
     const data = { ...store.config, tabs: store.config.tabs.filter(t => !t.temp) };
     fs.writeFileSync(configFile(), JSON.stringify(data, null, 2));
   } catch (err) {
-    console.error('Kon instellingen niet opslaan:', err);
+    require('./log').error('saving settings failed:', err);
   }
 }
 

@@ -1,7 +1,7 @@
-// Automatische updates via GitHub Releases (electron-updater).
-// Tabchat kijkt bij het opstarten en daarna elke 6 uur of er een nieuwe versie is,
-// downloadt die op de achtergrond en vraagt dan of je wilt installeren.
-// Bij een .deb vraagt Ubuntu daarbij om je wachtwoord.
+// Automatic updates via GitHub Releases (electron-updater).
+// Tabchat checks on startup and every 6 hours after that for a new version,
+// downloads it in the background and then asks whether you want to install.
+// With a .deb, Ubuntu asks for your password.
 const { app, Notification } = require('electron');
 const path = require('path');
 const store = require('./store');
@@ -14,21 +14,14 @@ let autoUpdater = null;
 try {
   ({ autoUpdater } = require('electron-updater'));
 } catch {
-  // electron-updater niet geïnstalleerd: updates uit
+  // electron-updater not installed: updates off
 }
 
 const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
 
-// Logboek van de updater: ~/.config/tabchat/updater.log (bij problemen kan een gebruiker dit meesturen)
-const LOG = path.join(app.getPath('userData'), 'updater.log');
-function log(level, ...parts) {
-  try {
-    const fs = require('fs');
-    try { if (fs.statSync(LOG).size > 256 * 1024) fs.renameSync(LOG, LOG + '.old'); } catch {}
-    const text = parts.map(x => (x instanceof Error ? x.stack : typeof x === 'string' ? x : JSON.stringify(x))).join(' ');
-    fs.appendFileSync(LOG, `${new Date().toISOString()} ${app.getVersion()} [${level}] ${text}\n`);
-  } catch {}
-}
+// Update log: ~/.config/tabchat/updater.log (a user can send it along when updating fails)
+const ulog = require('./log').create('updater');
+const log = (level, ...parts) => ulog[level](...parts);
 if (autoUpdater) {
   autoUpdater.logger = {
     info: (...a) => log('info', ...a),
@@ -39,12 +32,12 @@ if (autoUpdater) {
 }
 let timer = null;
 
-// Status voor het +-scherm, de tabbalk en het tray-menu
+// State for the + screen, the tab bar and the tray menu
 const status = {
   current: app.getVersion(),
   state: 'idle',   // idle | checking | latest | downloading | ready | failed | error | dev | off | store
-  store: platform.storeName, // Flathub / Snap Store: die regelen de updates
-  version: null,   // nieuwe versie, als die er is
+  store: platform.storeName, // Flathub / Snap Store: they handle updates
+  version: null,   // new version, if there is one
   percent: 0
 };
 
@@ -57,19 +50,19 @@ function enabled() {
   return store.config.settings.autoUpdate;
 }
 
-// Na een update: eenmalig laten weten dat het gelukt is
+// After an update: tell once that it worked
 function announceUpdate() {
-  if (!app.isPackaged) return; // npm start: niets onthouden en niets melden
+  if (!app.isPackaged) return; // npm start: remember nothing and report nothing
   const now = app.getVersion();
   const before = store.config.lastVersion;
   if (before === now) return;
   store.config.lastVersion = now;
   require('./config').save();
-  if (before && newer(before, now)) return; // oudere versie gestart: geen "bijgewerkt"-melding
-  // Geen vorige versie bekend? Dan alleen melden als Tabchat al eerder gebruikt is
-  // (versies van vóór 1.9.1 onthielden hun versienummer nog niet)
+  if (before && newer(before, now)) return; // older version started: no "updated" notification
+  // No previous version known? Then only report if Tabchat was used before
+  // (versions before 1.9.1 didn't remember their version number yet)
   if (!before && store.config.tabs.length === 0) return require('./donate').schedule('install');
-  // Na een update: "Wat is er nieuw" tonen; de doneervraag komt pas als je dat sluit
+  // After an update: show "What's new"; the donation request comes when you close it
   require('./donate').schedule('update');
   require('./whatsnew').showAfterUpdate(before);
   require('./notify').notify({
@@ -80,14 +73,14 @@ function announceUpdate() {
 }
 
 function init() {
-  // Eerste start na installatie of update? Dan geen feedbackvraag (zie feedback.js)
+  // First start after an install or update? Then no feedback request (see feedback.js)
   const special = app.isPackaged && store.config.lastVersion !== app.getVersion();
   announceUpdate();
   require('./feedback').start(special);
-  if (platform.storeManaged) return set({ state: 'store' }); // updates via de winkel
-  if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' }); // npm start: geen updates
+  if (platform.storeManaged) return set({ state: 'store' }); // updates through the store
+  if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' }); // npm start: no updates
   autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = false; // zelf kiezen wanneer (wachtwoord nodig bij .deb)
+  autoUpdater.autoInstallOnAppQuit = false; // the user chooses when (password needed for .deb)
 
   autoUpdater.on('checking-for-update', () => set({ state: 'checking' }));
   autoUpdater.on('update-not-available', () => set({ state: 'latest' }));
@@ -95,7 +88,7 @@ function init() {
   autoUpdater.on('download-progress', (p) => set({ percent: Math.round(p.percent) }));
   autoUpdater.on('update-downloaded', (info) => {
     set({ state: 'ready', version: info.version });
-    // Klik op de melding: naar "Over Tabchat" met de knop Nu installeren
+    // Notification click: go to "About Tabchat" with the Install now button
     require('./notify').notify({
       title: t('upd.readyTitle', { v: info.version }),
       body: t('upd.readyBody'),
@@ -103,9 +96,8 @@ function init() {
     });
   });
   autoUpdater.on('error', (err) => {
-    console.error('Update-fout:', err && err.message);
     log('error', 'event error', err);
-    // Fout tijdens installeren (bv. wachtwoord geweigerd): update blijft klaarstaan
+    // Error while installing (e.g. password refused): the update stays ready
     if (installing) { installing = false; set({ state: 'failed' }); return require('./tray').showWindow(); }
     set({ state: 'error' });
   });
@@ -113,7 +105,7 @@ function init() {
   sync();
 }
 
-// Aan/uit volgens de instelling
+// On/off according to the setting
 function sync() {
   if (!app.isPackaged || !autoUpdater || platform.storeManaged) return;
   clearInterval(timer);
@@ -123,7 +115,7 @@ function sync() {
   timer = setInterval(check, 6 * 60 * 60 * 1000);
 }
 
-// Nu controleren (ook via de knop in het +-scherm)
+// Check now (also via the button on the + screen)
 function check() {
   if (platform.storeManaged) return;
   if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' });
@@ -131,40 +123,40 @@ function check() {
   autoUpdater.checkForUpdates().catch(() => set({ state: 'error' }));
 }
 
-// Venster tonen op het +-scherm, gescrold naar de update-knop
+// Show the window on the + screen, scrolled to the update button
 function showUpdate() {
   require('./tray').showWindow();
   views.show('home');
   views.whenReady('home', (h) => h.webContents.executeJavaScript(
     "document.getElementById('about').scrollIntoView({ behavior: 'smooth', block: 'center' })"
-  ).catch(() => {}));
+  ).catch(e => log('warn', 'scroll to update button:', e)));
 }
 
-// Installeren en Tabchat opnieuw starten
-// Lukt het niet (bv. wachtwoord-venster weggeklikt), dan blijft Tabchat gewoon draaien
-// en staat de update de volgende keer weer klaar.
+// Install and restart Tabchat.
+// If it fails (e.g. password window dismissed), Tabchat just keeps running
+// and the update is ready again next time.
 let installing = false;
 async function install() {
-  log('info', `Nu installeren geklikt (status ${status.state}, versie ${status.version}, bezig ${installing})`);
+  log('info', `Install now clicked (state ${status.state}, version ${status.version}, busy ${installing})`);
   if ((status.state !== 'ready' && status.state !== 'failed') || !autoUpdater || installing) return;
   installing = true;
-  // Logins eerst opslaan (maximaal 3 seconden wachten, zodat het nooit blijft hangen)
+  // Save logins first (wait at most 3 seconds, so it never hangs)
   await Promise.race([require('./actions').flushLogins(), new Promise(r => setTimeout(r, 3000))]);
-  log('info', 'logins opgeslagen, installeren starten');
-  // Venster verbergen: tijdens het wachtwoordvenster wacht Tabchat op het installeren, en dan zou
-  // Ubuntu vragen "reageert niet: geforceerd afsluiten?". Bij een verborgen venster vraagt hij dat niet.
+  log('info', 'logins saved, starting install');
+  // Hide the window: while the password dialog is open Tabchat waits for the install, and Ubuntu
+  // would ask "not responding: force quit?". It doesn't ask that for a hidden window.
   if (store.alive()) store.win.hide();
-  // Afsluiten (tray weg, venster dicht) gebeurt pas via 'before-quit' als de installatie gelukt is
+  // Quitting (tray gone, window closed) only happens via 'before-quit' once the install succeeded
   try {
-    autoUpdater.quitAndInstall(false, true); // false = niet stil, true = daarna opnieuw starten
+    autoUpdater.quitAndInstall(false, true); // false = not silent, true = restart afterwards
   } catch (e) { log('error', 'quitAndInstall', e); }
-  // Nog steeds hier na een paar seconden? Dan is het mislukt of afgebroken: melden en knop weer tonen
+  // Still here after a few seconds? Then it failed or was cancelled: report it and show the button again
   setTimeout(() => {
     if (store.quitting) return;
-    log('warn', 'installeren niet gelukt of afgebroken');
+    log('warn', 'install failed or was cancelled');
     installing = false;
     set({ state: 'failed' });
-    require('./tray').showWindow(); // venster terug, met de melding
+    require('./tray').showWindow(); // window back, with the message
   }, 3000);
 }
 

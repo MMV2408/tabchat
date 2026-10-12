@@ -1,24 +1,24 @@
-// Gedeelde status van de app. Alle andere bestanden lezen en schrijven hier.
-// Zo staat alles wat "nu" geldt op één plek.
+// Shared app state. All other files read and write here,
+// so everything that applies "right now" is in one place.
 module.exports = {
-  win: null,      // het venster
-  bar: null,      // de tabbalk bovenin
-  home: null,     // het +-scherm
-  palette: null,  // het snelzoekvenster (Ctrl+K)
-  share: null,    // keuzevenster voor scherm delen
-  config: null,   // opgeslagen instellingen en tabbladen (zie config.js)
+  win: null,      // the window
+  bar: null,      // the tab bar at the top
+  home: null,     // the + screen
+  palette: null,  // the quick search window (Ctrl+K)
+  share: null,    // screen sharing picker
+  config: null,   // saved settings and tabs (see config.js)
 
-  views: {},              // tabblad-id -> scherm van die dienst
-  active: 'home',         // wat er nu zichtbaar is: een tabblad-id of 'home'
-  barRevealed: false,     // tabbalk tijdelijk zichtbaar bij "automatisch verbergen"
-  lastTab: null,          // laatst geopende tabblad (voor Esc in het +-scherm)
+  views: {},              // tab id -> view of that service
+  active: 'home',         // what is visible now: a tab id or 'home'
+  barRevealed: false,     // tab bar temporarily visible with "auto-hide"
+  lastTab: null,          // last opened tab (for Esc on the + screen)
   paletteOpen: false,
   shareOpen: false,
-  mutedTabs: new Set(),   // gedempte tabbladen (alleen deze sessie)
-  closedTabs: [],         // gesloten tabbladen, voor Ctrl+Shift+T
-  quitting: false,        // true zodra de app echt afsluit (dan niet naar de tray)
+  mutedTabs: new Set(),   // muted tabs (this session only)
+  closedTabs: [],         // closed tabs, for Ctrl+Shift+T
+  quitting: false,        // true once the app really quits (then don't hide to the tray)
 
-  // Bestaat het venster nog? (tijdens afsluiten kunnen tabbladen nog even signalen sturen)
+  // Does the window still exist? (while quitting, tabs can still send signals)
   alive() {
     return !!this.win && !this.win.isDestroyed();
   }

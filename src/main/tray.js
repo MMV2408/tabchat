@@ -1,5 +1,5 @@
-// Tray-icoon rechtsboven in de balk, en op de achtergrond blijven draaien.
-// Het kruisje verbergt het venster in plaats van de app af te sluiten.
+// Tray icon in the top bar, and keep running in the background.
+// The close button hides the window instead of quitting the app.
 const { Tray, Menu, Notification, nativeImage } = require('electron');
 const path = require('path');
 const store = require('./store');
@@ -13,7 +13,7 @@ const { t } = require('./i18n');
 const ASSETS = path.join(__dirname, '..', '..', 'assets');
 const ICON = path.join(ASSETS, 'icon.png');
 
-// Tray-icoon: gekleurd of wit, zonder of met rode stip (ongelezen berichten)
+// Tray icon: colored or white, with or without a red dot (unread messages)
 const images = {};
 function trayImage(withDot) {
   const name = (store.config.settings.whiteTray ? 'tray-white' : 'tray') + (withDot ? '-unread' : '');
@@ -24,17 +24,17 @@ function trayImage(withDot) {
 }
 
 let tray = null;
-let pending = null; // timer voor het aanmaken van het icoon
+let pending = null; // timer for creating the icon
 
-// ---------- venster tonen / verbergen ----------
+// ---------- show / hide the window ----------
 function showWindow(opts = {}) {
   if (!store.alive()) return;
   const win = store.win;
   if (win.isMinimized()) win.restore();
-  // Ubuntu (GNOME) weigert soms een venster naar voren te halen en toont dan
-  // "Tabchat is gereed". Een venster dat opnieuw verschijnt krijgt wél voorrang,
-  // dus als Tabchat open staat maar achter iets anders zit: even verbergen en weer tonen.
-  // force (klik op melding): altijd, zodat Ubuntu's toegangsbewijs zeker gebruikt wordt
+  // Ubuntu (GNOME) sometimes refuses to bring a window to the front and shows
+  // "Tabchat is ready" instead. A window that reappears does get focus,
+  // so if Tabchat is open but behind something else: hide it briefly and show it again.
+  // force (notification click): always, so Ubuntu's activation token is surely used
   if (win.isVisible() && (opts.force || !win.isFocused())) win.hide();
   win.show();
   win.focus();
@@ -46,19 +46,19 @@ function toggleWindow() {
   else showWindow();
 }
 
-// ---------- het icoon ----------
-// Aanmaken of weghalen, afhankelijk van de instelling
+// ---------- the icon ----------
+// Create or remove, depending on the setting
 function sync() {
   const wanted = store.config.settings.runInBackground && !store.quitting;
   if (wanted && !tray && !pending) {
-    // Op Linux verschijnt een icoon dat direct bij het opstarten wordt gemaakt
-    // soms niet. Daarom een seconde wachten tot het bureaublad er klaar voor is.
+    // On Linux an icon created right at startup sometimes doesn't appear.
+    // So we wait a second until the desktop is ready for it.
     pending = setTimeout(() => {
       pending = null;
       if (tray || store.quitting || !store.config.settings.runInBackground) return;
       tray = new Tray(trayImage(unread.any()));
       tray.setToolTip('Tabchat');
-      tray.on('click', toggleWindow); // werkt niet op elke Linux-versie, daarom ook in het menu
+      tray.on('click', toggleWindow); // doesn't work on every Linux version, so it's in the menu too
       refresh();
     }, 1000);
   } else if (!wanted) {
@@ -66,18 +66,18 @@ function sync() {
   }
 }
 
-// Icoon netjes afmelden (bij afsluiten), anders laat Ubuntu het de
-// volgende keer soms niet meer zien
+// Unregister the icon cleanly (on quit), otherwise Ubuntu sometimes
+// doesn't show it the next time
 function destroy() {
   if (pending) { clearTimeout(pending); pending = null; }
   if (tray) { tray.destroy(); tray = null; }
 }
 
-// Menu opnieuw opbouwen (na elke verandering van tabbladen of zichtbaarheid)
+// Rebuild the menu (after every change to tabs or visibility)
 function refresh() {
   if (!tray || !store.alive()) return;
 
-  // Icoon en tooltip: rode stip bij ongelezen berichten
+  // Icon and tooltip: red dot for unread messages
   const total = unread.total();
   tray.setImage(trayImage(unread.any()));
   const dndText = dnd.isOn() ? t('tray.tipDnd', { label: dnd.label() }) : '';
@@ -125,13 +125,13 @@ function refresh() {
   ]));
 }
 
-// ---------- kruisje ----------
+// ---------- close button ----------
 function onClose(event) {
-  if (store.quitting || !store.config.settings.runInBackground) return; // gewoon afsluiten
+  if (store.quitting || !store.config.settings.runInBackground) return; // just quit
   event.preventDefault();
   store.win.hide();
 
-  // De eerste keer uitleggen dat Tabchat nog draait
+  // Explain the first time that Tabchat keeps running
   if (!store.config.trayNoticeShown) {
     store.config.trayNoticeShown = true;
     config.save();
@@ -141,7 +141,7 @@ function onClose(event) {
   }
 }
 
-// Koppelen aan het venster (wordt aangeroepen vanuit window.js)
+// Attach to the window (called from window.js)
 function init() {
   store.win.on('close', onClose);
   store.win.on('show', refresh);

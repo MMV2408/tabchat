@@ -1,6 +1,6 @@
-// Controleren of een adres een werkende Brightspace is (voor het groene vinkje in het +-scherm).
-// Brightspace heeft een openbaar adres /d2l/api/versions/ dat zonder inloggen een lijstje versies geeft.
-// Lukt dat niet (sommige scholen schermen het af), dan kijken we of de pagina naar /d2l/ leidt.
+// Check whether an address is a working Brightspace (for the green check on the + screen).
+// Brightspace has a public /d2l/api/versions/ endpoint that lists versions without signing in.
+// If that fails (some schools block it), we check whether the page leads to /d2l/.
 const { net } = require('electron');
 const { normalizeUrl } = require('./catalog');
 
@@ -11,7 +11,7 @@ async function get(url, ms = 8000) {
   finally { clearTimeout(timer); }
 }
 
-// Uitkomst: { status: 'ok' | 'notBrightspace' | 'notFound' | 'error' | 'invalid', url }
+// Result: { status: 'ok' | 'notBrightspace' | 'notFound' | 'error' | 'invalid', url }
 async function check(input) {
   const url = normalizeUrl(input);
   if (!url) return { status: 'invalid', url: null };

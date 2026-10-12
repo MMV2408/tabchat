@@ -64,7 +64,7 @@
 </div>
 
 <script>
-  // ---------- vertalingen (zie src/main/i18n.js) ----------
+  // ---------- translations (see src/main/i18n.js) ----------
   let L = {};
   let curLang = null;
   const T = (k, v = {}) => {
@@ -89,7 +89,7 @@
   let shown = [];
   let sel = 0;
 
-  // Alle regels opbouwen uit de huidige status van de app
+  // Build all rows from the app's current state
   function build(s) {
     const out = [];
     const present = new Set(s.tabs.map(t => t.service));
@@ -99,7 +99,7 @@
       color: t.color, letter: t.label[0], hint: i < 8 ? 'Alt+' + (i + 1) : '', words: t.fullLabel || t.label
     }));
 
-    // Microsoft: "Outlook (School/werk)" en "Outlook (Privé)"
+    // Microsoft: "Outlook (Work/school)" and "Outlook (Personal)"
     const hasPersonal = (id) => s.catalog.some(x => x.base === id);
     const cname = (c) => c.base ? `${c.name} (${T('acct.personal')})` : hasPersonal(c.id) ? `${c.name} (${T('acct.work')})` : c.name;
     const cwords = (c) => c.base ? ' privé personal hotmail live outlook.com' : hasPersonal(c.id) ? ' school werk work' : '';
@@ -114,7 +114,7 @@
       if (allowed) out.push({ run: { type: 'action', id }, title, sub: '', icon, hint, words: title + ' ' + words });
     };
     const tab = s.activeIsTab;
-    // Zoekwoorden in beide talen, zodat zoeken altijd werkt
+    // Search words in both languages, so searching always works
     action('reload', T('pal.reload'), 'F5', '↻', 'herladen vernieuwen reload refresh', tab);
     action('reloadAll', T('pal.reloadAll'), '', '↻', 'alles herladen vernieuwen reload refresh all vastgelopen stuck', s.tabs.length > 0);
     action('mute', T(s.activeMuted ? 'pal.unmute' : 'pal.mute'), 'Alt+M', '🔇', 'dempen mute geluid stil sound', tab);

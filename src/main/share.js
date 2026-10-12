@@ -1,15 +1,15 @@
-// Scherm delen: een keuzevenster met alle schermen en vensters.
-// Op Wayland (standaard op Ubuntu) toont het systeem zelf al een keuzevenster;
-// dan krijgen we maar één bron terug en slaan we ons eigen venster over.
+// Screen sharing: a picker with all screens and windows.
+// On Wayland (default on Ubuntu) the system shows its own picker;
+// then we only get one source back and skip our own window.
 const { desktopCapturer } = require('electron');
 const store = require('./store');
 const views = require('./views');
 
-let pending = null; // { callback, sources } van het verzoek dat nu openstaat
+let pending = null; // { callback, sources } of the request that is open now
 
-// Aangeroepen als een dienst (Discord, Teams, ...) je scherm wil delen
+// Called when a service (Discord, Teams, ...) wants to share your screen
 async function request(callback) {
-  if (pending) cancel(); // vorig verzoek nog open: dat eerst afbreken
+  if (pending) cancel(); // previous request still open: cancel it first
 
   let sources;
   try {
@@ -20,18 +20,18 @@ async function request(callback) {
   } catch {
     return callback({});
   }
-  if (!sources.length) return callback({});           // niets gekozen of niets gevonden
-  if (sources.length === 1) return callback({ video: sources[0] }); // systeem heeft al gekozen
+  if (!sources.length) return callback({});           // nothing chosen or nothing found
+  if (sources.length === 1) return callback({ video: sources[0] }); // the system already chose
 
   pending = { callback, sources };
   open(sources);
 }
 
-// ---------- keuzevenster ----------
+// ---------- picker ----------
 function open(sources) {
   store.shareOpen = true;
-  const v = views.page('share'); // pas laden als je hem nodig hebt
-  store.win.contentView.removeChildView(v); // bovenop alles leggen
+  const v = views.page('share'); // only load it when needed
+  store.win.contentView.removeChildView(v); // put it on top of everything
   store.win.contentView.addChildView(v);
   views.layout();
   const list = sources.map(s => ({
@@ -54,7 +54,7 @@ function close() {
   views.dropLater('share', 5000);
 }
 
-// Gekozen: delen
+// Chosen: share
 function pick(id) {
   if (!pending) return;
   const source = pending.sources.find(s => s.id === id);
@@ -63,7 +63,7 @@ function pick(id) {
   close();
 }
 
-// Annuleren: niets delen
+// Cancel: share nothing
 function cancel() {
   if (!pending) return;
   pending.callback({});

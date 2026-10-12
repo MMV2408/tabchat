@@ -1,41 +1,35 @@
-// Startpunt van Tabchat.
-// Hier gebeurt bijna niets: de echte code staat in de andere bestanden in deze map.
+// Entry point of Tabchat.
+// Almost nothing happens here: the real code lives in the other files in this folder.
 const { app } = require('electron');
 const window = require('./window');
 const ipc = require('./ipc');
 const actions = require('./actions');
 
-// Minder geheugen voor JavaScript per tabblad
+// Less JavaScript memory per tab
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=256');
 
-// Hardwareversnelling uit (instelling in het +-scherm → Algemeen): helpt bij beeldproblemen
-// (zwart scherm, flikkeren), vooral met NVIDIA of Wayland. Scheelt nauwelijks geheugen. Moet vóór het starten.
+// Hardware acceleration off (setting on the + screen → General): helps with display problems
+// (black screen, flickering), mostly with NVIDIA or Wayland. Barely saves memory. Must be set before startup.
 const hwAccel = require('./config').peekSetting('hardwareAcceleration') !== false;
 require('./store').hwAtStart = hwAccel;
 if (!hwAccel) app.disableHardwareAcceleration();
 
-// Vangnet: een onverwachte fout komt in een logbestand in plaats van in een foutvenster.
-// Zo ziet een gebruiker nooit "A JavaScript error occurred", en kunnen we het toch terugvinden.
+// Safety net: an unexpected error goes to a log file instead of an error dialog.
+// That way a user never sees "A JavaScript error occurred", and we can still find it.
 function logError(err) {
-  try {
-    const fs = require('fs');
-    const path = require('path');
-    const file = path.join(app.getPath('userData'), 'error.log');
-    const line = `${new Date().toISOString()} ${app.getVersion()} ${(err && err.stack) || err}\n`;
-    fs.appendFileSync(file, line);
-  } catch {}
+  require('./log').error('uncaught:', err);
   console.error(err);
 }
 process.on('uncaughtException', logError);
 process.on('unhandledRejection', logError);
 
-// Maar één Tabchat tegelijk. Start je hem nog een keer terwijl hij op de
-// achtergrond draait, dan komt het bestaande venster tevoorschijn.
+// Only one Tabchat at a time. If you start it again while it runs in the
+// background, the existing window comes to the front.
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   app.on('second-instance', (_e, argv) => {
-    // Klik op een melding (zie notifier.js): het venster is dan al naar voren gehaald
+    // Notification click (see notifier.js): the window has already been brought forward
     if (require('./notifier').handleArgv(argv)) return;
     require('./tray').showWindow();
   });
@@ -43,7 +37,7 @@ if (!app.requestSingleInstanceLock()) {
   ipc.register();
 
   app.whenReady().then(() => { window.create(); require('./icons').start(); });
-  // Bij elk afsluiten (ook uitloggen of afsluiten van de computer)
+  // On every quit (also logging out or shutting down the computer)
   app.on('before-quit', () => {
     require('./store').quitting = true;
     require('./tray').destroy();

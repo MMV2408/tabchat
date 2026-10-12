@@ -1,11 +1,11 @@
-// Licht of donker thema. "Systeem" volgt Ubuntu (Instellingen → Uiterlijk).
-// De schermen van Tabchat kiezen hun kleuren via prefers-color-scheme (renderer/theme.css);
-// diensten als WhatsApp en Teams volgen dezelfde keuze, maar pas na opnieuw laden.
+// Light or dark theme. "System" follows Ubuntu (Settings → Appearance).
+// Tabchat's own screens pick their colors via prefers-color-scheme (renderer/theme.css);
+// services like WhatsApp and Teams follow the same choice, but only after a reload.
 const { nativeTheme } = require('electron');
 const store = require('./store');
 
-let dark = null;            // huidige stand, om echte wissels te herkennen
-const pending = new Set();  // tabbladen die nog opnieuw geladen moeten worden
+let dark = null;            // current mode, to detect real changes
+const pending = new Set();  // tabs that still need a reload
 
 function background() {
   return nativeTheme.shouldUseDarkColors ? '#1e1f22' : '#ffffff';
@@ -16,8 +16,8 @@ function apply() {
   if (store.win) store.win.setBackgroundColor(background());
 }
 
-// Diensten opnieuw laden zodat ze het nieuwe thema oppakken.
-// Het tabblad dat je nu gebruikt laden we pas als je wegklikt (bv. niet midden in een gesprek).
+// Reload services so they pick up the new theme.
+// The tab you're using is only reloaded once you leave it (e.g. not in the middle of a call).
 function reloadServices() {
   const views = require('./views');
   const visible = store.win && store.win.isVisible();
@@ -27,7 +27,7 @@ function reloadServices() {
   }
 }
 
-// Aangeroepen als je van tabblad wisselt of het venster verbergt
+// Called when you switch tabs or hide the window
 function flush(exceptId) {
   for (const id of [...pending]) {
     if (id === exceptId) continue;

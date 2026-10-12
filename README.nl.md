@@ -152,8 +152,11 @@ Op Wayland (standaard op Ubuntu) mogen apps niet zelf naar je scherm kijken; het
 **Een slapend tabblad liet mijn nieuwe berichten niet zien.**
 Dat klopt: een slapend tabblad is helemaal uitgeschakeld. Zet **Mag slapen** uit voor dat tabblad in het +-scherm om het wakker te houden. WhatsApp, Discord en Teams blijven standaard wakker.
 
-**Kan ik andere sites toevoegen, zoals Gmail?**
-Nog niet. Sommige diensten, zoals Gmail, blokkeren het inloggen in apps. Zelf diensten toevoegen staat op de planning.
+**Kan ik andere sites toevoegen?**
+Ja: klik in het +-scherm op **Eigen website** en plak het adres. Google-diensten (Gmail, Drive) blokkeren het inloggen in apps zoals Tabchat meestal, dus die werken misschien niet.
+
+**Er werkt iets niet. Hoe meld ik dat?**
+Open een [issue](https://github.com/MMV2408/tabchat/issues) en voeg de logbestanden uit `~/.config/tabchat/` toe: `tabchat.log` (algemeen) en `updater.log` (updates).
 
 ## Zelf bouwen
 
@@ -171,8 +174,9 @@ Meer over de mappenstructuur, iets toevoegen en een nieuwe versie uitbrengen sta
 
 ## Planning
 
-- [ ] Zelf diensten toevoegen (naam + webadres)
-- [ ] Snap Store en Flathub
+- [x] Zelf websites toevoegen (naam + webadres)
+- [x] Snap Store
+- [ ] Flathub
 - [ ] Profielen (bijvoorbeeld "School" en "Privé")
 
 Ideeën en bugmeldingen zijn welkom bij [Issues](https://github.com/MMV2408/tabchat/issues).

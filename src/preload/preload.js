@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-// Muis tegen de bovenrand (in het +-scherm): verborgen tabbalk tonen
+// Mouse at the top edge (on the + screen): show the hidden tab bar
 let lastEdge = 0;
 window.addEventListener('mousemove', (e) => {
   if (e.clientY > 24 || Date.now() - lastEdge < 400) return;
@@ -9,12 +9,12 @@ window.addEventListener('mousemove', (e) => {
 }, { passive: true, capture: true });
 
 contextBridge.exposeInMainWorld('tabchat', {
-  // status
+  // state
   getState: () => ipcRenderer.invoke('get-state'),
-  getStrings: () => ipcRenderer.invoke('get-strings'), // teksten in de gekozen taal
+  getStrings: () => ipcRenderer.invoke('get-strings'), // texts in the chosen language
   onState: (cb) => ipcRenderer.on('state', (_e, s) => cb(s)),
 
-  // tabbladen
+  // tabs
   open: (id) => ipcRenderer.send('open', id),
   add: (service, url) => ipcRenderer.send('add', service, url),
   onAskUrl: (cb) => ipcRenderer.on('ask-url', (_e, service) => cb(service)),
@@ -32,9 +32,9 @@ contextBridge.exposeInMainWorld('tabchat', {
   reorder: (id, to) => ipcRenderer.send('reorder', id, to),
   setTabSleep: (id, allowed) => ipcRenderer.send('tab-sleep', id, allowed),
 
-  // instellingen
+  // settings
   setSetting: (key, value) => ipcRenderer.send('set-setting', key, value),
-  setDnd: (mode) => ipcRenderer.send('set-dnd', mode), // minuten, 'tomorrow', 'forever' of null
+  setDnd: (mode) => ipcRenderer.send('set-dnd', mode), // minutes, 'tomorrow', 'forever' or null
   onShowShortcuts: (cb) => ipcRenderer.on('show-shortcuts', () => cb()),
 
   // updates
@@ -46,12 +46,12 @@ contextBridge.exposeInMainWorld('tabchat', {
   whatsNewClosed: () => ipcRenderer.send('whats-new-closed'),
   onWhatsNew: (cb) => ipcRenderer.on('whats-new', (_e, d) => cb(d)),
 
-  // scherm delen
+  // screen sharing
   onShareOpen: (cb) => ipcRenderer.on('share-open', (_e, list) => cb(list)),
   sharePick: (id) => ipcRenderer.send('share-pick', id),
   shareCancel: () => ipcRenderer.send('share-cancel'),
 
-  // snelzoeken
+  // quick search
   onPaletteOpen: (cb) => ipcRenderer.on('palette-open', (_e, s) => cb(s)),
   paletteRun: (item) => ipcRenderer.send('palette-run', item),
   paletteClose: () => ipcRenderer.send('palette-close'),

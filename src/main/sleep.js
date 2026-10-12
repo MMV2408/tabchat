@@ -1,20 +1,20 @@
-// Slaapstand voor tabbladen.
-// Een tabblad dat je een tijd niet hebt bekeken, wordt uit het geheugen gehaald.
-// Klik je erop, dan laadt het opnieuw (je blijft ingelogd).
-// Let op: een slapend tabblad krijgt geen meldingen en geen tellers.
+// Tab sleep.
+// A tab you haven't looked at for a while is removed from memory.
+// Click it and it loads again (you stay signed in).
+// Note: a sleeping tab gets no notifications and no counters.
 const store = require('./store');
 const config = require('./config');
 const views = require('./views');
 const microsoft = require('./microsoft');
 const { CATALOG } = require('./catalog');
 
-const asleep = new Set();   // tabbladen die nu slapen
-const lastSeen = {};        // tabblad-id -> wanneer je het voor het laatst bekeek
+const asleep = new Set();   // tabs that are asleep now
+const lastSeen = {};        // tab id -> when you last looked at it
 const started = Date.now();
 let timer = null;
 
-// Mag dit tabblad slapen? Eigen keuze van de gebruiker gaat voor,
-// anders de standaard van de dienst (chat-apps blijven wakker, zie catalog.js).
+// May this tab sleep? The user's own choice wins,
+// otherwise the service default (chat apps stay awake, see catalog.js).
 function canSleep(tab) {
   if (typeof tab.noSleep === 'boolean') return !tab.noSleep;
   return !CATALOG[tab.service].awake;
@@ -24,13 +24,13 @@ function isAsleep(id) {
   return asleep.has(id);
 }
 
-// Onthouden wanneer een tabblad bekeken is
+// Remember when a tab was viewed
 function seen(id) {
   if (id && id !== 'home') lastSeen[id] = Date.now();
 }
 
-// Laten slapen. Nooit: het tabblad dat je bekijkt, een tabblad dat geluid maakt
-// (bv. een gesprek) of een Microsoft-tabblad dat nog wacht met inloggen.
+// Put to sleep. Never: the tab you're viewing, a tab playing sound
+// (e.g. a call) or a Microsoft tab still waiting to sign in.
 function sleep(id) {
   const v = store.views[id];
   if (!v || id === store.active) return false;
@@ -42,31 +42,31 @@ function sleep(id) {
   return true;
 }
 
-// Wakker maken (gebeurt vanzelf als je het tabblad opent, zie views.show)
+// Wake up (happens by itself when you open the tab, see views.show)
 function wake(id) {
   if (!asleep.delete(id)) return;
   const tab = store.config.tabs.find(t => t.id === id);
   if (tab) views.createServiceView(tab);
 }
 
-// Bij het opstarten: tabblad meteen als slapend markeren (wordt dan niet geladen)
+// On startup: mark a tab as asleep right away (it isn't loaded then)
 function startAsleep(id) {
   asleep.add(id);
 }
 
-// Slapend opstarten? Alleen als de slaapstand aanstaat en het tabblad mag slapen
+// Start asleep? Only if tab sleep is on and the tab may sleep
 function shouldStartAsleep(tab) {
   const s = store.config.settings;
   return s.sleepEnabled && s.sleepOnStart && canSleep(tab);
 }
 
-// Tabblad gesloten of verwijderd
+// Tab closed or removed
 function forget(id) {
   asleep.delete(id);
   delete lastSeen[id];
 }
 
-// Elke minuut kijken welke tabbladen lang genoeg niet bekeken zijn
+// Every minute: check which tabs haven't been viewed for long enough
 function check() {
   const s = store.config.settings;
   if (!s.sleepEnabled) return;
@@ -83,7 +83,7 @@ function start() {
   timer = setInterval(check, 60 * 1000);
 }
 
-// Per tabblad instellen of het mag slapen
+// Set per tab whether it may sleep
 function setAllowed(id, allowed) {
   const tab = store.config.tabs.find(t => t.id === id);
   if (!tab) return;

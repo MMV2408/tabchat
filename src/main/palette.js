@@ -1,12 +1,12 @@
-// Het snelzoekvenster (Ctrl+K)
+// The quick search window (Ctrl+K)
 const store = require('./store');
 const views = require('./views');
 const actions = require('./actions');
 const { CATALOG } = require('./catalog');
 const dnd = require('./dnd');
 
-// Acties die je vanuit Ctrl+K kunt kiezen. Nieuwe actie = één regel hier
-// (en een regel in palette.html zodat hij in de lijst staat).
+// Actions you can pick from Ctrl+K. New action = one line here
+// (and a line in palette.html so it shows up in the list).
 const ACTIONS = {
   reload: () => actions.reload(),
   reloadAll: () => actions.reloadAll(),
@@ -27,7 +27,7 @@ const ACTIONS = {
   dndOff: () => dnd.set(null)
 };
 
-// Het venster bovenop alle tabbladen leggen
+// Put the window on top of all tabs
 function bringToFront() {
   if (!store.palette) return;
   store.win.contentView.removeChildView(store.palette);
@@ -37,7 +37,7 @@ function bringToFront() {
 
 function open() {
   store.paletteOpen = true;
-  views.page('palette'); // pas laden als je hem nodig hebt
+  views.page('palette'); // only load it when needed
   bringToFront();
   views.layout();
   views.whenReady('palette', (v) => {
@@ -52,14 +52,14 @@ function hide() {
   store.paletteOpen = false;
   views.layout();
   views.focusActive();
-  views.dropLater('palette', 60 * 1000); // een minuut niet gebruikt: uit het geheugen
+  views.dropLater('palette', 60 * 1000); // unused for a minute: free the memory
 }
 
 function toggle() {
   if (store.paletteOpen) hide(); else open();
 }
 
-// Een gekozen regel uitvoeren
+// Run the chosen item
 function run(item) {
   hide();
   if (!item) return;

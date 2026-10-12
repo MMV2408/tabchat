@@ -1,6 +1,6 @@
-// Automatisch starten bij inloggen.
-// Op Linux gaat dat via een .desktop-bestand in ~/.config/autostart/.
-// Tabchat start dan met "--hidden": meteen verborgen in de tray.
+// Start automatically at login.
+// On Linux this is done with a .desktop file in ~/.config/autostart/.
+// Tabchat then starts with "--hidden": hidden in the tray right away.
 const { app } = require('electron');
 const fs = require('fs');
 const path = require('path');
@@ -10,10 +10,10 @@ const platform = require('./platform');
 const configDir = process.env.XDG_CONFIG_HOME || path.join(app.getPath('home'), '.config');
 const FILE = path.join(configDir, 'autostart', 'tabchat.desktop');
 
-// Is deze keer gestart via autostart?
+// Was this start triggered by autostart?
 const startedHidden = process.argv.includes('--hidden');
 
-// Hoe Tabchat gestart moet worden (geïnstalleerd, AppImage of tijdens testen)
+// How Tabchat should be started (installed, AppImage or during development)
 function command() {
   if (process.env.APPIMAGE) return `"${process.env.APPIMAGE}" --hidden`;
   if (app.isPackaged) return `"${process.execPath}" --hidden`;
@@ -30,15 +30,15 @@ function desktopFile() {
     'Icon=tabchat',
     'Terminal=false',
     'X-GNOME-Autostart-enabled=true',
-    'X-GNOME-Autostart-Delay=5', // even wachten tot de balk bovenin klaar is
+    'X-GNOME-Autostart-Delay=5', // wait a moment until the top bar is ready
     ''
   ].join('\n');
 }
 
-// Bestand aanmaken of weghalen, volgens de instelling.
-// Ook bij elke start, zodat het pad klopt na een update.
+// Create or remove the file, according to the setting.
+// Also on every start, so the path is right after an update.
 function sync() {
-  if (platform.storeManaged) return; // map ~/.config/autostart is daar niet bereikbaar
+  if (platform.storeManaged) return; // ~/.config/autostart can't be reached there
   try {
     if (store.config.settings.autostart) {
       fs.mkdirSync(path.dirname(FILE), { recursive: true });
@@ -47,7 +47,7 @@ function sync() {
       fs.unlinkSync(FILE);
     }
   } catch (err) {
-    console.error('Kon automatisch starten niet instellen:', err);
+    require('./log').warn('setting up autostart failed:', err);
   }
 }
 

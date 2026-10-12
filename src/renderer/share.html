@@ -60,7 +60,7 @@
 </div>
 
 <script>
-  // ---------- vertalingen (zie src/main/i18n.js) ----------
+  // ---------- translations (see src/main/i18n.js) ----------
   let L = {};
   let curLang = null;
   const T = (k, v = {}) => {
@@ -120,7 +120,7 @@
       }
       list.append(grid);
     }
-    // Eerste scherm alvast selecteren
+    // Select the first screen already
     const first = sources.find(s => s.type === 'screen') || sources[0];
     if (first) select(first.id);
     ok.focus();
@@ -135,7 +135,7 @@
   });
 
   window.tabchat.onShareOpen(async (sources) => {
-    await loadStrings(); // taal kan veranderd zijn: altijd even ophalen
+    await loadStrings(); // language may have changed: always fetch
     render(sources);
   });
 </script>

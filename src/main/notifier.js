@@ -1,18 +1,19 @@
-// Meldingen via Ubuntu zelf (het meldingssysteem van de desktop, via D-Bus).
+// Notifications via Ubuntu itself (the desktop's notification system, via D-Bus).
 //
-// Electron-meldingen (en meldingen die Tabchat zelf stuurt) laten de muis na een klik
-// ~15 seconden laden: GNOME koppelt de melding aan Tabchat en "start" de app bij een klik.
-// Daarom stuurt een klein hulpprogramma zonder venster de meldingen (notify-helper.js):
-// GNOME koppelt ze dan aan geen enkele app en start niets. De klik komt via het
-// hulpprogramma bij ons binnen en dan halen we zelf het venster en het juiste tabblad naar voren.
+// Electron notifications (and ones Tabchat sends itself) show a loading cursor for ~15 seconds
+// after a click: GNOME links the notification to Tabchat and "starts" the app on a click.
+// That's why a small helper without a window sends the notifications (notify-helper.js):
+// GNOME then links them to no app at all and starts nothing. The click reaches us via the
+// helper, and we bring the window and the right tab to the front ourselves.
 //
-// Lukt dat niet, of in Flathub, dan gebruikt Tabchat gewoon de meldingen van Electron.
+// If that fails, or in Flathub, Tabchat simply uses Electron's notifications.
 const { nativeImage, Notification } = require('electron');
 const { fork } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const platform = require('./platform');
+const log = require('./log');
 
 const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
 const TMP = path.join(os.tmpdir(), 'tabchat-notify-' + process.getuid());
@@ -21,16 +22,16 @@ let child = null;
 let available = null;
 let nextKey = 1;
 const pending = new Map(); // key -> { opts, file, cb }
-const items = new Map();   // D-Bus-id -> { onClick, onClose, file }
+const items = new Map();   // D-Bus id -> { onClick, onClose, file }
 
-// Kan het via Ubuntu? (start het hulpprogramma nog niet: dat gebeurt pas bij de eerste melding)
+// Can we use Ubuntu? (doesn't start the helper yet: that only happens on the first notification)
 function isAvailable() {
   if (available !== null) return available;
   available = platform.kind !== 'flatpak' && process.platform === 'linux' && !!process.env.DBUS_SESSION_BUS_ADDRESS;
   return available;
 }
 
-// Het hulpprogramma starten als het nog niet draait
+// Start the helper if it isn't running
 let stopping = false;
 function start() {
   if (child) return true;
@@ -42,9 +43,9 @@ function start() {
     });
     child.on('message', onMessage);
     child.on('exit', () => {
-      if (!stopping) available = false; // onverwacht gestopt: verder via Electron
+      if (!stopping) available = false; // stopped unexpectedly: continue via Electron
       child = null;
-      for (const p of pending.values()) failed(p); // nog niet getoond: alsnog via Electron
+      for (const p of pending.values()) failed(p); // not shown yet: show via Electron instead
       pending.clear();
       items.clear();
     });
@@ -53,7 +54,7 @@ function start() {
   } catch { available = false; child = null; return false; }
 }
 
-// Geen meldingen meer open? Dan na 10 minuten het hulpprogramma afsluiten (scheelt ~90 MB)
+// No notifications open anymore? Then stop the helper after 10 minutes (saves ~90 MB)
 const IDLE = 10 * 60 * 1000;
 let idleTimer = null;
 function idleCheck() {
@@ -63,7 +64,7 @@ function idleCheck() {
   idleTimer = setTimeout(() => {
     if (!child || pending.size || items.size) return;
     stopping = true;
-    try { child.kill(); } catch {}
+    try { child.kill(); } catch (e) { log.warn('notify helper stop:', e); }
   }, IDLE);
 }
 
@@ -77,8 +78,10 @@ function onMessage(m) {
     if (p.cb) p.cb(m.id);
   } else if (m.type === 'click') {
     runClick(m.id);
+  } else if (m.type === 'log') {
+    log.warn('notify helper:', m.text);
   } else if (m.type === 'closed') {
-    forget(m.id, true); // klik komt altijd vóór het sluiten binnen, dus dit is wegklikken of verlopen
+    forget(m.id, true); // a click always arrives before the close, so this is a dismiss or a timeout
   }
 }
 
@@ -104,13 +107,13 @@ function runClick(id) {
   if (it.onClick) it.onClick();
 }
 
-// Oud (van een eerdere aanpak); laten staan zodat index.js niet hoeft te veranderen
+// Old (from an earlier approach); kept so index.js doesn't have to change
 function handleArgv() { return false; }
 
-// ---------- tonen ----------
+// ---------- showing ----------
 const markup = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-// Terugval: gewone Electron-melding
+// Fallback: a regular Electron notification
 function fallback({ title, body, onClick }) {
   if (!Notification.isSupported()) return;
   const n = new Notification({ title, body, icon: ICON });
@@ -118,7 +121,7 @@ function fallback({ title, body, onClick }) {
   n.show();
 }
 
-// image: data-URL (mag leeg zijn). cb(id) met het D-Bus-id, of null.
+// image: data URL (may be empty). cb(id) with the D-Bus id, or null.
 function show(opts, cb) {
   const { title, body, image, onClick, onClose } = opts;
   if (!isAvailable() || !start()) { fallback(opts); return cb && cb(null); }
@@ -143,7 +146,7 @@ function show(opts, cb) {
 
 function close(id) {
   if (!items.has(id) || !child) return;
-  try { child.send({ type: 'close', id }); } catch {}
+  try { child.send({ type: 'close', id }); } catch (e) { log.warn('notify helper close:', e); }
   forget(id, false);
 }
 

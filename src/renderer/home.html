@@ -41,7 +41,7 @@
   .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .btns button { white-space: nowrap; padding: 8px 6px; }
   .remove { background: transparent; color: #f23f43; }
-  /* kaarten: versleepbaar, eigen websites met label en ✎ */
+  /* cards: draggable, own websites with label and ✎ */
   .card { position: relative; }
   .card[draggable="true"] { cursor: grab; }
   .card.dragging { opacity: .4; }
@@ -59,7 +59,7 @@
   .cathead h2 { flex: 1; }
   .linkbtn { background: none; padding: 0; color: var(--text-muted); font-size: 13px; }
   .linkbtn:hover { color: var(--text-strong); text-decoration: underline; }
-  /* formulier eigen website */
+  /* own website form */
   .field-label { display: block; font-size: 13px; color: var(--text-muted); margin: 14px 0 6px; }
   .restartbtn { background: #5865F2; color: #fff; padding: 7px 12px; margin-right: 12px; white-space: nowrap; }
   .ftabs { display: flex; gap: 4px; margin: 0 0 12px; padding: 4px; background: var(--bg-0); border-radius: 10px; overflow-x: auto; }
@@ -120,7 +120,7 @@
   h2 .hint { text-transform: none; letter-spacing: 0; font-weight: 400; }
   kbd { background: var(--bg-1); border: 1px solid var(--bg-3); border-bottom-width: 2px; border-radius: 5px; padding: 1px 7px; font-family: inherit; font-size: 13px; color: var(--text); }
 
-  /* sneltoetsen-venster */
+  /* shortcuts window */
   .wn-sub { color: var(--text-muted); margin: 4px 0 4px; font-size: 14px; }
   .wn-list { margin: 0; padding-left: 20px; color: var(--text); line-height: 1.6; font-size: 14px; }
   .wn-foot { display: flex; justify-content: flex-end; margin: 20px 0 12px; }
@@ -128,11 +128,11 @@
   .about .links .donate { margin-top: 0; }
   #modal, #wn, #ask, #site, #svcs { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
   #modal.open, #wn.open, #ask.open, #site.open, #svcs.open { display: flex; }
-  /* adres vragen (Brightspace van je school) */
+  /* ask for an address (your school's Brightspace) */
   .ask-input { width: 100%; margin: 14px 0 6px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--bg-3); background: var(--bg-1); color: var(--text); font: inherit; font-size: 15px; }
   .ask-input:focus { outline: 2px solid #5865F2; border-color: transparent; }
   .ask-err { color: #f23f43; font-size: 13px; min-height: 18px; }
-  /* adresveld in de instellingen, met vinkje */
+  /* address field in the settings, with check mark */
   .urlbox { width: 320px; flex-shrink: 0; }
   .urlbox .ask-input { margin: 0; font-size: 14px; padding: 8px 10px; }
   .urlstatus { font-size: 13px; min-height: 18px; margin-top: 5px; color: var(--text-muted); }
@@ -150,7 +150,7 @@
   .key span:first-child { color: var(--text); }
   .key .combo { white-space: nowrap; }
 
-  /* schakelaar */
+  /* switch */
   .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider { position: absolute; inset: 0; background: var(--slider-off); border-radius: 24px; cursor: pointer; transition: .15s; }
@@ -258,7 +258,7 @@
 </div>
 
 <script>
-  // ---------- vertalingen (zie src/main/i18n.js) ----------
+  // ---------- translations (see src/main/i18n.js) ----------
   let L = {};
   let curLang = null;
   const T = (k, v = {}) => {
@@ -277,13 +277,13 @@
     document.querySelectorAll('[data-i18n-placeholder]').forEach(e => { e.placeholder = T(e.dataset.i18nPlaceholder); });
   }
 
-  // Functies: de teksten staan in i18n.js onder f.<key>.name en f.<key>.desc.
-  // options = keuzelijst in plaats van schakelaar.
+  // Features: the texts are in i18n.js under f.<key>.name and f.<key>.desc.
+  // options = dropdown instead of a switch.
   const FEATURES = [
     { group: 'general', key: 'language', options: [['auto', 'f.language.auto'], ['nl', '!Nederlands'], ['en', '!English']] },
     { group: 'general', key: 'theme', options: [['system', 'f.theme.system'], ['dark', 'f.theme.dark'], ['light', 'f.theme.light']] },
     { group: 'general', key: 'tabBar', options: [['normal', 'f.tabBar.normal'], ['compact', 'f.tabBar.compact'], ['autohide', 'f.tabBar.autohide']] },
-    { group: 'general', key: 'openLinks', options: 'links' }, // lijst hangt af van de browsers op deze computer
+    { group: 'general', key: 'openLinks', options: 'links' }, // list depends on the browsers on this computer
     { group: 'general', key: 'spellcheck' },
     { group: 'general', key: 'hardwareAcceleration' },
     { group: 'accounts', key: 'stayLoggedIn' },
@@ -299,10 +299,13 @@
     { group: 'memory', key: 'sleepMinutes', options: [[15, 'f.sleepMinutes.15'], [30, 'f.sleepMinutes.30'], [60, 'f.sleepMinutes.60']] },
     { group: 'memory', key: 'sleepOnStart' }
   ];
-  // Functies verdeeld over tabjes; het laatst gekozen tabje onthouden we
+  // Features split into tabs; we remember the last chosen tab
   const FEATURE_TABS = ['general', 'accounts', 'notify', 'startup', 'memory'];
   let featTab = 'general';
-  try { if (FEATURE_TABS.includes(localStorage.getItem('featTab'))) featTab = localStorage.getItem('featTab'); } catch {}
+  // localStorage can be unavailable (blocked); then we simply don't remember the tab
+  const stored = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+  const keep = (k, v) => { try { localStorage.setItem(k, v); return true; } catch { return false; } };
+  if (FEATURE_TABS.includes(stored('featTab'))) featTab = stored('featTab');
 
   const el = (tag, cls, text) => {
     const e = document.createElement(tag);
@@ -317,16 +320,16 @@
     return b;
   };
 
-  // Naam met de sneltoets-letter onderstreept, bv. O<u>n</u>eDrive
+  // Name with the shortcut letter underlined, e.g. O<u>n</u>eDrive
   function nameWithKey(name, key) {
     const div = el('div', 'name');
-    const i = key ? name.toLowerCase().indexOf(key) : -1; // geen sneltoets: niets onderstrepen
+    const i = key ? name.toLowerCase().indexOf(key) : -1; // no shortcut: underline nothing
     if (i < 0) { div.textContent = name; return div; }
     div.append(name.slice(0, i), el('u', null, name[i]), name.slice(i + 1));
     return div;
   }
 
-  // ---------- sneltoetsen-venster ----------
+  // ---------- shortcuts window ----------
   const KEYS = [
     ['keys.general', [
       [['Ctrl', 'K'], 'keys.search'],
@@ -384,14 +387,14 @@
   modal.onclick = (e) => { if (e.target === modal) closeKeys(); };
   window.tabchat.onShowShortcuts(openKeys);
 
-  // ---------- Wat is er nieuw ----------
+  // ---------- What's new ----------
   const wn = document.getElementById('wn');
   const closeWn = () => { if (!wn.classList.contains('open')) return; wn.classList.remove('open'); window.tabchat.whatsNewClosed(); };
   document.getElementById('closeWn').onclick = closeWn;
   document.getElementById('okWn').onclick = closeWn;
   wn.onclick = (e) => { if (e.target === wn) closeWn(); };
   window.tabchat.onWhatsNew(async (d) => {
-    await loadStrings(); // taal kan veranderd zijn
+    await loadStrings(); // language may have changed
     closeKeys();
     document.getElementById('wnSub').textContent = d.updated ? T('wn.updated', { v: d.current }) : '';
     const list = document.getElementById('wnList');
@@ -406,7 +409,7 @@
     document.getElementById('okWn').focus();
   });
 
-  // ---------- adres controleren (groen vinkje als het een werkende Brightspace is) ----------
+  // ---------- check an address (green check if it's a working Brightspace) ----------
   const URL_STATUS = { checking: 'busy', ok: 'ok', notBrightspace: 'warn', notFound: 'bad', invalid: 'bad', error: 'warn' };
   function showStatus(elStatus, status) {
     elStatus.className = 'urlstatus' + (status ? ' ' + URL_STATUS[status] : '');
@@ -420,10 +423,10 @@
     showStatus(elStatus, res.status);
     return res;
   }
-  // Mag dit adres bewaard worden? Bestaat het niet of is het geen adres, dan niet.
+  // May this address be saved? Not if it doesn't exist or isn't an address.
   const savable = (res) => res.status === 'ok' || res.status === 'notBrightspace' || res.status === 'error';
 
-  // ---------- adres vragen (dienst waarvan het adres per school verschilt, bv. Brightspace) ----------
+  // ---------- ask for an address (service whose address differs per school, e.g. Brightspace) ----------
   const ask = document.getElementById('ask');
   const askInput = document.getElementById('askInput');
   const askErr = document.getElementById('askErr');
@@ -462,7 +465,7 @@
   ask.onclick = (e) => { if (e.target === ask) closeAsk(); };
   window.tabchat.onAskUrl(openAsk);
 
-  // ---------- kaarten in het +-scherm: volgorde, verbergen, eigen websites ----------
+  // ---------- cards on the + screen: order, hiding, your own websites ----------
   let lastState = null;
   const hiddenSet = (s) => new Set((s.settings && s.settings.hiddenServices) || []);
   function visibleCards(s) {
@@ -482,7 +485,7 @@
     return b;
   }
 
-  // Slepen om de volgorde van de kaarten te veranderen
+  // Drag to change the order of the cards
   let dragCard = null;
   function makeDraggable(card, id) {
     card.draggable = true;
@@ -510,7 +513,7 @@
     document.querySelectorAll('.card.drop-before, .card.drop-after').forEach(c => c.classList.remove('drop-before', 'drop-after'));
   }
 
-  // ---------- diensten kiezen (vaste diensten tonen/verbergen) ----------
+  // ---------- choose services (show/hide built-in services) ----------
   const svcs = document.getElementById('svcs');
   function openSvcs() {
     if (!lastState) return;
@@ -540,7 +543,7 @@
   document.getElementById('svcsOk').onclick = closeSvcs;
   svcs.onclick = (e) => { if (e.target === svcs) closeSvcs(); };
 
-  // ---------- eigen website toevoegen / wijzigen ----------
+  // ---------- add / edit your own website ----------
   const COLORS = ['#5865F2', '#25D366', '#E8642C', '#0078D4', '#E5484D', '#A855F7', '#F0B232', '#4E5058'];
   const site = document.getElementById('site');
   const siteName = document.getElementById('siteName');
@@ -570,7 +573,7 @@
   function drawLogin() {
     document.querySelectorAll('#siteLogin button').forEach(b => {
       b.classList.toggle('on', (b.dataset.v === 'school') === siteSchool);
-      b.disabled = siteTemp.checked; // incognito heeft altijd een eigen, tijdelijke login
+      b.disabled = siteTemp.checked; // incognito always has its own temporary login
     });
   }
   document.querySelectorAll('#siteLogin button').forEach(b => { b.onclick = () => { siteSchool = b.dataset.v === 'school'; drawLogin(); }; });
@@ -587,7 +590,7 @@
     showSiteStatus('checking');
     let res;
     try { res = await window.tabchat.checkSite(v); } catch { res = { status: 'error', url: v }; }
-    if (seq !== siteSeq) return null; // intussen verder getypt
+    if (seq !== siteSeq) return null; // the user kept typing meanwhile
     siteCheck = res;
     showSiteStatus(res.status);
     setIcon(res.icon || null);
@@ -627,7 +630,7 @@
     const res = siteCheck && siteCheck.url ? siteCheck : await runSiteCheck();
     if (!res || res.status === 'notFound' || res.status === 'invalid') { siteUrl.focus(); return; }
     let host = '';
-    try { host = new URL(res.url).hostname.replace(/^www\./, ''); } catch {}
+    try { host = new URL(res.url).hostname.replace(/^www\./, ''); } catch { host = ''; } // checked address is always valid; just in case
     const data = { name: siteName.value.trim() || res.title || host, url: res.url, color: siteColor, icon: res.icon || null, school: siteSchool };
     if (siteEdit) window.tabchat.updateCustom(siteEdit.id, data);
     else window.tabchat.addCustom(data, siteTemp.checked);
@@ -644,7 +647,7 @@
   siteName.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitSite(); });
   site.onclick = (e) => { if (e.target === site) closeSite(); };
 
-  // Esc: eerst het venster sluiten, anders terug naar je tabblad
+  // Esc: close the dialog first, otherwise back to your tab
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     if (site.classList.contains('open')) closeSite();
@@ -656,7 +659,7 @@
   });
 
   function render(s) {
-    // Jouw tabbladen
+    // Your tabs
     const mine = document.getElementById('mine');
     mine.replaceChildren();
     if (s.tabs.length === 0) {
@@ -668,7 +671,7 @@
       rm.onclick = () => {
         if (confirm(T('home.removeConfirm', { name: t.label }))) window.tabchat.remove(t.id);
       };
-      // Mag dit tabblad in slaapstand?
+      // May this tab sleep?
       const sw = el('label', 'sleepsw');
       const swBox = el('span', 'switch');
       const inp = document.createElement('input');
@@ -678,12 +681,12 @@
       swBox.append(inp, el('span', 'slider'));
       sw.append(T(t.asleep ? 'home.asleepMaySleep' : 'home.maySleep'), swBox);
       sw.title = T('home.sleepTitle');
-      const icon = (s.catalog.find(c => c.id === t.service) || {}).icon; // logo van de dienst, als die gevonden is
+      const icon = (s.catalog.find(c => c.id === t.service) || {}).icon; // logo of the service, if one was found
       row.append(icon ? iconBadge({ name: t.label, color: t.color, icon }) : badge(t.label, t.color), el('div', 'name', t.fullLabel || t.label), sw, rm);
       mine.append(row);
     }
 
-    // Dienst toevoegen
+    // Add a service
     const cat = document.getElementById('catalog');
     cat.replaceChildren();
     lastState = s;
@@ -693,7 +696,7 @@
       const top = el('div', 'top');
       top.append(c.icon ? iconBadge(c) : badge(c.name, c.color), nameWithKey(c.name, c.key));
       if (c.custom) {
-        // Eigen website: label "Eigen" en ✎ om te wijzigen of te verwijderen
+        // Own website: "Own" label and ✎ to edit or delete
         card.append(el('span', 'own', T('own.badge')));
         const ed = el('button', 'editbtn', '✎');
         ed.title = T('own.edit');
@@ -703,7 +706,7 @@
       card.append(top, el('div', 'desc', c.desc));
       makeDraggable(card, c.id);
       if (personal) {
-        // Microsoft: school/werk en privé zijn aparte websites met een eigen login
+        // Microsoft: work/school and personal are separate websites with their own login
         const btns = el('div', 'btns');
         const work = el('button', 'add', T('home.addWork'));
         work.title = T('home.addWorkTitle', { k: ' · Alt+' + c.key.toUpperCase() });
@@ -716,22 +719,22 @@
       } else {
         if (c.key) card.title = T('home.addTitle', { k: c.key.toUpperCase() });
         const add = el('button', 'add', T('home.addBtn'));
-        add.onclick = () => window.tabchat.add(c.id); // adres nodig en nog niet bekend? Dan vraagt de app erom
+        add.onclick = () => window.tabchat.add(c.id); // address needed and not known yet? Then the app asks for it
         card.append(add);
       }
       cat.append(card);
     }
-    // Laatste kaart: zelf een website toevoegen
+    // Last card: add a website yourself
     const own = el('div', 'card addown');
     own.append(el('div', 'plus', '+'), el('div', 'name', T('own.card')), el('div', 'desc', T('own.cardDesc')));
     own.onclick = () => openSite(null);
     cat.append(own);
-    // Kolommen: zo gelijk mogelijk over twee rijen, maximaal 4 naast elkaar (5 kaarten = 3 + 2, 7 = 4 + 3)
+    // Columns: as even as possible over two rows, at most 4 side by side (5 cards = 3 + 2, 7 = 4 + 3)
     const n = cat.children.length;
     const cols = n <= 2 ? n : Math.min(4, Math.ceil(n / 2));
     cat.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
 
-    // Over Tabchat / updates
+    // About Tabchat / updates
     const about = document.getElementById('about');
     about.replaceChildren();
     const u = s.update || {};
@@ -757,7 +760,7 @@
       about.append(cb);
     }
 
-    // Niet storen
+    // Do not disturb
     const dr = document.getElementById('dndrow');
     dr.replaceChildren();
     const status = el('div', 'status');
@@ -774,21 +777,21 @@
     btn(T('dnd.forever'), 'forever');
     if (s.dnd.manual) btn(T('dnd.turnOff'), null, 'dndbtn off');
 
-    // Functies
+    // Features
     const feat = document.getElementById('features');
     feat.replaceChildren();
     const ftabs = document.getElementById('featTabs');
     ftabs.replaceChildren();
     for (const g of FEATURE_TABS) {
       const b = el('button', g === featTab ? 'on' : '', T('ftab.' + g));
-      b.onclick = () => { featTab = g; try { localStorage.setItem('featTab', g); } catch {} render(s); };
+      b.onclick = () => { featTab = g; keep('featTab', g); render(s); };
       ftabs.append(b);
     }
     for (const f of FEATURES) {
       if (f.group !== featTab) continue;
-      if (f.hideInStore && s.platform && s.platform.storeManaged) continue; // Flathub/Snap regelt dit zelf
+      if (f.hideInStore && s.platform && s.platform.storeManaged) continue; // Flathub/Snap handle this themselves
       if (f.type === 'url') {
-        if (f.key === 'brightspaceUrl' && hiddenSet(s).has('brightspace')) continue; // Brightspace verborgen
+        if (f.key === 'brightspaceUrl' && hiddenSet(s).has('brightspace')) continue; // Brightspace hidden
         feat.append(urlRow(f, s));
         continue;
       }
@@ -797,14 +800,14 @@
       const title = el('div', 'name', T(`f.${f.key}.name`));
       text.append(title, el('div', 'desc', T(`f.${f.key}.desc`)));
 
-      // Keuzelijst in plaats van schakelaar
+      // Dropdown instead of a switch
       if (f.options) {
         const sel = document.createElement('select');
         const opts = f.options === 'links'
           ? [['default', 'f.openLinks.default'], ...(s.browsers || []).map(b => [b.id, '!' + b.name]), ['internal', 'f.openLinks.internal']]
           : f.options;
         for (const [value, label] of opts) {
-          // '!Tekst' = niet vertalen (taalnamen staan altijd in hun eigen taal)
+          // '!Text' = don't translate (language names are always in their own language)
           const o = el('option', null, label.startsWith('!') ? label.slice(1) : T(label));
           o.value = value;
           if (String(s.settings[f.key]) === String(value)) o.selected = true;
@@ -824,7 +827,7 @@
       input.onchange = () => window.tabchat.setSetting(f.key, input.checked);
       label.append(input, el('span', 'slider'));
       if (f.key === 'hardwareAcceleration' && s.restartNeeded) {
-        // Werkt pas na opnieuw starten
+        // Only takes effect after a restart
         const rb = el('button', 'restartbtn', T('f.hardwareAcceleration.restart'));
         rb.onclick = () => window.tabchat.relaunch();
         row.append(text, rb, label);
@@ -833,7 +836,7 @@
     }
   }
 
-  // Instelling met een adres (Brightspace van je school): één keer gemaakt, zodat typen niet onderbroken wordt
+  // Setting with an address (your school's Brightspace): created once, so typing isn't interrupted
   const urlRows = {};
   function urlRow(f, s) {
     const saved = s.settings[f.key] || '';
@@ -865,12 +868,12 @@
       }, 700);
     });
     r = urlRows[f.key] = { row, input, status, lang: curLang };
-    if (input.value) checkUrl(input.value, status); // vinkje meteen tonen
+    if (input.value) checkUrl(input.value, status); // show the check mark right away
     return row;
   }
   window.tabchat.onFocusSetting((key) => {
     const f = FEATURES.find(x => x.key === key);
-    if (f && f.group !== featTab && lastState) { featTab = f.group; render(lastState); } // naar het juiste tabje
+    if (f && f.group !== featTab && lastState) { featTab = f.group; render(lastState); } // to the right tab
     const r = urlRows[key];
     if (!r) return;
     r.row.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -880,7 +883,7 @@
     setTimeout(() => r.row.classList.remove('flash'), 1500);
   });
 
-  // Bij een andere taal: vaste teksten en sneltoetsen opnieuw opbouwen
+  // On a language change: rebuild the fixed texts and shortcuts
   const update = async (s) => {
     const before = curLang;
     await loadStrings(s.lang);

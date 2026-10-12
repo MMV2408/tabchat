@@ -1,12 +1,12 @@
-// Draait in elk tabblad van een dienst (WhatsApp, Discord, ...).
-// 1. Ongelezen: diensten geven hun aantal soms door via de "app-badge"
-//    (navigator.setAppBadge). Die vangen we op en sturen we naar Tabchat.
-// 2. Niet storen: meldingen van de dienst tegenhouden zolang het aanstaat.
-// 3. Klik op een melding: Tabchat openen op dit tabblad.
-// 4. Meldingen gaan (als het kan) via Ubuntu zelf, zie main/notifier.js.
+// Runs in every service tab (WhatsApp, Discord, ...).
+// 1. Unread: services sometimes report their count via the "app badge"
+// (navigator.setAppBadge). We catch it and send it to Tabchat.
+// 2. Do not disturb: block the service's notifications while it's on.
+// 3. Notification click: open Tabchat on this tab.
+// 4. Notifications go through Ubuntu itself when possible, see main/notifier.js.
 const { ipcRenderer, webFrame } = require('electron');
 
-// Muis tegen de bovenrand: verborgen tabbalk tonen (alleen als die instelling aanstaat; de app beslist)
+// Mouse at the top edge: show the hidden tab bar (only if that setting is on; the app decides)
 let lastEdge = 0;
 window.addEventListener('mousemove', (e) => {
   if (e.clientY > 24 || Date.now() - lastEdge < 400) return;
@@ -17,21 +17,21 @@ window.addEventListener('mousemove', (e) => {
 const dndAtStart = ipcRenderer.sendSync('get-dnd') === true;
 const nativeNotify = ipcRenderer.sendSync('notify-available') === true;
 
-// Deze code draait in de pagina zelf
+// This code runs in the page itself
 webFrame.executeJavaScript(`(() => {
-  // ---------- ongelezen (app-badge) ----------
+  // ---------- unread (app badge) ----------
   const send = (n) => window.postMessage({ __tabchatBadge: n }, '*');
   navigator.setAppBadge = (n) => { send(n === undefined ? 'dot' : Number(n)); return Promise.resolve(); };
   navigator.clearAppBadge = () => { send(0); return Promise.resolve(); };
 
-  // ---------- niet storen ----------
+  // ---------- do not disturb ----------
   window.__tabchatDnd = ${dndAtStart};
 
   const N = window.Notification;
   if (N) {
     const Wrapped = function (title, options) {
       if (window.__tabchatDnd) {
-        const fake = new EventTarget(); // nep-melding die nergens verschijnt
+        const fake = new EventTarget(); // fake notification that never shows up
         fake.close = () => {};
         return fake;
       }
@@ -41,7 +41,7 @@ webFrame.executeJavaScript(`(() => {
       return n;
     };
 
-    // Melding die Tabchat via Ubuntu toont; gedraagt zich voor de pagina als een gewone Notification
+    // Notification shown by Tabchat via Ubuntu; to the page it behaves like a normal Notification
     const live = new Map();
     let seq = 0;
     class TabchatNotification extends EventTarget {
@@ -60,13 +60,15 @@ webFrame.executeJavaScript(`(() => {
       }
       async _send() {
         let image = '';
-        try { // plaatje (bv. profielfoto) als data-URL meesturen; blob:-adressen kan alleen de pagina lezen
+        try { // send the picture (e.g. profile photo) as a data URL; only the page can read blob: addresses
           if (this.icon) {
             const res = await Promise.race([fetch(new URL(this.icon, location.href)), new Promise((_, r) => setTimeout(r, 800))]);
             const blob = await res.blob();
             if (blob.size < 2000000) image = await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = () => ok(''); fr.readAsDataURL(blob); });
           }
-        } catch {}
+        } catch {
+          image = ''; // picture not readable (in time): send the notification without it
+        }
         window.postMessage({ __tabchatNotify: { id: this._id, title: this.title, body: this.body, image } }, '*');
         this._fire('show');
       }
@@ -94,7 +96,7 @@ webFrame.executeJavaScript(`(() => {
   }
 })()`);
 
-// Badge-getal en klik op melding doorsturen naar Tabchat
+// Forward badge count and notification clicks to Tabchat
 window.addEventListener('message', (e) => {
   if (e.source !== window || !e.data) return;
   if (e.data.__tabchatClick === true) return ipcRenderer.send('notification-click');
@@ -105,12 +107,12 @@ window.addEventListener('message', (e) => {
   if (n === 'dot' || (Number.isFinite(n) && n >= 0)) ipcRenderer.send('badge', n);
 });
 
-// Klik of sluiten van een Ubuntu-melding doorgeven aan de pagina (bv. WhatsApp opent dan de chat)
+// Pass a click or close of an Ubuntu notification on to the page (e.g. WhatsApp then opens the chat)
 ipcRenderer.on('notify-event', (_e, { id, type }) => {
   webFrame.executeJavaScript(`window.__tabchatNotifyEvent && window.__tabchatNotifyEvent(${Number(id)}, ${JSON.stringify(type)})`);
 });
 
-// Niet storen aan/uit vanuit Tabchat
+// Do not disturb on/off from Tabchat
 ipcRenderer.on('dnd', (_e, on) => {
   webFrame.executeJavaScript(`window.__tabchatDnd = ${on ? 'true' : 'false'}`);
 });

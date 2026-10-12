@@ -1,4 +1,4 @@
-// Het hoofdvenster opbouwen: tabbalk, +-scherm, snelzoekvenster en de tabbladen.
+// Building the main window: tab bar, + screen, quick search and the tabs.
 const { BaseWindow, WebContentsView } = require('electron');
 const path = require('path');
 const store = require('./store');
@@ -18,10 +18,10 @@ const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
 
 function create() {
   store.config = config.load();
-  theme.apply(); // licht/donker vóór het venster verschijnt
-  autostart.sync(); // pad in het autostart-bestand bijwerken (bv. na een update)
+  theme.apply(); // light/dark before the window appears
+  autostart.sync(); // update the path in the autostart file (e.g. after an update)
 
-  // Via autostart gestart: verborgen in de tray (alleen als er een tray-icoon is)
+  // Started via autostart: hidden in the tray (only if there is a tray icon)
   const hidden = autostart.startedHidden && store.config.settings.runInBackground;
 
   const win = store.win = new BaseWindow({
@@ -29,7 +29,7 @@ function create() {
     height: 800,
     title: 'Tabchat',
     autoHideMenuBar: true,
-    frame: false, // geen Ubuntu-titelbalk: de tabbalk is de titelbalk (slepen, − □ ✕)
+    frame: false, // no Ubuntu title bar: the tab bar is the title bar (drag, − □ ✕)
     minWidth: 480,
     minHeight: 360,
     backgroundColor: theme.background(),
@@ -37,14 +37,14 @@ function create() {
     show: !hidden
   });
 
-  // De tabbalk. Het +-scherm, Ctrl+K en scherm delen laden pas als je ze opent (zie views.page)
+  // The tab bar. The + screen, Ctrl+K and screen sharing only load when opened (see views.page)
   const bar = store.bar = new WebContentsView({ webPreferences: { preload: PRELOAD } });
   win.contentView.addChildView(bar);
   bar.webContents.on('before-input-event', shortcuts.handler('bar'));
   bar.webContents.loadFile(path.join(RENDERER, 'tabs.html'));
 
-  // De opgeslagen tabbladen. Het eerste tabblad wordt altijd geladen (dat zie je meteen);
-  // de rest mag slapend opstarten als dat aanstaat.
+  // The saved tabs. The first tab is always loaded (you see it right away);
+  // the rest may start asleep if that's enabled.
   const firstId = store.config.tabs.length ? store.config.tabs[0].id : null;
   for (const tab of store.config.tabs) {
     if (tab.id !== firstId && sleep.shouldStartAsleep(tab)) sleep.startAsleep(tab.id);
@@ -54,22 +54,22 @@ function create() {
   if (store.active !== 'home') store.lastTab = store.active;
 
   win.on('resize', views.layout);
-  // Maximaliseren: icoon van de knop □ bijwerken
+  // Maximize: update the icon of the □ button
   win.on('maximize', views.broadcast);
   win.on('unmaximize', views.broadcast);
   win.on('blur', () => views.revealBar(false));
   win.on('focus', views.focusActive);
   views.layout();
-  views.watchEdge(); // tabbalk automatisch verbergen: bovenrand in de gaten houden
-  tray.init(); // tray-icoon + kruisje = verbergen
-  dnd.apply(); // Niet storen van vorige keer (bv. "tot morgen") weer toepassen
-  dnd.watchSystem(); // Niet storen van Ubuntu volgen
-  theme.init(); // bij een ander thema de diensten herladen
-  sleep.start(); // slaapstand: elke minuut kijken welke tabbladen mogen slapen
-  updater.init(); // automatische updates (alleen in de geïnstalleerde versie)
+  views.watchEdge(); // auto-hide tab bar: watch the top edge
+  tray.init(); // tray icon + close button = hide
+  dnd.apply(); // re-apply Do not disturb from last time (e.g. "until tomorrow")
+  dnd.watchSystem(); // follow Ubuntu's Do not disturb
+  theme.init(); // reload services when the theme changes
+  sleep.start(); // tab sleep: check every minute which tabs may sleep
+  updater.init(); // automatic updates (installed version only)
 
-  // Sneltoetsen direct laten werken bij het opstarten:
-  // eerst de tabbalk (laadt meteen), daarna het tabblad zodra dat klaar is
+  // Make shortcuts work right away on startup:
+  // first the tab bar (loads instantly), then the tab once it's ready
   bar.webContents.once('did-finish-load', () => {
     const target = store.active === 'home' ? store.home : store.views[store.active];
     if (target && target.webContents.isLoading()) bar.webContents.focus();

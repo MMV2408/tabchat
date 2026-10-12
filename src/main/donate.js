@@ -1,5 +1,5 @@
-// Vraag om te doneren: één klein venster na de eerste installatie en na elke update,
-// tot iemand "Niet meer tonen" aanvinkt. Niet bij npm start.
+// Donation request: one small window after the first install and after each update,
+// until someone ticks "Don't show again". Not with npm start.
 const { app, dialog, shell } = require('electron');
 const path = require('path');
 const store = require('./store');
@@ -14,7 +14,7 @@ function open() {
 
 async function ask() {
   if (store.config.donateNever || store.quitting || !store.win) return;
-  store.config.donateAskedAt = Date.now(); // feedbackvraag niet vlak hierna (feedback.js)
+  store.config.donateAskedAt = Date.now(); // no feedback request right after this (feedback.js)
   require('./config').save();
   const { response, checkboxChecked } = await dialog.showMessageBox(store.win, {
     type: 'none',
@@ -34,23 +34,23 @@ async function ask() {
   if (response === 0) open();
 }
 
-// Pas tonen als het venster zichtbaar is (niet bij verborgen starten in de tray)
+// Only show when the window is visible (not when starting hidden in the tray)
 function showWhenVisible() {
   if (store.win.isVisible()) ask();
   else store.win.once('show', () => setTimeout(ask, 1500));
 }
 
-// kind: 'install' (eerste keer) of 'update'
+// kind: 'install' (first time) or 'update'
 let afterUpdate = false;
 function schedule(kind) {
   if (!app.isPackaged || store.config.donateNever) return;
-  // Na een update: pas vragen als "Wat is er nieuw" gesloten is
+  // After an update: only ask once "What's new" is closed
   if (kind === 'update') { afterUpdate = true; return; }
-  // Eerste keer: eerst rustig diensten toevoegen en inloggen
+  // First time: let people add services and sign in first
   setTimeout(() => { if (store.win) showWhenVisible(); }, 3 * 60 * 1000);
 }
 
-// "Wat is er nieuw" is gesloten (of er was niets nieuws)
+// "What's new" was closed (or there was nothing new)
 function afterWhatsNew() {
   if (!afterUpdate) return;
   afterUpdate = false;

@@ -1,5 +1,5 @@
-// "Wat is er nieuw": een venstertje in het +-scherm met de veranderingen per versie.
-// Verschijnt vanzelf na een update, en via "Wat is er nieuw" onder Over Tabchat.
+// "What's new": a small window on the + screen with the changes per version.
+// Shows up by itself after an update, and via "What's new" under About Tabchat.
 const { app } = require('electron');
 const store = require('./store');
 const views = require('./views');
@@ -15,14 +15,14 @@ function send(from) {
   views.whenReady('home', (h) => h.webContents.send('whats-new', data(from)));
 }
 
-// Via een klik (melding of link): venster naar voren halen
+// From a click (notification or link): bring the window to the front
 function show(from, force = false) {
   require('./palette').hide();
   require('./tray').showWindow({ force });
   send(from);
 }
 
-// Na een update: tonen zodra het +-scherm geladen is en het venster zichtbaar is
+// After an update: show once the + screen is loaded and the window is visible
 function showAfterUpdate(from) {
   if (!changelog.since(from, 'en').length) return require('./donate').afterWhatsNew();
   const go = () => setTimeout(() => send(from), 1200);

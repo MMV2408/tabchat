@@ -1,9 +1,10 @@
-// De schermen in het venster: tabbladen maken, tonen, verbergen en de status
-// doorsturen naar de tabbalk en het +-scherm.
+// The views in the window: creating, showing and hiding tabs, and sending
+// the state to the tab bar and the + screen.
 const { WebContentsView, shell } = require('electron');
 const path = require('path');
 const store = require('./store');
-const { UA, CATALOG, LOGIN_HOSTS, urlFor, isOwnHost } = require('./catalog');
+const { UA, CATALOG, LOGIN_HOSTS, urlFor, isOwnHost, hostOf } = require('./catalog');
+const log = require('./log');
 const microsoft = require('./microsoft');
 const shortcuts = require('./shortcuts');
 const palette = require('./palette');
@@ -12,18 +13,18 @@ const dnd = require('./dnd');
 const sleep = require('./sleep');
 const i18n = require('./i18n');
 
-// Hoogte tabbalk: altijd 44 pixels (compact = alleen icoontjes, even hoog). Bij "automatisch verbergen"
-// neemt de balk geen ruimte in en schuift hij over de dienst heen als je de muis naar boven beweegt.
+// Tab bar height: always 44 pixels (compact = icons only, same height). With "auto-hide"
+// the bar takes no space and slides over the service when you move the mouse to the top.
 const barMode = () => (store.config && store.config.settings.tabBar) || 'normal';
 const barHeight = () => 44;
 const ERROR_PAGE = path.join(__dirname, '..', 'renderer', 'error.html');
 
-// ---------- eigen schermen (+-scherm, Ctrl+K, scherm delen): pas laden als je ze nodig hebt ----------
-// Elk scherm is een eigen proces van ~100 MB. Ze worden geladen als je ze opent en weer
-// opgeruimd als je ze een tijdje niet gebruikt.
+// ---------- own screens (+ screen, Ctrl+K, screen sharing): only loaded when needed ----------
+// Each screen is its own process of ~100 MB. They're loaded when you open them and
+// cleaned up when you haven't used them for a while.
 const PRELOAD = path.join(__dirname, '..', 'preload', 'preload.js');
 const PAGES = { home: 'home.html', palette: 'palette.html', share: 'share.html' };
-const STACK = ['home', 'bar', 'palette', 'share']; // van onder naar boven (boven de tabbladen)
+const STACK = ['home', 'bar', 'palette', 'share']; // bottom to top (above the tabs)
 const dropTimers = {};
 
 function page(name) {
@@ -31,7 +32,7 @@ function page(name) {
   dropTimers[name] = null;
   if (store[name]) return store[name];
   const v = new WebContentsView({ webPreferences: { preload: PRELOAD } });
-  if (name !== 'home') v.setBackgroundColor('#00000000'); // doorzichtig, de app blijft erachter zichtbaar
+  if (name !== 'home') v.setBackgroundColor('#00000000'); // transparent, the app stays visible behind it
   if (name !== 'share') v.webContents.on('before-input-event', shortcuts.handler(name));
   if (name === 'home') {
     v.webContents.on('focus', () => {
@@ -43,14 +44,14 @@ function page(name) {
   const cv = store.win.contentView;
   cv.addChildView(v);
   store[name] = v;
-  // Wat boven dit scherm hoort, weer bovenop leggen
+  // Put whatever belongs above this screen back on top
   for (const other of STACK.slice(STACK.indexOf(name) + 1)) {
     if (store[other]) { cv.removeChildView(store[other]); cv.addChildView(store[other]); }
   }
   return v;
 }
 
-// fn(view) zodra het scherm geladen is (het +-scherm krijgt nog even om zijn teksten op te halen)
+// fn(view) once the screen has loaded (the + screen gets a moment to fetch its texts)
 function whenReady(name, fn) {
   const v = page(name);
   const go = () => setTimeout(() => { if (store[name] === v) fn(v); }, name === 'home' ? 250 : 0);
@@ -67,18 +68,18 @@ function drop(name) {
   if (!v || !store.alive()) return;
   if ((name === 'home' && store.active === 'home') || (name === 'palette' && store.paletteOpen) || (name === 'share' && store.shareOpen)) return;
   store[name] = null;
-  try { store.win.contentView.removeChildView(v); } catch {}
+  try { store.win.contentView.removeChildView(v); } catch (e) { log.warn('remove view:', name, e); }
   v.webContents.close();
 }
 
-// ---------- status naar de schermen ----------
+// ---------- state to the screens ----------
 function labelFor(tab) {
   const same = store.config.tabs.filter(t => t.service === tab.service);
   const name = CATALOG[tab.service].name;
   return same.length > 1 ? `${name} ${same.indexOf(tab) + 1}` : name;
 }
 
-// Labeltje "School/werk" of "Privé" bij Microsoft-tabbladen, alleen als je ze allebei hebt
+// "Work/school" or "Personal" label on Microsoft tabs, only if you have both
 function accountOf(tab) {
   const g = CATALOG[tab.service].group;
   return g === 'microsoft' ? 'work' : g === 'microsoft-personal' ? 'personal' : '';
@@ -100,11 +101,11 @@ function getState() {
       id: t.id,
       service: t.service,
       label: labelFor(t),
-      tag: t.temp ? 'temp' : accountTag(t), // '', 'work', 'personal' of 'temp' (incognito)
+      tag: t.temp ? 'temp' : accountTag(t), // '', 'work', 'personal' or 'temp' (incognito)
       fullLabel: labelFor(t) + (t.temp ? ` (${i18n.t('acct.temp')})` : accountTag(t) ? ` (${i18n.t('acct.' + accountTag(t))})` : ''),
       color: CATALOG[t.service].color,
       muted: mutedTabs.has(t.id),
-      unread: unread.get(t.id), // aantal, 'dot' of 0
+      unread: unread.get(t.id), // count, 'dot' or 0
       asleep: sleep.isAsleep(t.id),
       canSleep: sleep.canSleep(t)
     })),
@@ -119,7 +120,7 @@ function getState() {
       desc: s.custom ? s.desc : i18n.t('svc.' + (s.base || id))
     })),
     settings: config.settings,
-    restartNeeded: config.settings.hardwareAcceleration !== false ? !store.hwAtStart : !!store.hwAtStart, // hardwareversnelling veranderd
+    restartNeeded: config.settings.hardwareAcceleration !== false ? !store.hwAtStart : !!store.hwAtStart, // hardware acceleration changed
     maximized: store.win ? store.win.isMaximized() : false
   };
 }
@@ -129,10 +130,10 @@ function broadcast() {
   const s = getState();
   store.bar.webContents.send('state', s);
   if (store.home) store.home.webContents.send('state', s);
-  require('./tray').refresh(); // tabbladen in het tray-menu bijwerken
+  require('./tray').refresh(); // update the tabs in the tray menu
 }
 
-// ---------- tabblad maken ----------
+// ---------- creating a tab ----------
 function createServiceView(tab) {
   const v = new WebContentsView({
     webPreferences: {
@@ -148,28 +149,28 @@ function createServiceView(tab) {
   v.webContents.on('before-input-event', shortcuts.handler('tab'));
   unread.watch(tab, v);
 
-  // Sommige sites (zoals Discord) markeren hun bovenbalk als "sleepgebied" voor hun eigen desktop-app.
-  // In een venster zonder titelbalk zou je daar het hele Tabchat-venster mee slepen, en bij een
-  // automatisch verborgen tabbalk vangt dat de klikken bovenin af. Dat zetten we voor elke site uit.
+  // Some sites (like Discord) mark their top bar as a "drag region" for their own desktop app.
+  // In a window without a title bar that would drag the whole Tabchat window, and with an
+  // auto-hidden tab bar it would swallow clicks at the top. We turn that off for every site.
   v.webContents.on('dom-ready', () => {
-    v.webContents.insertCSS('*, *::before, *::after { -webkit-app-region: no-drag !important; }').catch(() => {});
+    v.webContents.insertCSS('*, *::before, *::after { -webkit-app-region: no-drag !important; }').catch(e => log.warn('insert css:', tab.id, e));
   });
   v.webContents.on('did-finish-load', () => {
     const url = v.webContents.getURL();
     if (url.startsWith('file:')) {
-      v.webContents.setZoomFactor(1); // foutscherm altijd op normale grootte
+      v.webContents.setZoomFactor(1); // error page always at normal size
     } else {
-      // Zoom terugzetten na het laden van een pagina
+      // Restore the zoom after a page loads
       const t = store.config.tabs.find(x => x.id === tab.id);
       if (t && t.zoom) v.webContents.setZoomFactor(t.zoom);
       checkRawPage(tab, v);
     }
-    // Na herladen (F5) de focus terugzetten op het actieve tabblad
+    // After a reload (F5) put the focus back on the active tab
     if (tab.id === store.active && store.win.isFocused()) focusActive();
   });
 
-  // Een verborgen tabblad (bv. Outlook dat op de achtergrond laadt) kan de focus
-  // "stelen". Dan werken de sneltoetsen niet meer. Zet de focus dan direct terug.
+  // A hidden tab (e.g. Outlook loading in the background) can "steal" the focus.
+  // Then the shortcuts stop working, so we put the focus straight back.
   v.webContents.on('focus', () => {
     if (tab.id !== store.active || store.paletteOpen || store.shareOpen) setImmediate(focusActive);
   });
@@ -179,15 +180,14 @@ function createServiceView(tab) {
     microsoft.watchLogin(tab, v);
   }
 
-  // Inlogvensters in de app; andere links volgens "Links openen in" (zie links.js)
+  // Sign-in windows inside the app; other links according to "Open links in" (see links.js)
   const links = require('./links');
   v.webContents.setWindowOpenHandler(({ url }) => {
-    let host = '';
-    try { host = new URL(url).hostname; } catch {}
+    const host = hostOf(url);
     if (LOGIN_HOSTS.includes(host)) return { action: 'allow' };
-    if (isOwnHost(tab, host)) return { action: 'allow' }; // bv. Brightspace opent een eigen pagina in een venster
+    if (isOwnHost(tab, host)) return { action: 'allow' }; // e.g. Brightspace opens its own page in a window
     if (/^https?:/.test(url)) { links.open(url, ses); return { action: 'deny' }; }
-    // Leeg venster (Outlook doet dat): verborgen openen en het adres opvangen
+    // Empty window (Outlook does that): open it hidden and catch the address
     if (!url || url === 'about:blank') return { action: 'allow', overrideBrowserWindowOptions: { show: false } };
     return { action: 'deny' };
   });
@@ -195,7 +195,7 @@ function createServiceView(tab) {
     if (!url || url === 'about:blank') links.catchBlank(child, ses);
   });
 
-  // Foutscherm: "Adres wijzigen" geklikt? Naar het +-scherm, naar het adresveld
+  // Error page: "Change address" clicked? Go to the + screen, to the address field
   v.webContents.on('did-navigate-in-page', (_e, url) => {
     if (!url.startsWith('file:') || !url.includes('#tabchat-fix-url')) return;
     const key = CATALOG[tab.service].settingUrl;
@@ -203,27 +203,27 @@ function createServiceView(tab) {
     if (key) whenReady('home', (h) => h.webContents.send('focus-setting', key));
   });
 
-  // Foutscherm als de dienst niet laadt (geen internet, storing) of vastloopt
+  // Error page when the service doesn't load (no internet, outage) or crashes
   v.webContents.on('did-fail-load', (_e, code, desc, url, isMainFrame) => {
-    if (!isMainFrame || code === -3 || url.startsWith('file:')) return; // -3 = afgebroken, geen echte fout
+    if (!isMainFrame || code === -3 || url.startsWith('file:')) return; // -3 = aborted, not a real error
     showError(tab, v, { code, desc, url: /^https?:/.test(url) ? url : urlFor(tab) });
   });
   v.webContents.on('render-process-gone', (_e, details) => {
-    if (details.reason === 'clean-exit' || store.views[tab.id] !== v) return; // zelf gesloten (bv. slaapstand)
+    if (details.reason === 'clean-exit' || store.views[tab.id] !== v) return; // closed by us (e.g. tab sleep)
     showError(tab, v, { reason: 'crash' });
   });
 
-  // Scherm delen: keuzevenster tonen (zie share.js)
+  // Screen sharing: show the picker (see share.js)
   ses.setDisplayMediaRequestHandler((_request, callback) => require('./share').request(callback));
 
-  // Wachten als een ander Microsoft-tabblad met dezelfde login al bezig is
+  // Wait if another Microsoft tab with the same login is already signing in
   if (microsoft.shouldWait(tab)) microsoft.waiting.add(tab.id);
   else v.webContents.loadURL(urlFor(tab));
 
   v.setVisible(false);
   store.win.contentView.addChildView(v);
   store.views[tab.id] = v;
-  dnd.applyToView(tab.id, v); // geluid uit bij Niet storen
+  dnd.applyToView(tab.id, v); // sound off with Do not disturb
   if (store.paletteOpen) palette.bringToFront();
 }
 
@@ -239,17 +239,17 @@ function destroyView(id) {
   delete store.views[id];
 }
 
-// Uit het geheugen halen voor de slaapstand (tabblad blijft in de balk staan)
+// Remove from memory for tab sleep (the tab stays in the bar)
 function removeForSleep(id) {
   const v = store.views[id];
   if (!v) return;
   store.win.contentView.removeChildView(v);
   v.webContents.close();
   delete store.views[id];
-  unread.forget(id); // een slapend tabblad kan niet tellen
+  unread.forget(id); // a sleeping tab can't count
 }
 
-// ---------- foutscherm ----------
+// ---------- error page ----------
 function showError(tab, v, info) {
   if (v.webContents.isDestroyed()) return;
   const svc = CATALOG[tab.service];
@@ -261,24 +261,24 @@ function showError(tab, v, info) {
       code: String(info.code || ''),
       desc: info.desc || '',
       reason: info.reason || '',
-      fix: svc.askUrl ? '1' : '', // adres verschilt per school: knop "Adres wijzigen" bij een onbekend adres
+      fix: svc.askUrl ? '1' : '', // address differs per school: "Change address" button for an unknown address
       lang: i18n.lang()
     }
   });
 }
 
-// Sommige diensten (bv. Outlook) tonen zonder internet hun eigen offline-pagina
-// als ruwe code. Die pagina "laadt" wel, dus did-fail-load merkt niets.
-// Herkennen we zo'n pagina, dan tonen we ons eigen foutscherm.
+// Some services (e.g. Outlook) show their own offline page as raw code when there's
+// no internet. That page does "load", so did-fail-load notices nothing.
+// If we recognize such a page, we show our own error page.
 function checkRawPage(tab, v) {
   v.webContents.executeJavaScript(
     "document.contentType === 'text/plain' && /^\\s*<(!doctype|html)/i.test((document.body && document.body.innerText) || '')"
   ).then(isRaw => {
     if (isRaw) showError(tab, v, { code: -106, desc: 'OFFLINE_PAGE', url: urlFor(tab) });
-  }).catch(() => {});
+  }).catch(e => log.info('raw page check:', tab.id, e.message)); // page navigated away meanwhile
 }
 
-// Herladen. Staat er een foutscherm? Dan de dienst opnieuw proberen.
+// Reload. Is an error page showing? Then try the service again.
 function reloadView(id) {
   const v = store.views[id];
   if (!v) return;
@@ -290,7 +290,7 @@ function reloadView(id) {
   }
 }
 
-// ---------- tabbalk tonen bij "automatisch verbergen" ----------
+// ---------- showing the tab bar with "auto-hide" ----------
 let hideTimer = null;
 function revealBar(on) {
   if (!store.alive()) return;
@@ -300,15 +300,15 @@ function revealBar(on) {
   if (on && (store.paletteOpen || store.shareOpen)) return;
   store.barRevealed = on;
   if (on) {
-    // Balk bovenop de dienst leggen (snelzoeken en scherm delen blijven daarboven)
+    // Put the bar on top of the service (quick search and screen sharing stay above it)
     const cv = store.win.contentView;
     for (const v of [store.bar, store.palette, store.share]) if (v) { cv.removeChildView(v); cv.addChildView(v); }
   }
   layout();
 }
-// Muis van de balk af: na een korte pauze weer verbergen
+// Mouse off the bar: hide again after a short pause
 function hideBarSoon() {
-  if (hideTimer) return; // al bezig met verbergen: niet steeds opnieuw beginnen
+  if (hideTimer) return; // already hiding: don't restart every time
   hideTimer = setTimeout(() => { hideTimer = null; revealBar(false); }, 500);
 }
 function cancelHide() {
@@ -316,8 +316,8 @@ function cancelHide() {
   hideTimer = null;
 }
 
-// De muis zelf in de gaten houden (de rand van een venster zonder titelbalk vangt de muis af,
-// dus de pagina merkt de bovenrand niet altijd). Alleen bij "automatisch verbergen".
+// Watch the mouse ourselves (the border of a window without a title bar catches the mouse,
+// so the page doesn't always notice the top edge). Only with "auto-hide".
 let edgeTimer = null;
 function watchEdge() {
   clearInterval(edgeTimer);
@@ -330,13 +330,13 @@ function watchEdge() {
     const b = store.win.getContentBounds();
     const insideX = p.x >= b.x && p.x <= b.x + b.width;
     if (!insideX) return;
-    if (p.y >= b.y - 2 && p.y <= b.y + 24) revealBar(true);                                // bovenste strook
-    else if (store.barRevealed && p.y >= b.y && p.y <= b.y + barHeight()) cancelHide();        // op de balk
-    else if (store.barRevealed) hideBarSoon();                                              // van de balk af
+    if (p.y >= b.y - 2 && p.y <= b.y + 24) revealBar(true);                                // top strip
+    else if (store.barRevealed && p.y >= b.y && p.y <= b.y + barHeight()) cancelHide();        // on the bar
+    else if (store.barRevealed) hideBarSoon();                                              // off the bar
   }, 120);
 }
 
-// ---------- tonen ----------
+// ---------- showing ----------
 function layout() {
   if (!store.alive()) return;
   if (store.active === 'home') page('home');
@@ -356,7 +356,7 @@ function layout() {
   if (store.share) { store.share.setBounds({ x: 0, y: 0, width, height }); store.share.setVisible(store.shareOpen); }
 }
 
-// Toetsenbord naar het juiste scherm, zodat de sneltoetsen altijd werken
+// Keyboard to the right screen, so the shortcuts always work
 function focusActive() {
   if (store.shareOpen && store.share) return store.share.webContents.focus();
   if (store.paletteOpen && store.palette) return store.palette.webContents.focus();
@@ -365,14 +365,14 @@ function focusActive() {
 }
 
 function show(id) {
-  if (sleep.isAsleep(id)) sleep.wake(id); // slapend tabblad: weer laden
-  if (microsoft.waiting.has(id)) microsoft.loadTab(id); // zelf geopend: dan toch laden
-  sleep.seen(store.active); // vorige tabblad: net nog bekeken
+  if (sleep.isAsleep(id)) sleep.wake(id); // sleeping tab: load it again
+  if (microsoft.waiting.has(id)) microsoft.loadTab(id); // opened by the user: load it anyway
+  sleep.seen(store.active); // previous tab: just viewed
   sleep.seen(id);
   store.active = id;
   if (id !== 'home') store.lastTab = id;
-  if (id !== 'home' && store.home) dropLater('home', 3 * 60 * 1000); // +-scherm 3 minuten niet gebruikt: opruimen
-  require('./theme').flush(id); // tabbladen met een nieuw thema herladen zodra je wegklikt
+  if (id !== 'home' && store.home) dropLater('home', 3 * 60 * 1000); // + screen unused for 3 minutes: clean it up
+  require('./theme').flush(id); // reload tabs with a new theme once you leave them
   layout();
   broadcast();
   if (!store.paletteOpen && !store.shareOpen) focusActive();

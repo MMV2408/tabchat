@@ -152,8 +152,11 @@ On Wayland (the default on Ubuntu), apps are not allowed to look at your screen 
 **A sleeping tab did not show my new messages.**
 That is expected: a sleeping tab is fully unloaded. Turn off **May sleep** for that tab on the + screen to keep it awake. WhatsApp, Discord and Teams stay awake by default.
 
-**Can I add other websites, like Gmail?**
-Not yet. Some services, such as Gmail, block sign-in inside apps. Adding your own services is on the roadmap.
+**Can I add other websites?**
+Yes: click **Your own website** on the + screen and paste the address. Google services (Gmail, Drive) usually block signing in from apps like Tabchat, so those may not work.
+
+**Something doesn't work. How do I report it?**
+Open an [issue](https://github.com/MMV2408/tabchat/issues) and attach the log files from `~/.config/tabchat/`: `tabchat.log` (general) and `updater.log` (updates).
 
 ## Building from source
 
@@ -220,8 +223,9 @@ gh release create v1.2.3 dist/tabchat_1.2.3_amd64.deb dist/Tabchat-1.2.3.AppImag
 
 ## Roadmap
 
-- [ ] Add your own services (name + web address)
-- [ ] Snap Store and Flathub
+- [x] Add your own websites (name + web address)
+- [x] Snap Store
+- [ ] Flathub
 - [ ] Profiles (e.g. "School" and "Personal")
 
 Ideas and bug reports are welcome in [Issues](https://github.com/MMV2408/tabchat/issues).

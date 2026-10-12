@@ -15,7 +15,7 @@
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#1b1320">
-<!-- Snapcraft-verificatie: plak hier de meta-tag die snapcraft.io geeft (Settings → Verify) -->
+<!-- Snapcraft verification: paste the meta tag from snapcraft.io here (Settings → Verify) -->
 <link rel="icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,7 @@
   .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
   kbd { font: 700 .85em var(--body); background: var(--surface-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
 
-  /* ---------- kop ---------- */
+  /* ---------- header ---------- */
   header.top { display: flex; align-items: center; gap: 20px; padding: 20px 0; }
   .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font: 700 22px var(--display); margin-right: auto; }
   .brand img { width: 34px; height: 34px; }
@@ -63,7 +63,7 @@
   .btn.ghost { color: var(--text); border: 1.5px solid var(--line); background: transparent; }
   .btn.ghost:hover { border-color: var(--muted); }
 
-  /* ---------- de simulatie: het herkenbare element ---------- */
+  /* ---------- the simulation: the signature element ---------- */
   .try { margin: 56px 0 12px; color: var(--muted); font-size: 16px; }
   .try b { color: var(--text); }
   .simbox { position: relative; width: 100%; }
@@ -98,7 +98,7 @@
   .tabmenu hr { border: 0; border-top: 1px solid rgba(127,127,140,.25); margin: 5px 4px; }
   .caption { color: var(--muted); font-size: 16px; margin: 18px 4px 0; min-height: 3.2em; max-width: 70ch; }
 
-  /* ---------- secties ---------- */
+  /* ---------- sections ---------- */
   section { padding: 104px 0 0; }
   h2 { font: 800 clamp(30px, 4vw, 46px)/1.1 var(--display); letter-spacing: -0.015em; margin: 0 0 18px; max-width: 22ch; }
   .intro { color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
@@ -172,7 +172,7 @@
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
 <script>
-  // Thema en taal zo vroeg mogelijk, zodat de pagina niet eerst verkeerd verschijnt
+  // Theme and language as early as possible, so the page doesn't show up wrong first
   (function () {
     let t = null, l = null;
     try { t = localStorage.getItem('theme'); l = localStorage.getItem('lang'); } catch {}
@@ -211,9 +211,9 @@
       <p class="try" data-i18n-html="sim.try"></p>
       <div class="simbox" id="simbox">
         <div class="win" id="win" role="application" aria-label="Tabchat demo">
-          <iframe class="tabsframe" src="sim/tabs.html?v=1.20.3" title="Tabs" scrolling="no"></iframe>
+          <iframe class="tabsframe" src="sim/tabs.html?v=1.21.0" title="Tabs" scrolling="no"></iframe>
           <div class="content">
-            <iframe id="home" src="sim/home.html?v=1.20.3" title="Settings" hidden></iframe>
+            <iframe id="home" src="sim/home.html?v=1.21.0" title="Settings" hidden></iframe>
             <img id="shot" alt="" hidden>
             <div class="placeholder" id="ph" hidden><div class="badge" id="phBadge"></div><strong id="phName"></strong><span data-i18n="sim.soon"></span></div>
           </div>
@@ -318,10 +318,10 @@
   </footer>
 </div>
 
-<script src="sim/data.js?v=1.20.3"></script>
-<script src="sim/engine.js?v=1.20.3"></script>
+<script src="sim/data.js?v=1.21.0"></script>
+<script src="sim/engine.js?v=1.21.0"></script>
 <script>
-// ---------- teksten van de website ----------
+// ---------- website texts ----------
 const TEXT = {
   en: {
     'nav.features': 'Features', 'nav.faq': 'FAQ', 'nav.install': 'Install',
@@ -433,8 +433,8 @@ const TEXT = {
   }
 };
 
-// Screenshots per dienst in de simulatie. null = nog geen screenshot (dan een nette tijdelijke vlak).
-// Een betere screenshot? Zet hem in docs/sim/shots/ (inhoud onder de tabbalk, ca. 1540×890).
+// Screenshots per service in the simulation. null = no screenshot yet (then a neat placeholder).
+// A better screenshot? Put it in docs/sim/shots/ (content below the tab bar, about 1540×890).
 const SHOTS = {
   whatsapp: 'sim/shots/whatsapp.png',
   discord: 'sim/shots/discord.png',
@@ -477,7 +477,7 @@ function applyTheme() {
 document.getElementById('langBtn').onclick = () => { lang = lang === 'en' ? 'nl' : 'en'; save('lang', lang); applyText(); applyTheme(); TabchatSim.setSite({ lang }); };
 document.getElementById('themeBtn').onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; save('theme', theme); applyTheme(); TabchatSim.setSite({ theme }); };
 
-// ---------- sneltoetsen: dezelfde lijst en teksten als in de app ----------
+// ---------- shortcuts: same list and texts as in the app ----------
 function buildKeys() {
   const S = SIM_DATA.strings[lang];
   document.getElementById('keytable').innerHTML = SIM_DATA.keys.map(([group, rows]) =>
@@ -485,7 +485,7 @@ function buildKeys() {
       `<div class="keyrow"><span>${esc(S[what])}</span><span>${combo.map(k => `<kbd>${esc(k)}</kbd>`).join(' + ')}</span></div>`).join('') + '</div>').join('');
 }
 
-// ---------- wat is er nieuw: rechtstreeks uit de app (changelog.js op GitHub) ----------
+// ---------- what's new: straight from the app (changelog.js on GitHub) ----------
 let changelog = SIM_DATA.changelog;
 function buildNews() {
   document.getElementById('newslist').innerHTML = changelog.slice(0, 3).map(e =>
@@ -498,7 +498,7 @@ fetch('https://raw.githubusercontent.com/MMV2408/tabchat/main/src/main/changelog
     if (list.length) { changelog = list; buildNews(); }
   }).catch(() => {});
 
-// ---------- de simulatie ----------
+// ---------- the simulation ----------
 const win = document.getElementById('win'), box = document.getElementById('simbox');
 function fit() { const s = box.clientWidth / 1120; win.style.transform = `scale(${s})`; box.style.height = win.offsetHeight * s + 'px'; }
 new ResizeObserver(fit).observe(box);
@@ -527,7 +527,7 @@ function renderSim(s) {
   document.getElementById('caption').textContent = T(cap);
 }
 
-// ---------- rechtsklikmenu van een tabblad ----------
+// ---------- a tab's right-click menu ----------
 let menu = null;
 function closeMenu() { if (menu) { menu.remove(); menu = null; } }
 TabchatSim.onTabMenu((id, pos) => {
@@ -546,7 +546,7 @@ TabchatSim.onTabMenu((id, pos) => {
     menu.append(b);
   }
   document.body.append(menu);
-  // Van de plek in het (verkleinde) tabbalk-venster naar de plek op de pagina
+  // From the position in the (scaled) tab bar frame to the position on the page
   let x = innerWidth / 2, y = innerHeight / 2;
   const fr = pos && [...document.querySelectorAll('iframe')].find(f => f.contentWindow === pos.frame);
   if (fr) { const r = fr.getBoundingClientRect(), k = r.width / fr.offsetWidth; x = r.left + pos.x * k; y = r.top + pos.y * k; }
@@ -560,7 +560,7 @@ addEventListener('blur', () => setTimeout(() => { if (menu && !menu.contains(doc
 addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 addEventListener('scroll', closeMenu, { passive: true });
 
-// Automatisch verbergen in de demo: muis naar de bovenrand = balk verschijnt
+// Auto-hide in the demo: mouse to the top edge = bar appears
 let barTimer = null;
 win.addEventListener('mousemove', (e) => {
   if (win.dataset.bar !== 'autohide') return;
@@ -577,7 +577,7 @@ applyTheme();
 applyText();
 TabchatSim.setSite({ lang, theme });
 TabchatSim.subscribe(renderSim);
-Object.values(SHOTS).filter(Boolean).forEach(src => { new Image().src = src; }); // vooraf laden
+Object.values(SHOTS).filter(Boolean).forEach(src => { new Image().src = src; }); // preload
 </script>
 </body>
 </html>

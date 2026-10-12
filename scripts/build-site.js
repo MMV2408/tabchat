@@ -1,5 +1,5 @@
-// Zet de app-simulatie op de website (docs/sim) klaar met de echte schermen van Tabchat.
-// Draai na wijzigingen aan home.html, tabs.html, teksten of diensten:  node scripts/build-site.js
+// Prepares the app simulation on the website (docs/sim) with Tabchat's real screens.
+// Run after changes to home.html, tabs.html, texts or services:  node scripts/build-site.js
 const fs = require('fs');
 const path = require('path');
 
@@ -8,7 +8,7 @@ const src = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const out = path.join(root, 'docs', 'sim');
 fs.mkdirSync(out, { recursive: true });
 
-// Een stuk JavaScript (object of lijst) uit een bronbestand halen, zonder de app te starten
+// Pull a piece of JavaScript (object or array) out of a source file, without starting the app
 function literal(file, name) {
   const s = src(file);
   const start = s.indexOf(`const ${name} = `);
@@ -37,20 +37,20 @@ const data = {
 };
 fs.writeFileSync(path.join(out, 'data.js'), '// Gemaakt door scripts/build-site.js, niet met de hand aanpassen\nwindow.SIM_DATA = ' + JSON.stringify(data) + ';\n');
 
-// De schermen zelf, met een nep-"tabchat" (mock.js) in plaats van de echte app
+// The screens themselves, with a fake "tabchat" (mock.js) instead of the real app
 for (const f of ['home.html', 'tabs.html']) {
   const html = src('src/renderer/' + f).replace('</head>', '<script src="mock.js"></script>\n</head>');
   fs.writeFileSync(path.join(out, f), html);
 }
 
-// Thema: naast "volg het systeem" ook vast licht/donker, gekozen door de website
+// Theme: besides "follow the system" also fixed light/dark, chosen by the website
 const theme = src('src/renderer/theme.css');
 const m = theme.match(/@media \(prefers-color-scheme: light\) \{\s*:root \{([\s\S]*?)\}\s*\}/);
 if (!m) throw new Error('licht thema niet gevonden in theme.css');
 fs.writeFileSync(path.join(out, 'theme.css'),
   theme.slice(0, m.index) + `:root[data-theme="light"] {${m[1]}}\n`);
 
-// Versie achter de sim-bestanden in index.html, zodat browsers na een release niet een oude, bewaarde versie gebruiken
+// Version after the sim files in index.html, so browsers don't use an old cached copy after a release
 const idx = path.join(__dirname, '..', 'docs', 'index.html');
 fs.writeFileSync(idx, fs.readFileSync(idx, 'utf8').replace(/(src="sim\/[\w.-]+\.(?:js|html))(\?v=[\w.-]+)?"/g, `$1?v=${data.version}"`));
 console.log('Klaar: docs/sim (versie ' + data.version + ')');

@@ -1,14 +1,16 @@
-// Klein hulpprogramma dat de meldingen naar Ubuntu stuurt (draait als apart proces, zonder venster).
+// Small helper that sends notifications to Ubuntu (runs as a separate process, without a window).
 //
-// Waarom apart? Ubuntu (GNOME) koppelt een melding aan de app van het proces dat hem stuurt.
-// Komt hij van Tabchat zelf, dan "start" GNOME Tabchat bij een klik (zeker als het venster
-// geminimaliseerd is) en laat de muis ~15 seconden laden. Een proces zonder venster hoort bij
-// geen enkele app, dus GNOME start niets: geen laden. De klik geven we door aan Tabchat.
+// Why separate? Ubuntu (GNOME) links a notification to the app of the process that sends it.
+// If it comes from Tabchat itself, GNOME "starts" Tabchat on a click (especially when the window
+// is minimized) and shows a loading cursor for ~15 seconds. A process without a window belongs to
+// no app, so GNOME starts nothing: no loading. We pass the click on to Tabchat.
 const dbus = require('dbus-next');
 
 const NAME = 'org.freedesktop.Notifications';
 const OBJ = '/org/freedesktop/Notifications';
-const send = (m) => { try { process.send(m); } catch {} };
+// Parent gone (Tabchat quit)? Then there's nobody to tell, so a failed send is fine
+const send = (m) => { try { process.send(m); } catch { /* parent gone */ } };
+const report = (where) => (e) => send({ type: 'log', text: where + ': ' + (e && e.message) });
 
 let bus;
 try {
@@ -19,7 +21,7 @@ try {
 bus.call(new dbus.Message({
   destination: 'org.freedesktop.DBus', path: '/org/freedesktop/DBus', interface: 'org.freedesktop.DBus',
   member: 'AddMatch', signature: 's', body: [`type='signal',interface='${NAME}'`]
-})).catch(() => {});
+})).catch(report('dbus call 1'));
 
 bus.on('message', (msg) => {
   if (msg.type !== dbus.MessageType.SIGNAL || msg.interface !== NAME) return;
@@ -40,9 +42,9 @@ process.on('message', (m) => {
   } else if (m.type === 'close') {
     bus.call(new dbus.Message({
       destination: NAME, path: OBJ, interface: NAME, member: 'CloseNotification', signature: 'u', body: [m.id]
-    })).catch(() => {});
+    })).catch(report('dbus call 2'));
   }
 });
 
-process.on('disconnect', () => process.exit(0)); // Tabchat is afgesloten
+process.on('disconnect', () => process.exit(0)); // Tabchat has quit
 send({ type: 'ready' });

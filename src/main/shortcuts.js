@@ -1,12 +1,12 @@
-// Alle sneltoetsen op één plek.
-// Nieuwe sneltoets = één regel hier (en in de lijst in home.html).
+// All keyboard shortcuts in one place.
+// New shortcut = one line here (and in the list in home.html).
 const store = require('./store');
 const { serviceByKey } = require('./catalog');
 const actions = require('./actions');
 const palette = require('./palette');
 const views = require('./views');
 
-// source: 'tab', 'bar', 'home' of 'palette' (waar de toets werd ingedrukt)
+// source: 'tab', 'bar', 'home' or 'palette' (where the key was pressed)
 function handler(source) {
   return (event, input) => {
     if (input.type !== 'keyDown') return;
@@ -15,20 +15,20 @@ function handler(source) {
     const { alt, shift } = input;
     const run = (fn) => { event.preventDefault(); fn(); };
 
-    // Alt (alleen) toont de verborgen tabbalk
+    // Alt (on its own) shows the hidden tab bar
     if (key === 'Alt' && !ctrl && !shift && store.config.settings.tabBar === 'autohide') {
       views.revealBar(!store.barRevealed);
       return;
     }
-    // Werkt overal, ook in het snelzoekvenster
+    // Works everywhere, also in the quick search window
     if (ctrl && !alt && !shift && key === 'k') return run(palette.toggle);
     if (ctrl && !alt && !shift && key === 'q') return run(actions.quit);
-    if (source === 'palette') return; // de rest regelt het snelzoekvenster zelf
+    if (source === 'palette') return; // the quick search window handles the rest itself
 
     if (alt && !ctrl && !shift) {
-      // Alt+1 t/m Alt+8: naar dat tabblad, Alt+9: laatste tabblad
+      // Alt+1 to Alt+8: go to that tab, Alt+9: last tab
       if (/^[1-9]$/.test(key)) return run(() => actions.goToIndex(key === '9' ? -1 : Number(key) - 1));
-      // In het +-scherm: Alt+beginletter voegt een nieuw tabblad van die dienst toe
+      // On the + screen: Alt+first letter adds a new tab of that service
       if (store.active === 'home') {
         const service = serviceByKey(key);
         if (service) return run(() => actions.addTab(service));

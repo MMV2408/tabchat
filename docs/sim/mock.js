@@ -1,7 +1,7 @@
-// Op de website: dit scherm praat met de simulatie op de pagina (engine.js) in plaats van met de app.
+// On the website: this screen talks to the simulation on the page (engine.js) instead of the app.
 (function () {
   let sim = null;
   try { sim = window.parent !== window && window.parent.TabchatSim; } catch {}
-  if (!sim) { location.replace('../'); return; } // los geopend: naar de website
+  if (!sim) { location.replace('../'); return; } // opened on its own: go to the website
   window.tabchat = sim.connect(window);
 })();

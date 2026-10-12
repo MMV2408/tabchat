@@ -1,11 +1,12 @@
-// Echte logo's voor de vaste diensten in het +-scherm.
-// We halen het icoontje één keer op bij de dienst zelf en bewaren het in de config.
-// Lukt dat niet (offline, site geblokkeerd), dan blijft de gekleurde letter staan.
+// Real logos for the built-in services on the + screen.
+// We fetch the icon once from the service itself and store it in the config.
+// If that fails (offline, site blocked), the colored letter stays.
 const { CATALOG } = require('./catalog');
 const store = require('./store');
+const log = require('./log');
 
-// Per dienst: adressen om te proberen. Een adres op /favicon.ico wordt direct opgehaald,
-// anders lezen we de pagina en zoeken we het icoon in <link rel="icon">.
+// Per service: addresses to try. An address ending in /favicon.ico is fetched directly,
+// otherwise we read the page and look for the icon in <link rel="icon">.
 const SOURCES = {
   whatsapp: ['https://web.whatsapp.com/favicon.ico', 'https://www.whatsapp.com/'],
   discord: ['https://discord.com/favicon.ico', 'https://discord.com/'],
@@ -14,7 +15,7 @@ const SOURCES = {
   teams: ['https://teams.microsoft.com/favicon.ico', 'https://teams.live.com/favicon.ico']
 };
 
-// Waar het icoon van komt; verandert dit (ander Brightspace-adres), dan halen we het opnieuw
+// Where the icon comes from; if this changes (other Brightspace address), we fetch it again
 function sourceKey(id) {
   if (id === 'brightspace') return store.config.settings.brightspaceUrl || '';
   return (SOURCES[id] || []).join(' ');
@@ -37,12 +38,14 @@ async function fetchFor(id) {
       if (!r.ok) continue;
       const icon = await fetchIcon(r.url || u, await r.text());
       if (icon) return icon;
-    } catch {}
+    } catch (e) {
+      log.info('logo fetch failed:', id, u, e.message); // try the next source
+    }
   }
   return null;
 }
 
-// Bewaarde icoontjes in CATALOG zetten (ook voor de privé-varianten van Microsoft)
+// Put stored icons in CATALOG (also for the personal Microsoft variants)
 function apply() {
   const cache = store.config.icons || {};
   for (const [id, c] of Object.entries(CATALOG)) {
@@ -65,7 +68,7 @@ async function refresh() {
       const from = sourceKey(id);
       if (!from || (cache[id] && cache[id].from === from && cache[id].icon)) continue;
       const icon = await fetchFor(id);
-      if (!icon) continue; // volgende start opnieuw proberen
+      if (!icon) continue; // try again on the next start
       cache[id] = { from, icon };
       changed = true;
     }
@@ -77,7 +80,7 @@ async function refresh() {
   } finally { busy = false; }
 }
 
-// Bij het starten: eerst de bewaarde tonen, daarna (rustig) ontbrekende ophalen
+// On startup: show the stored ones first, then (calmly) fetch the missing ones
 function start() {
   apply();
   setTimeout(refresh, 4000);

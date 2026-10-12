@@ -1,6 +1,13 @@
-// Wat is er nieuw: per versie een korte lijst, in het Nederlands en Engels.
-// Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
+// What's new: a short list per version, in Dutch and English.
+// New version? Add a block at the top (and in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
+  {
+    v: '1.21.0',
+    nl: ['Fouten waar Tabchat zelf mee verder kan, worden nu bijgehouden in ~/.config/tabchat/tabchat.log in plaats van stil genegeerd. Handig om mee te sturen als er iets niet werkt',
+         'Opgeruimde code: commentaar in het Engels, zodat anderen makkelijker kunnen meelezen en bijdragen'],
+    en: ["Errors Tabchat can recover from are now kept in ~/.config/tabchat/tabchat.log instead of being silently ignored. Handy to send along when something doesn't work",
+         'Cleaned-up code: comments in English, so others can read along and contribute more easily']
+  },
   {
     v: '1.20.3',
     nl: ['Nu installeren: geen vraag meer van Ubuntu om Tabchat geforceerd af te sluiten terwijl je je wachtwoord invult'],
@@ -125,14 +132,14 @@ const CHANGELOG = [
   }
 ];
 
-// Is versie a nieuwer dan b? (bv. '1.11.1' > '1.11.0')
+// Is version a newer than b? (e.g. '1.11.1' > '1.11.0')
 function newer(a, b) {
   const pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);
   for (let i = 0; i < 3; i++) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0);
   return false;
 }
 
-// Versies na "from" (of de laatste paar als from leeg is), in de gekozen taal
+// Versions after "from" (or the last few if from is empty), in the chosen language
 function since(from, lang, max = 5) {
   return CHANGELOG
     .filter(e => !from || newer(e.v, from))

@@ -1,5 +1,5 @@
-// Links uit WhatsApp, Outlook, Teams enz. openen: in je standaardbrowser,
-// in een gekozen browser (Firefox, Chrome, ...) of in een venster van Tabchat zelf.
+// Open links from WhatsApp, Outlook, Teams etc.: in your default browser,
+// in a chosen browser (Firefox, Chrome, ...) or in a Tabchat window.
 const { BrowserWindow, shell, app } = require('electron');
 const { execFile } = require('child_process');
 const fs = require('fs');
@@ -9,7 +9,7 @@ const platform = require('./platform');
 
 const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
 
-// Bekende browsers en hun .desktop-bestanden (gewoon, Snap en Flatpak)
+// Known browsers and their .desktop files (regular, Snap and Flatpak)
 const KNOWN = [
   ['firefox', 'Firefox', ['firefox.desktop', 'firefox_firefox.desktop', 'org.mozilla.firefox.desktop']],
   ['chrome', 'Google Chrome', ['google-chrome.desktop', 'com.google.Chrome.desktop']],
@@ -34,7 +34,7 @@ function dirs() {
   ];
 }
 
-// Welke browsers staan er op deze computer? (In Flathub/Snap kunnen we dat niet zien.)
+// Which browsers are installed? (We can't see that inside Flathub/Snap.)
 let cache = null;
 function browsers() {
   if (platform.storeManaged) return [];
@@ -53,37 +53,37 @@ function browsers() {
   return cache;
 }
 
-// ---------- in Tabchat zelf ----------
+// ---------- inside Tabchat ----------
 function openInternal(url, ses) {
   const w = new BrowserWindow({
     width: 1100,
     height: 800,
     autoHideMenuBar: true,
     icon: ICON,
-    webPreferences: { session: ses } // zelfde login als het tabblad (bv. SharePoint vanuit Teams)
+    webPreferences: { session: ses } // same login as the tab (e.g. SharePoint from Teams)
   });
   w.webContents.setWindowOpenHandler(({ url: u }) => {
-    if (/^https?:/.test(u)) w.loadURL(u); // links in dit venster blijven in dit venster
+    if (/^https?:/.test(u)) w.loadURL(u); // links in this window stay in this window
     return { action: 'deny' };
   });
   w.loadURL(url);
 }
 
-// ---------- openen volgens de instelling ----------
+// ---------- open according to the setting ----------
 function open(url, ses) {
   if (!/^https?:/.test(url)) return;
   const choice = store.config.settings.openLinks || 'default';
   if (choice === 'internal' && ses) return openInternal(url, ses);
   const b = browsers().find(x => x.id === choice);
   if (b) {
-    // gio start de browser zoals het app-menu dat doet; lukt het niet, dan de standaardbrowser
+    // gio starts the browser like the app menu does; if that fails, the default browser
     return execFile('gio', ['launch', b.file, url], (err) => { if (err) shell.openExternal(url); });
   }
   shell.openExternal(url);
 }
 
-// Sommige diensten (Outlook) openen eerst een leeg venster en zetten er daarna pas het adres in.
-// Dat lege venster vangen we op: zodra het echte adres bekend is, openen we dat en sluiten het.
+// Some services (Outlook) first open an empty window and only then set its address.
+// We catch that empty window: once the real address is known, we open it and close the window.
 function catchBlank(child, ses) {
   let done = false;
   const handle = (target) => {

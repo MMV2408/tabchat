@@ -1,17 +1,17 @@
-// Eigen websites: elke site als tabblad, met een eigen kaart in het +-scherm.
-// Ze staan in config.custom en worden bij het starten aan CATALOG toegevoegd, zodat ze verder
-// overal werken als een vaste dienst (tabblad, teller, meldingen, slaapstand, Ctrl+K).
-// Incognito: een tijdelijk tabblad dat niets bewaart (geen kaart, geen login, weg na sluiten).
+// Your own websites: any site as a tab, with its own card on the + screen.
+// They live in config.custom and are added to CATALOG on startup, so from then on
+// they work like a built-in service everywhere (tab, counter, notifications, sleep, Ctrl+K).
+// Incognito: a temporary tab that saves nothing (no card, no login, gone after closing).
 const { net } = require('electron');
-const { CATALOG, normalizeUrl } = require('./catalog');
+const { CATALOG, normalizeUrl, hostOf } = require('./catalog');
+const log = require('./log');
 
-const MAX_ICON = 150 * 1024; // icoontjes groter dan dit slaan we niet op
+const MAX_ICON = 150 * 1024; // icons larger than this are not stored
 
-// Een eigen website als dienst toevoegen aan CATALOG
+// Add one of your own websites to CATALOG as a service
 function register(c) {
   if (!c || !c.id || !c.url) return;
-  let host = '';
-  try { host = new URL(c.url).hostname.replace(/^www\./, ''); } catch {}
+  const host = hostOf(c.url).replace(/^www\./, '');
   CATALOG[c.id] = {
     name: c.name || host || 'Website',
     url: c.url,
@@ -25,8 +25,8 @@ function register(c) {
   };
 }
 
-// Sneltoets (Alt+letter in het +-scherm): de eerste letter uit de naam die nog vrij is.
-// T en M zijn al van Alt+T (+-scherm) en Alt+M (geluid uit). Geen vrije letter? Dan geen sneltoets.
+// Shortcut (Alt+letter on the + screen): the first letter of the name that is still free.
+// T and M are taken by Alt+T (+ screen) and Alt+M (mute). No free letter? Then no shortcut.
 const RESERVED = ['t', 'm'];
 function freeKey(id, name) {
   const used = new Set(RESERVED);
@@ -45,7 +45,7 @@ function unregister(id) {
 
 const newId = (prefix) => prefix + '-' + Math.random().toString(36).slice(2, 8);
 
-// Google (Gmail, Drive, YouTube-login) blokkeert inloggen in apps zoals Tabchat
+// Google (Gmail, Drive, YouTube sign-in) blocks signing in from apps like Tabchat
 const isGoogle = (host) => /(^|\.)google\.[a-z.]+$|(^|\.)gmail\.com$|(^|\.)youtube\.com$/i.test(host);
 
 async function get(url, ms = 8000) {
@@ -55,7 +55,7 @@ async function get(url, ms = 8000) {
   finally { clearTimeout(timer); }
 }
 
-// Icoontje van de site als data-URL (uit <link rel="icon">, anders /favicon.ico)
+// The site's icon as a data URL (from <link rel="icon">, otherwise /favicon.ico)
 async function fetchIcon(pageUrl, html) {
   const tried = [];
   const m = [...String(html).matchAll(/<link\b[^>]*>/gi)].map(x => x[0])
@@ -74,12 +74,14 @@ async function fetchIcon(pageUrl, html) {
       const buf = Buffer.from(await r.arrayBuffer());
       if (!buf.length || buf.length > MAX_ICON) continue;
       return `data:${type || 'image/x-icon'};base64,${buf.toString('base64')}`;
-    } catch {}
+    } catch (e) {
+      log.info('icon fetch failed:', u, e.message); // try the next candidate
+    }
   }
   return null;
 }
 
-// Controleren voor het groene vinkje: { status: 'ok' | 'google' | 'notFound' | 'error' | 'invalid', url, title, icon }
+// Check for the green check mark: { status: 'ok' | 'google' | 'notFound' | 'error' | 'invalid', url, title, icon }
 async function check(input) {
   const url = normalizeUrl(input);
   if (!url) return { status: 'invalid', url: null };
@@ -97,7 +99,7 @@ async function check(input) {
   }
 }
 
-// Opgeschoonde gegevens uit het formulier
+// Cleaned-up data from the form
 function clean(data) {
   const url = normalizeUrl(data && data.url);
   if (!url) return null;

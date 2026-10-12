@@ -119,6 +119,11 @@
   </requires>
 
   <releases>
+    <release version="1.21.0" date="2026-10-12">
+      <description>
+        <p>Recoverable errors are now logged to a file, and the code comments are in English.</p>
+      </description>
+    </release>
     <release version="1.20.3" date="2026-10-12">
       <description>
         <p>No more "not responding" prompt while installing an update.</p>

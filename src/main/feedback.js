@@ -1,8 +1,8 @@
-// Vraag om feedback: één klein venster na 7 dagen gebruik, met een link naar een kort formulier.
-// - nooit bij de eerste start na een installatie of update (dan komen "Wat is er nieuw" en de doneervraag al)
-// - nooit binnen 3 dagen na de doneervraag
-// - "Later" vraagt het over 14 dagen nog één keer; daarna nooit meer
-// Er wordt niets automatisch verstuurd: de gebruiker opent zelf het formulier. Niet bij npm start.
+// Feedback request: one small window after 7 days of use, with a link to a short form.
+// - never on the first start after an install or update ("What's new" and the donation request come then)
+// - never within 3 days of the donation request
+// - "Later" asks once more after 14 days; never again after that
+// Nothing is sent automatically: the user opens the form themselves. Not with npm start.
 const { app, dialog, shell } = require('electron');
 const path = require('path');
 const store = require('./store');
@@ -46,18 +46,18 @@ async function ask() {
     cancelId: 1
   });
   if (response === 0) { f.done = true; open(); }
-  else if (checkboxChecked || f.laterCount >= 1) f.done = true; // na één keer "Later" niet meer vragen
+  else if (checkboxChecked || f.laterCount >= 1) f.done = true; // after one "Later", don't ask again
   else { f.laterCount = 1; f.nextAt = Date.now() + 14 * DAY; }
   if (checkboxChecked) f.done = true;
   config.save();
 }
 
-// Bij het starten. special = eerste start na installatie of update.
+// On startup. special = first start after an install or update.
 function start(special) {
   if (!app.isPackaged) return;
   if (!store.config.firstUse) { store.config.firstUse = Date.now(); config.save(); }
   if (special || !due()) return;
-  // Rustig: pas na 2 minuten, en alleen als het venster zichtbaar is
+  // Calmly: only after 2 minutes, and only when the window is visible
   setTimeout(() => {
     if (!store.win) return;
     if (store.win.isVisible()) ask();

@@ -1,17 +1,17 @@
-// Simulatie van Tabchat op de website. De tabbalk en het +-scherm zijn de echte schermen van de app
-// (sim/tabs.html en sim/home.html); dit bestand speelt "de app" voor ze: het onthoudt tabbladen,
-// instellingen en Niet storen, en vertelt de pagina wat er in het venster moet staan.
+// Simulation of Tabchat on the website. The tab bar and the + screen are the app's real screens
+// (sim/tabs.html and sim/home.html); this file plays "the app" for them: it keeps tabs,
+// settings and Do not disturb, and tells the page what the window should show.
 (function () {
   const D = window.SIM_DATA;
   const frames = new Set();
-  const listeners = new Set(); // de website zelf
+  const listeners = new Set(); // the website itself
   let siteLang = 'en', siteTheme = 'dark';
   let nextId = 1;
 
-  const settings = { ...D.settings, brightspaceUrl: 'https://brightspace.example.edu/' }; // voorbeeldschool
+  const settings = { ...D.settings, brightspaceUrl: 'https://brightspace.example.edu/' }; // example school
   const tab = (service, extra = {}) => ({ id: 't' + nextId++, service, canSleep: !D.catalog[service].awake, asleep: false, unread: 0, muted: false, ...extra });
   let tabs = [
-    // Zelfde aantallen als op de screenshots (sim/shots)
+    // Same counts as in the screenshots (sim/shots)
     tab('whatsapp', { unread: 45 }),
     tab('discord', { unread: 'dot' }),
     tab('brightspace'),
@@ -21,12 +21,12 @@
   ];
   let active = tabs[0].id;
   let lastTab = active;
-  let dnd = null;         // null, 'forever' of een tijdstip (ms)
+  let dnd = null;         // null, 'forever' or a timestamp (ms)
   let upd = 'idle';
   let menuHandler = null;
   let barHoverCb = null;
 
-  // Het rechtsklikmenu van een tabblad, net als in de app (src/main/ipc.js)
+  // A tab's right-click menu, just like in the app (src/main/ipc.js)
   function menuItems(id) {
     const i = tabs.findIndex(t => t.id === id);
     if (i < 0) return [];
@@ -69,9 +69,9 @@
     return s;
   };
 
-  // Labels zoals in de app: "Outlook", of "Outlook 1" en "Outlook 2" bij meer van dezelfde
+  // Labels like in the app: "Outlook", or "Outlook 1" and "Outlook 2" when there are several
   function labeled() {
-    // Microsoft: labeltje School/werk of Privé, alleen als je ze allebei hebt (zoals in de app)
+    // Microsoft: Work/school or Personal label, only if you have both (like in the app)
     const acct = (t) => { const g = D.catalog[t.service].group; return g === 'microsoft' ? 'work' : g === 'microsoft-personal' ? 'personal' : ''; };
     const kinds = new Set(tabs.map(acct));
     const both = kinds.has('work') && kinds.has('personal');
@@ -144,7 +144,7 @@
       checkUrl: async (u) => {
         const s = String(u || '').trim();
         if (!/^(https?:\/\/)?[^\s/]+\.[^\s/]{2,}/i.test(s)) return { status: 'invalid', url: null };
-        await new Promise(r => setTimeout(r, 600)); // even "controleren"
+        await new Promise(r => setTimeout(r, 600)); // pretend to "check"
         return { status: 'ok', url: (/^https?:/i.test(s) ? s : 'https://' + s).replace(/\/?$/, '/') };
       },
       checkSite: async (u) => {
@@ -217,7 +217,7 @@
     connect(win) {
       const f = { win, state: [], keys: [], wn: [], ask: [], lastPos: null };
       frames.add(f);
-      // Waar is rechts geklikt? (voor het tabblad-menu, dat de website tekent)
+      // Where was the right-click? (for the tab menu, which the website draws)
       win.addEventListener('contextmenu', (e) => { f.lastPos = { frame: win, x: e.clientX, y: e.clientY }; }, true);
       win.addEventListener('pagehide', () => frames.delete(f));
       applyTheme(win);

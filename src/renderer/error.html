@@ -51,14 +51,14 @@
 </div>
 
 <script>
-  // Gegevens komen via het adres mee (zie views.js)
+  // Details come in via the address (see views.js)
   const q = new URLSearchParams(location.search);
   const name = q.get('name') || 'Deze dienst';
   const url = q.get('url');
   const code = Number(q.get('code')) || 0;
   const reason = q.get('reason');
 
-  // Deze pagina heeft geen toegang tot i18n.js, dus de teksten staan hier zelf
+  // This page has no access to i18n.js, so the texts live here
   const TEXT = {
     nl: {
       crashTitle: '{n} is vastgelopen', crashText: 'Het tabblad is gestopt. Opnieuw laden lost dit meestal op; je blijft ingelogd.',
@@ -87,11 +87,11 @@
   document.getElementById('letter').textContent = name[0];
   document.getElementById('browser').href = url;
 
-  // Passende melding kiezen
+  // Pick the right message
   let title, text;
   let host = '';
-  try { host = new URL(url).hostname; } catch {}
-  // -105 = adres bestaat niet; bij diensten met een eigen adres (Brightspace) ligt dat aan het adres
+  try { host = new URL(url).hostname; } catch { host = ''; } // no valid address: show no host
+  // -105 = address doesn't exist; for services with their own address (Brightspace) the address is the problem
   const notFound = q.get('fix') === '1' && code === -105 && navigator.onLine;
   const kind = reason === 'crash' ? 'crash'
     : notFound ? 'notfound'
@@ -104,14 +104,14 @@
   document.getElementById('text').textContent = text;
   if (q.get('desc')) document.getElementById('code').textContent = T('code', { c: q.get('desc') });
 
-  // Opnieuw proberen = terug naar de dienst
+  // Try again = back to the service
   function retry() { location.href = url; }
   document.getElementById('retry').onclick = retry;
 
-  // Weer online? Direct opnieuw proberen
+  // Back online? Try again right away
   window.addEventListener('online', retry);
 
-  // Adres bestaat niet: knop "Adres wijzigen" (opent het +-scherm), niet vanzelf opnieuw proberen
+  // Address doesn't exist: "Change address" button (opens the + screen), don't retry by itself
   if (notFound) {
     const b = document.getElementById('retry');
     b.textContent = T('fix');
@@ -119,7 +119,7 @@
     window.removeEventListener('online', retry);
     document.getElementById('browser').style.display = 'none';
   }
-  // Anders elke 30 seconden vanzelf opnieuw (niet na een crash)
+  // Otherwise retry by itself every 30 seconds (not after a crash)
   if (reason !== 'crash' && !notFound) {
     let left = 30;
     const auto = document.getElementById('auto');

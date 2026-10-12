@@ -1,6 +1,6 @@
-// Niet storen: alle meldingen en geluiden uit, eventueel voor een bepaalde tijd.
-// De meldingen zelf worden tegengehouden in preload/service.js.
-// Staat "Niet storen" van Ubuntu (GNOME) aan, dan doet Tabchat automatisch mee.
+// Do not disturb: all notifications and sounds off, optionally for a set time.
+// The notifications themselves are blocked in preload/service.js.
+// When Do not disturb of Ubuntu (GNOME) is on, Tabchat follows automatically.
 const { app } = require('electron');
 const { spawn, execFile } = require('child_process');
 const platform = require('./platform');
@@ -10,9 +10,9 @@ const views = require('./views');
 const i18n = require('./i18n');
 
 let timer = null;
-let systemOn = false; // Niet storen van Ubuntu/GNOME
+let systemOn = false; // Do not disturb of Ubuntu/GNOME
 
-// Zelf aangezet in Tabchat?
+// Turned on in Tabchat itself?
 function isManual() {
   const until = store.config.dndUntil;
   if (!until) return false;
@@ -20,19 +20,19 @@ function isManual() {
   return Date.now() < until;
 }
 
-// Via Ubuntu aangezet (en de instelling staat aan)?
+// Turned on via Ubuntu (and the setting is on)?
 function isSystem() {
   return systemOn && store.config.settings.followSystemDnd;
 }
 
-// Staat Niet storen nu aan?
+// Is Do not disturb on right now?
 function isOn() {
   return isManual() || isSystem();
 }
 
-// ---------- Niet storen van Ubuntu volgen ----------
-// GNOME bewaart dit als "show-banners" (false = Niet storen aan).
-// In Flathub/Snap kan Tabchat daar niet bij; GNOME verbergt de meldingen daar zelf al.
+// ---------- follow Ubuntu's Do not disturb ----------
+// GNOME stores this as "show-banners" (false = Do not disturb on).
+// In Flathub/Snap Tabchat can't read it; GNOME already hides the notifications there itself.
 function setSystem(on) {
   if (on === systemOn) return;
   systemOn = on;
@@ -47,13 +47,15 @@ function watchSystem() {
   });
   try {
     const p = spawn('gsettings', ['monitor', ...KEY]);
-    p.on('error', () => {}); // geen GNOME: dan niets
+    p.on('error', () => {}); // not GNOME: then nothing
     p.stdout.on('data', (d) => setSystem(/false\s*$/.test(String(d).trim())));
     app.on('will-quit', () => p.kill());
-  } catch {}
+  } catch (e) {
+    require('./log').info('gsettings monitor not available:', e.message); // not GNOME
+  }
 }
 
-// mode: aantal minuten, 'tomorrow' (tot morgen 08:00), 'forever' of null (uit)
+// mode: number of minutes, 'tomorrow' (until 08:00 tomorrow), 'forever' or null (off)
 function set(mode) {
   let until = null;
   if (mode === 'forever') {
@@ -71,12 +73,12 @@ function set(mode) {
   apply();
 }
 
-// Toepassen op alle tabbladen (en een timer zetten voor het einde)
+// Apply to all tabs (and set a timer for the end)
 function apply() {
   clearTimeout(timer);
   const on = isOn();
 
-  // Tijd voorbij? Dan opruimen
+  // Time's up? Then clean up
   if (!isManual() && store.config.dndUntil) {
     store.config.dndUntil = null;
     config.save();
@@ -87,17 +89,17 @@ function apply() {
 
   for (const [id, v] of Object.entries(store.views)) {
     applyToView(id, v);
-    v.webContents.send('dnd', on); // meldingen in het tabblad tegenhouden
+    v.webContents.send('dnd', on); // block notifications in the tab
   }
   views.broadcast();
 }
 
-// Geluid: uit bij Niet storen, of als het tabblad zelf gedempt is
+// Sound: off with Do not disturb, or when the tab itself is muted
 function applyToView(id, v) {
   v.webContents.setAudioMuted(isOn() || store.mutedTabs.has(id));
 }
 
-// Tekst voor tabbalk, tray en Ctrl+K, bv. "tot 19:37" of "tot morgen 08:00"
+// Text for tab bar, tray and Ctrl+K, e.g. "until 19:37" or "until 08:00 tomorrow"
 function label() {
   if (!isManual()) return isSystem() ? i18n.t('dnd.system') : null;
   const until = store.config.dndUntil;
