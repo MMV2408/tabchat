@@ -84,8 +84,19 @@
   .wn-foot { display: flex; justify-content: flex-end; margin: 20px 0 12px; }
   .about .links { display: flex; gap: 14px; margin-top: 4px; }
   .about .links .donate { margin-top: 0; }
-  #modal, #wn { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
-  #modal.open, #wn.open { display: flex; }
+  #modal, #wn, #ask { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
+  #modal.open, #wn.open, #ask.open { display: flex; }
+  /* adres vragen (Brightspace van je school) */
+  .ask-input { width: 100%; margin: 14px 0 6px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--bg-3); background: var(--bg-1); color: var(--text); font: inherit; font-size: 15px; }
+  .ask-input:focus { outline: 2px solid #5865F2; border-color: transparent; }
+  .ask-err { color: #f23f43; font-size: 13px; min-height: 18px; }
+  /* adresveld in de instellingen, met vinkje */
+  .urlbox { width: 320px; flex-shrink: 0; }
+  .urlbox .ask-input { margin: 0; font-size: 14px; padding: 8px 10px; }
+  .urlstatus { font-size: 13px; min-height: 18px; margin-top: 5px; color: var(--text-muted); }
+  .urlstatus.ok { color: #23a55a; } .urlstatus.bad { color: #f23f43; } .urlstatus.warn { color: #d99a1e; }
+  .feature.flash { box-shadow: 0 0 0 2px #5865F2; transition: box-shadow .3s; }
+  .ask-foot { display: flex; justify-content: flex-end; gap: 8px; margin: 12px 0 12px; }
   .sheet { background: var(--bg-0); border-radius: 14px; width: min(640px, 100%); padding: 24px 24px 12px; box-shadow: 0 16px 48px rgba(0,0,0,.5); }
   .sheet-head { display: flex; align-items: center; margin-bottom: 4px; }
   .sheet-head h3 { flex: 1; margin: 0; color: var(--text-strong); font-size: 20px; }
@@ -154,6 +165,17 @@
   </div>
 </div>
 
+<div id="ask">
+  <div class="sheet" role="dialog">
+    <div class="sheet-head"><h3 id="askTitle"></h3><button class="close" id="closeAsk" data-i18n-title="keys.close">✕</button></div>
+    <p class="wn-sub" id="askText"></p>
+    <input class="ask-input" id="askInput" type="url" autocomplete="url" spellcheck="false">
+    <div class="urlstatus" id="askStatus"></div>
+    <div class="ask-err" id="askErr"></div>
+    <div class="ask-foot"><button class="dndbtn" id="askCancel" data-i18n="ask.cancel"></button><button class="add" id="askOk" data-i18n="ask.add"></button></div>
+  </div>
+</div>
+
 <script>
   // ---------- vertalingen (zie src/main/i18n.js) ----------
   let L = {};
@@ -183,6 +205,7 @@
     { key: 'spellcheck' },
     { key: 'stayLoggedIn' },
     { key: 'shareMicrosoft' },
+    { key: 'brightspaceUrl', type: 'url' },
     { key: 'autostart', hideInStore: true },
     { key: 'runInBackground' },
     { key: 'whiteTray' },
@@ -222,7 +245,7 @@
       [['Ctrl', 'K'], 'keys.search'],
       [['Alt', 'T'], 'keys.home'],
       [['Esc'], 'keys.back'],
-      [['Alt', 'W / D / T / O / N'], 'keys.addLetter'],
+      [['Alt', 'W / D / T / O / N / B'], 'keys.addLetter'],
       [['F11'], 'keys.fullscreen'],
       [['Ctrl', 'Q'], 'keys.quit']
     ]],
@@ -296,10 +319,67 @@
     document.getElementById('okWn').focus();
   });
 
+  // ---------- adres controleren (groen vinkje als het een werkende Brightspace is) ----------
+  const URL_STATUS = { checking: 'busy', ok: 'ok', notBrightspace: 'warn', notFound: 'bad', invalid: 'bad', error: 'warn' };
+  function showStatus(elStatus, status) {
+    elStatus.className = 'urlstatus' + (status ? ' ' + URL_STATUS[status] : '');
+    elStatus.textContent = status ? T('url.' + status) : '';
+  }
+  async function checkUrl(value, elStatus) {
+    if (!value.trim()) { showStatus(elStatus, ''); return { status: 'empty' }; }
+    showStatus(elStatus, 'checking');
+    let res;
+    try { res = await window.tabchat.checkUrl(value); } catch { res = { status: 'error', url: value }; }
+    showStatus(elStatus, res.status);
+    return res;
+  }
+  // Mag dit adres bewaard worden? Bestaat het niet of is het geen adres, dan niet.
+  const savable = (res) => res.status === 'ok' || res.status === 'notBrightspace' || res.status === 'error';
+
+  // ---------- adres vragen (dienst waarvan het adres per school verschilt, bv. Brightspace) ----------
+  const ask = document.getElementById('ask');
+  const askInput = document.getElementById('askInput');
+  const askErr = document.getElementById('askErr');
+  let askService = null;
+  const looksLikeUrl = (v) => /^(https?:\/\/)?[^\s/]+\.[^\s/]{2,}(\/\S*)?$/i.test(v.trim());
+  function openAsk(service) {
+    askService = service;
+    document.getElementById('askTitle').textContent = T(`ask.${service}.title`);
+    document.getElementById('askText').textContent = T(`ask.${service}.text`);
+    askInput.placeholder = T(`ask.${service}.placeholder`);
+    askInput.value = '';
+    askErr.textContent = '';
+    showStatus(document.getElementById('askStatus'), '');
+    closeKeys();
+    ask.classList.add('open');
+    askInput.focus();
+  }
+  const closeAsk = () => ask.classList.remove('open');
+  async function submitAsk() {
+    if (!looksLikeUrl(askInput.value)) { askErr.textContent = T('ask.invalid'); askInput.focus(); return; }
+    const res = await checkUrl(askInput.value, document.getElementById('askStatus'));
+    if (!savable(res)) { askInput.focus(); return; }
+    window.tabchat.add(askService, res.url || askInput.value.trim());
+    closeAsk();
+  }
+  let askTimer = null;
+  askInput.addEventListener('input', () => {
+    clearTimeout(askTimer);
+    askTimer = setTimeout(() => { if (looksLikeUrl(askInput.value)) checkUrl(askInput.value, document.getElementById('askStatus')); }, 700);
+  });
+  document.getElementById('askOk').onclick = submitAsk;
+  document.getElementById('askCancel').onclick = closeAsk;
+  document.getElementById('closeAsk').onclick = closeAsk;
+  askInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAsk(); });
+  askInput.addEventListener('input', () => { askErr.textContent = ''; });
+  ask.onclick = (e) => { if (e.target === ask) closeAsk(); };
+  window.tabchat.onAskUrl(openAsk);
+
   // Esc: eerst het venster sluiten, anders terug naar je tabblad
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (wn.classList.contains('open')) closeWn();
+    if (ask.classList.contains('open')) closeAsk();
+    else if (wn.classList.contains('open')) closeWn();
     else if (modal.classList.contains('open')) closeKeys();
     else window.tabchat.back();
   });
@@ -355,7 +435,7 @@
       } else {
         card.title = T('home.addTitle', { k: c.key.toUpperCase() });
         const add = el('button', 'add', T('home.addBtn'));
-        add.onclick = () => window.tabchat.add(c.id);
+        add.onclick = () => window.tabchat.add(c.id); // adres nodig en nog niet bekend? Dan vraagt de app erom
         card.append(add);
       }
       cat.append(card);
@@ -409,6 +489,7 @@
     feat.replaceChildren();
     for (const f of FEATURES) {
       if (f.hideInStore && s.platform && s.platform.storeManaged) continue; // Flathub/Snap regelt dit zelf
+      if (f.type === 'url') { feat.append(urlRow(f, s)); continue; }
       const row = el('div', 'feature');
       const text = el('div', 'text');
       const title = el('div', 'name', T(`f.${f.key}.name`));
@@ -444,6 +525,51 @@
       feat.append(row);
     }
   }
+
+  // Instelling met een adres (Brightspace van je school): één keer gemaakt, zodat typen niet onderbroken wordt
+  const urlRows = {};
+  function urlRow(f, s) {
+    const saved = s.settings[f.key] || '';
+    let r = urlRows[f.key];
+    if (r && r.lang === curLang) {
+      if (document.activeElement !== r.input && r.input.value !== saved && saved) { r.input.value = saved; checkUrl(saved, r.status); }
+      return r.row;
+    }
+    const row = el('div', 'feature');
+    const text = el('div', 'text');
+    text.append(el('div', 'name', T(`f.${f.key}.name`)), el('div', 'desc', T(`f.${f.key}.desc`)));
+    const box = el('div', 'urlbox');
+    const input = document.createElement('input');
+    input.className = 'ask-input';
+    input.type = 'url';
+    input.spellcheck = false;
+    input.placeholder = T(`f.${f.key}.placeholder`);
+    input.value = (r && r.input.value) || saved;
+    const status = el('div', 'urlstatus');
+    box.append(input, status);
+    row.append(text, box);
+    let timer = null;
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        const res = await checkUrl(input.value, status);
+        if (res.status === 'empty') window.tabchat.setSetting(f.key, '');
+        else if (savable(res)) window.tabchat.setSetting(f.key, res.url);
+      }, 700);
+    });
+    r = urlRows[f.key] = { row, input, status, lang: curLang };
+    if (input.value) checkUrl(input.value, status); // vinkje meteen tonen
+    return row;
+  }
+  window.tabchat.onFocusSetting((key) => {
+    const r = urlRows[key];
+    if (!r) return;
+    r.row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    r.input.focus();
+    r.input.select();
+    r.row.classList.add('flash');
+    setTimeout(() => r.row.classList.remove('flash'), 1500);
+  });
 
   // Bij een andere taal: vaste teksten en sneltoetsen opnieuw opbouwen
   const update = async (s) => {

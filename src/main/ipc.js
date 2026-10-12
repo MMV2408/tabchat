@@ -37,7 +37,8 @@ function register() {
   // tabbladen
   ipcMain.on('open', (_e, id) => { if (id === 'home' || store.config.tabs.some(t => t.id === id)) views.show(id); });
   ipcMain.on('tab-sleep', (_e, id, allowed) => sleep.setAllowed(id, allowed));
-  ipcMain.on('add', (_e, service) => actions.addTab(service));
+  ipcMain.on('add', (_e, service, url) => actions.addTab(service, url));
+  ipcMain.handle('check-url', (_e, url) => require('./brightspace').check(url));
   ipcMain.on('remove', (_e, id) => actions.removeTab(id));
   ipcMain.on('back', () => actions.back());
   ipcMain.on('reorder', (_e, id, to) => actions.reorderTab(id, to));

@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.17.0',
+    nl: ['Brightspace van je school als tabblad, ingelogd met hetzelfde schoolaccount als Teams en Outlook. Het adres vul je één keer in het +-scherm in; een groen vinkje laat zien dat het werkt'],
+    en: ["Your school's Brightspace as a tab, signed in with the same school account as Teams and Outlook. Enter its address once on the + screen; a green check shows it works"]
+  },
+  {
     v: '1.16.0',
     nl: ['Feedback geven: een link in het +-scherm, en na een week één keer de vraag hoe Tabchat bevalt. Er wordt niets automatisch verstuurd'],
     en: ['Give feedback: a link on the + screen, and after a week a one-time question about how Tabchat is working for you. Nothing is sent automatically']

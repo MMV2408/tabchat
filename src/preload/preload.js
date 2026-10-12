@@ -8,7 +8,10 @@ contextBridge.exposeInMainWorld('tabchat', {
 
   // tabbladen
   open: (id) => ipcRenderer.send('open', id),
-  add: (service) => ipcRenderer.send('add', service),
+  add: (service, url) => ipcRenderer.send('add', service, url),
+  onAskUrl: (cb) => ipcRenderer.on('ask-url', (_e, service) => cb(service)),
+  checkUrl: (url) => ipcRenderer.invoke('check-url', url),
+  onFocusSetting: (cb) => ipcRenderer.on('focus-setting', (_e, key) => cb(key)),
   remove: (id) => ipcRenderer.send('remove', id),
   back: () => ipcRenderer.send('back'),
   tabMenu: (id) => ipcRenderer.send('tab-menu', id),

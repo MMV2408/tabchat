@@ -10,6 +10,9 @@ description: |
   - Keeps running in the background with a tray icon
   - Do not disturb, also following Ubuntu's own Do not disturb
   - One shared Microsoft sign-in for Teams, Outlook and OneDrive that stays signed in
+  - Work/school and personal Microsoft accounts (Outlook.com, Hotmail) side by side
+  - Your school's Brightspace, signed in with the same school account
+  - WhatsApp voice and video calls
   - Tab sleep, quick search (Ctrl+K) and browser-style shortcuts
   - Screen sharing in Discord and Teams
   - Light and dark theme, English and Dutch
@@ -17,7 +20,7 @@ description: |
   Tabchat is an independent project and is not affiliated with WhatsApp, Meta,
   Discord or Microsoft. It shows the official web versions and collects no data.
 license: MIT
-website: https://github.com/MMV2408/tabchat
+website: https://mmv2408.github.io/tabchat/
 source-code: https://github.com/MMV2408/tabchat
 issues: https://github.com/MMV2408/tabchat/issues
 contact: https://github.com/MMV2408/tabchat/issues

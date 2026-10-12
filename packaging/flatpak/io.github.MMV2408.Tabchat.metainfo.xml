@@ -22,6 +22,7 @@
       <li>Clicking a notification opens the right tab</li>
       <li>One shared Microsoft sign-in for Teams, Outlook and OneDrive that stays signed in</li>
       <li>Work/school and personal Microsoft accounts side by side</li>
+      <li>Your school's Brightspace, with the same school sign-in</li>
       <li>Tab sleep: unused tabs are unloaded from memory and return with one click</li>
       <li>Quick search with Ctrl+K and browser-style keyboard shortcuts</li>
       <li>Screen sharing in Discord and Teams, also on Wayland</li>
@@ -97,6 +98,7 @@
     <keyword>outlook</keyword>
     <keyword>messenger</keyword>
     <keyword>chat</keyword>
+    <keyword>brightspace</keyword>
   </keywords>
 
   <supports>
@@ -108,6 +110,11 @@
   </requires>
 
   <releases>
+    <release version="1.17.0" date="2026-10-12">
+      <description>
+        <p>Your school's Brightspace as a tab, signed in with the same school account as Teams and Outlook.</p>
+      </description>
+    </release>
     <release version="1.16.0" date="2026-10-12">
       <description>
         <p>A feedback link on the + screen, and a one-time feedback question after a week of use.</p>

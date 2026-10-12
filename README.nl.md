@@ -35,10 +35,11 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 ## Functies
 
 **Tabbladen**
-- 💬 WhatsApp, Discord, Teams, Outlook en OneDrive — voeg alleen toe wat je gebruikt
+- 💬 WhatsApp, Discord, Teams, Outlook, OneDrive en Brightspace — voeg alleen toe wat je gebruikt
 - 👥 Meerdere accounts van dezelfde dienst, elk met een eigen login
 - ↔️ Tabbladen verslepen, rechtsklik voor meer opties
 - 🔐 Eén gedeelde Microsoft-login voor Teams, Outlook en OneDrive (ook voor school- en werkaccounts), en je **blijft ingelogd** na een herstart
+- 🎓 **Brightspace** van je school (elke school: je vult het adres in), ingelogd met hetzelfde schoolaccount als Teams en Outlook
 - 🏫 School-/werkaccounts en **privé**-accounts van Microsoft (Outlook.com, Hotmail, Live) naast elkaar, elk met een eigen login
 
 <img align="right" src="docs/screenshots/tray.png" alt="Tray-menu" width="210">
@@ -98,7 +99,7 @@ Tabchat zoekt zelf naar nieuwe versies en downloadt ze op de achtergrond. Staat 
 ## Aan de slag
 
 1. Open Tabchat en klik op **+** (of druk op `Alt+T`).
-2. Voeg de diensten toe die je gebruikt. Elke dienst opent in een eigen tabblad. Kies bij Teams, Outlook en OneDrive voor **School/werk** of **Privé**.
+2. Voeg de diensten toe die je gebruikt. Elke dienst opent in een eigen tabblad. Kies bij Teams, Outlook en OneDrive voor **School/werk** of **Privé**. Vul bij Brightspace één keer het Brightspace-adres van je school in (aan te passen in het +-scherm; een groen vinkje laat zien dat het werkt).
 3. Log één keer in — Tabchat onthoudt het.
 
 Al het andere — taal, slaapstand, starten bij inloggen, wit tray-icoon — staat in hetzelfde **+**-scherm.
@@ -126,7 +127,7 @@ Al het andere — taal, slaapstand, starten bij inloggen, wit tray-icoon — sta
 | `F11` | Volledig scherm |
 | `Ctrl+Q` | Tabchat echt afsluiten |
 
-In het +-scherm voegt `Alt` + de onderstreepte letter een dienst toe (`W`hatsApp, `D`iscord, `T`eams, `O`utlook, O`n`eDrive).
+In het +-scherm voegt `Alt` + de onderstreepte letter een dienst toe (`W`hatsApp, `D`iscord, `T`eams, `O`utlook, O`n`eDrive, `B`rightspace).
 
 ## Privacy
 

@@ -35,10 +35,11 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 ## Features
 
 **Tabs**
-- 💬 WhatsApp, Discord, Teams, Outlook and OneDrive — add only what you need
+- 💬 WhatsApp, Discord, Teams, Outlook, OneDrive and Brightspace — add only what you need
 - 👥 Multiple accounts of the same service, each with its own sign-in
 - ↔️ Drag tabs to reorder them, right-click for more options
 - 🔐 One shared Microsoft sign-in for Teams, Outlook and OneDrive (school and work accounts too), and it **stays signed in** after a restart
+- 🎓 **Brightspace** from your school (any school: you enter its address), signed in with the same school account as Teams and Outlook
 - 🏫 Work/school and **personal** Microsoft accounts (Outlook.com, Hotmail, Live) side by side, each with its own sign-in
 
 <img align="right" src="docs/screenshots/tray.png" alt="Tray menu" width="210">
@@ -98,7 +99,7 @@ Tabchat checks for new versions by itself and downloads them in the background. 
 ## Getting started
 
 1. Open Tabchat and click **+** (or press `Alt+T`).
-2. Add the services you use. Each one opens in its own tab. For Teams, Outlook and OneDrive, pick **Work/school** or **Personal**.
+2. Add the services you use. Each one opens in its own tab. For Teams, Outlook and OneDrive, pick **Work/school** or **Personal**. For Brightspace, enter your school's Brightspace address once (you can change it on the + screen; a green check shows it works).
 3. Sign in once — Tabchat remembers it.
 
 Everything else — language, tab sleep, start at login, white tray icon — is on the same **+** screen.
@@ -126,7 +127,7 @@ Everything else — language, tab sleep, start at login, white tray icon — is 
 | `F11` | Full screen |
 | `Ctrl+Q` | Really quit Tabchat |
 
-On the + screen, `Alt` + the underlined letter adds a service (`W`hatsApp, `D`iscord, `T`eams, `O`utlook, O`n`eDrive).
+On the + screen, `Alt` + the underlined letter adds a service (`W`hatsApp, `D`iscord, `T`eams, `O`utlook, O`n`eDrive, `B`rightspace).
 
 ## Privacy
 

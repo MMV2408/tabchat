@@ -98,7 +98,7 @@
   function snapshot() {
     return JSON.parse(JSON.stringify({
       tabs: labeled(), active,
-      catalog: Object.entries(D.catalog).map(([id, c]) => ({ id, name: c.name, key: c.key, color: c.color, base: c.base, desc: T('svc.' + (c.base || id)) })),
+      catalog: Object.entries(D.catalog).map(([id, c]) => ({ id, name: c.name, key: c.key, color: c.color, base: c.base, askUrl: c.askUrl, desc: T('svc.' + (c.base || id)) })),
       settings, dnd: dndState(),
       update: { state: upd, current: D.version, version: D.version },
       platform: { kind: 'deb', storeManaged: false },
@@ -129,7 +129,19 @@
       getStrings: async () => ({ strings: D.strings[lang()], lang: lang() }),
       onState: (cb) => f.state.push(cb),
       open,
-      add: (service) => { const t = tab(service); tabs.push(t); open(t.id); },
+      add: (service, url) => {
+        if (D.catalog[service].askUrl && !url && !settings.brightspaceUrl) { f.ask.forEach(cb => cb(service)); return; }
+        if (url && !settings.brightspaceUrl) settings.brightspaceUrl = url;
+        const t = tab(service); tabs.push(t); open(t.id);
+      },
+      onAskUrl: (cb) => f.ask.push(cb),
+      onFocusSetting: () => {},
+      checkUrl: async (u) => {
+        const s = String(u || '').trim();
+        if (!/^(https?:\/\/)?[^\s/]+\.[^\s/]{2,}/i.test(s)) return { status: 'invalid', url: null };
+        await new Promise(r => setTimeout(r, 600)); // even "controleren"
+        return { status: 'ok', url: (/^https?:/i.test(s) ? s : 'https://' + s).replace(/\/?$/, '/') };
+      },
       remove: (id) => {
         tabs = tabs.filter(t => t.id !== id);
         if (lastTab === id) lastTab = tabs[0] ? tabs[0].id : null;
@@ -172,7 +184,7 @@
 
   window.TabchatSim = {
     connect(win) {
-      const f = { win, state: [], keys: [], wn: [], lastPos: null };
+      const f = { win, state: [], keys: [], wn: [], ask: [], lastPos: null };
       frames.add(f);
       // Waar is rechts geklikt? (voor het tabblad-menu, dat de website tekent)
       win.addEventListener('contextmenu', (e) => { f.lastPos = { frame: win, x: e.clientX, y: e.clientY }; }, true);

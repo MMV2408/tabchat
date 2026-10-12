@@ -3,7 +3,7 @@
 const { app, session } = require('electron');
 const store = require('./store');
 const config = require('./config');
-const { CATALOG } = require('./catalog');
+const { CATALOG, urlFor } = require('./catalog');
 const views = require('./views');
 const microsoft = require('./microsoft');
 
@@ -16,9 +16,24 @@ function nextId(service) {
   return id;
 }
 
-function addTab(service) {
+function addTab(service, url) {
   if (!CATALOG[service]) return;
   const tab = { id: nextId(service), service };
+  const svc = CATALOG[service];
+  if (svc.askUrl) {
+    // Adres verschilt per school: het adres uit de instellingen, anders eerst vragen
+    const { normalizeUrl } = require('./catalog');
+    const given = normalizeUrl(url);
+    const saved = svc.settingUrl ? normalizeUrl(store.config.settings[svc.settingUrl]) : null;
+    if (!given && !saved) {
+      views.show('home');
+      store.home.webContents.send('ask-url', service);
+      return;
+    }
+    // Ingevuld en nog niets bewaard? Dan onthouden voor de volgende keer
+    if (given && svc.settingUrl && !saved) store.config.settings[svc.settingUrl] = given;
+    else if (given && given !== saved) tab.url = given;
+  }
   store.config.tabs.push(tab);
   config.save();
   views.createServiceView(tab);
@@ -194,6 +209,17 @@ function setSetting(key, value) {
       views.createServiceView(tab);
     }
     views.layout();
+  }
+  if (key === 'brightspaceUrl') {
+    // Nieuw adres: alle Brightspace-tabbladen gaan naar het nieuwe adres
+    const clean = require('./catalog').normalizeUrl(value) || '';
+    store.config.settings.brightspaceUrl = clean;
+    config.save();
+    for (const tab of store.config.tabs) {
+      if (tab.service !== 'brightspace') continue;
+      delete tab.url;
+      if (store.views[tab.id]) store.views[tab.id].webContents.loadURL(urlFor(tab));
+    }
   }
   if (key === 'runInBackground') require('./tray').sync();
   if (key === 'unreadBadges') require('./unread').changed();

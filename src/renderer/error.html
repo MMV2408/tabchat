@@ -65,6 +65,7 @@
       offTitle: 'Geen internetverbinding', offText: '{n} laadt vanzelf opnieuw zodra je weer verbinding hebt.',
       slowTitle: 'Dat duurt te lang', slowText: '{n} reageert niet. Misschien is je verbinding traag of heeft {n} een storing.',
       failTitle: '{n} kon niet laden', failText: 'Mogelijk heeft {n} een storing, of blokkeert een netwerk (bijvoorbeeld op school) de verbinding.',
+      notfoundTitle: 'Dit adres bestaat niet', notfoundText: 'Er staat geen website op {h}. Controleer het adres in het +-scherm.', fix: 'Adres wijzigen',
       retry: 'Opnieuw proberen', browser: 'Openen in browser', auto: 'Automatisch opnieuw over {s} s', code: 'Foutcode: {c}'
     },
     en: {
@@ -72,6 +73,7 @@
       offTitle: 'No internet connection', offText: '{n} will reload by itself as soon as you are back online.',
       slowTitle: 'This is taking too long', slowText: '{n} is not responding. Your connection may be slow or {n} may be having problems.',
       failTitle: '{n} could not load', failText: '{n} may be having problems, or a network (for example at school) is blocking the connection.',
+      notfoundTitle: 'This address does not exist', notfoundText: 'There is no website at {h}. Check the address on the + screen.', fix: 'Change address',
       retry: 'Try again', browser: 'Open in browser', auto: 'Retrying automatically in {s} s', code: 'Error code: {c}'
     }
   };
@@ -87,12 +89,17 @@
 
   // Passende melding kiezen
   let title, text;
+  let host = '';
+  try { host = new URL(url).hostname; } catch {}
+  // -105 = adres bestaat niet; bij diensten met een eigen adres (Brightspace) ligt dat aan het adres
+  const notFound = q.get('fix') === '1' && code === -105 && navigator.onLine;
   const kind = reason === 'crash' ? 'crash'
+    : notFound ? 'notfound'
     : !navigator.onLine ? 'off'
     : (code === -7 || code === -118) ? 'slow'
     : 'fail';
   title = T(kind + 'Title', { n: name });
-  text = T(kind + 'Text', { n: name });
+  text = T(kind + 'Text', { n: name, h: host });
   document.getElementById('title').textContent = title;
   document.getElementById('text').textContent = text;
   if (q.get('desc')) document.getElementById('code').textContent = T('code', { c: q.get('desc') });
@@ -104,8 +111,16 @@
   // Weer online? Direct opnieuw proberen
   window.addEventListener('online', retry);
 
+  // Adres bestaat niet: knop "Adres wijzigen" (opent het +-scherm), niet vanzelf opnieuw proberen
+  if (notFound) {
+    const b = document.getElementById('retry');
+    b.textContent = T('fix');
+    b.onclick = () => { location.hash = 'tabchat-fix-url-' + Date.now(); };
+    window.removeEventListener('online', retry);
+    document.getElementById('browser').style.display = 'none';
+  }
   // Anders elke 30 seconden vanzelf opnieuw (niet na een crash)
-  if (reason !== 'crash') {
+  if (reason !== 'crash' && !notFound) {
     let left = 30;
     const auto = document.getElementById('auto');
     const tick = () => {

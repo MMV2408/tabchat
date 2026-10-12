@@ -3,7 +3,7 @@
 const { WebContentsView, shell } = require('electron');
 const path = require('path');
 const store = require('./store');
-const { UA, CATALOG, LOGIN_HOSTS } = require('./catalog');
+const { UA, CATALOG, LOGIN_HOSTS, urlFor, isOwnHost } = require('./catalog');
 const microsoft = require('./microsoft');
 const shortcuts = require('./shortcuts');
 const palette = require('./palette');
@@ -56,7 +56,7 @@ function getState() {
     browsers: require('./links').browsers().map(b => ({ id: b.id, name: b.name })),
     platform: { kind: require('./platform').kind, storeManaged: require('./platform').storeManaged },
     update: require('./updater').getStatus(),
-    catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, base: s.base || null, desc: i18n.t('svc.' + (s.base || id)) })),
+    catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, base: s.base || null, askUrl: !!s.askUrl, desc: i18n.t('svc.' + (s.base || id)) })),
     settings: config.settings
   };
 }
@@ -116,6 +116,7 @@ function createServiceView(tab) {
     let host = '';
     try { host = new URL(url).hostname; } catch {}
     if (LOGIN_HOSTS.includes(host)) return { action: 'allow' };
+    if (isOwnHost(tab, host)) return { action: 'allow' }; // bv. Brightspace opent een eigen pagina in een venster
     if (/^https?:/.test(url)) { links.open(url, ses); return { action: 'deny' }; }
     // Leeg venster (Outlook doet dat): verborgen openen en het adres opvangen
     if (!url || url === 'about:blank') return { action: 'allow', overrideBrowserWindowOptions: { show: false } };
@@ -125,10 +126,18 @@ function createServiceView(tab) {
     if (!url || url === 'about:blank') links.catchBlank(child, ses);
   });
 
+  // Foutscherm: "Adres wijzigen" geklikt? Naar het +-scherm, naar het adresveld
+  v.webContents.on('did-navigate-in-page', (_e, url) => {
+    if (!url.startsWith('file:') || !url.includes('#tabchat-fix-url')) return;
+    const key = CATALOG[tab.service].settingUrl;
+    show('home');
+    if (key) store.home.webContents.send('focus-setting', key);
+  });
+
   // Foutscherm als de dienst niet laadt (geen internet, storing) of vastloopt
   v.webContents.on('did-fail-load', (_e, code, desc, url, isMainFrame) => {
     if (!isMainFrame || code === -3 || url.startsWith('file:')) return; // -3 = afgebroken, geen echte fout
-    showError(tab, v, { code, desc, url: /^https?:/.test(url) ? url : CATALOG[tab.service].url });
+    showError(tab, v, { code, desc, url: /^https?:/.test(url) ? url : urlFor(tab) });
   });
   v.webContents.on('render-process-gone', (_e, details) => {
     if (details.reason === 'clean-exit' || store.views[tab.id] !== v) return; // zelf gesloten (bv. slaapstand)
@@ -140,7 +149,7 @@ function createServiceView(tab) {
 
   // Wachten als een ander Microsoft-tabblad met dezelfde login al bezig is
   if (microsoft.shouldWait(tab)) microsoft.waiting.add(tab.id);
-  else v.webContents.loadURL(CATALOG[tab.service].url);
+  else v.webContents.loadURL(urlFor(tab));
 
   v.setVisible(false);
   store.win.contentView.addChildView(v);
@@ -179,10 +188,11 @@ function showError(tab, v, info) {
     query: {
       name: svc.name,
       color: svc.color,
-      url: info.url || svc.url,
+      url: info.url || urlFor(tab),
       code: String(info.code || ''),
       desc: info.desc || '',
       reason: info.reason || '',
+      fix: svc.askUrl ? '1' : '', // adres verschilt per school: knop "Adres wijzigen" bij een onbekend adres
       lang: i18n.lang()
     }
   });
@@ -195,7 +205,7 @@ function checkRawPage(tab, v) {
   v.webContents.executeJavaScript(
     "document.contentType === 'text/plain' && /^\\s*<(!doctype|html)/i.test((document.body && document.body.innerText) || '')"
   ).then(isRaw => {
-    if (isRaw) showError(tab, v, { code: -106, desc: 'OFFLINE_PAGE', url: CATALOG[tab.service].url });
+    if (isRaw) showError(tab, v, { code: -106, desc: 'OFFLINE_PAGE', url: urlFor(tab) });
   }).catch(() => {});
 }
 
@@ -205,7 +215,7 @@ function reloadView(id) {
   if (!v) return;
   if (v.webContents.getURL().startsWith('file:')) {
     const tab = store.config.tabs.find(t => t.id === id);
-    if (tab) v.webContents.loadURL(CATALOG[tab.service].url);
+    if (tab) v.webContents.loadURL(urlFor(tab));
   } else {
     v.webContents.reload();
   }

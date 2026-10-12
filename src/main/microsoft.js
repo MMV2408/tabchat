@@ -5,7 +5,9 @@
 const { dialog } = require('electron');
 const store = require('./store');
 const config = require('./config');
-const { CATALOG, isMsAppHost } = require('./catalog');
+const { CATALOG, isMsAppHost, urlFor, isOwnHost } = require('./catalog');
+// De dienst zelf (Microsoft, of bv. de Brightspace van je school) en geen inlogscherm
+const isAppHost = (tab, host) => isMsAppHost(host) || isOwnHost(tab, host);
 const views = require('./views');
 const { t } = require('./i18n');
 
@@ -36,7 +38,7 @@ function loadTab(id) {
   const tab = store.config.tabs.find(t => t.id === id);
   if (!tab || !store.views[id]) return;
   waiting.delete(id);
-  store.views[id].webContents.loadURL(CATALOG[tab.service].url);
+  store.views[id].webContents.loadURL(urlFor(tab));
 }
 
 function onLoggedIn(tab) {
@@ -49,7 +51,7 @@ function onLoggedIn(tab) {
       // Staat het andere tabblad nog op een inlogscherm? Dan opnieuw laden.
       let host = '';
       try { host = new URL(store.views[t.id].webContents.getURL()).hostname; } catch {}
-      if (host && !isMsAppHost(host)) loadTab(t.id);
+      if (host && !isAppHost(t, host)) loadTab(t.id);
     }
   }, 2000);
 }
@@ -62,7 +64,7 @@ function watchLogin(tab, view) {
     try { host = new URL(url).hostname; } catch {}
     if (!host) return;
     const part = partitionFor(tab);
-    if (!isMsAppHost(host)) {
+    if (!isAppHost(tab, host)) {
       onLogin = true;
     } else if (onLogin || !msReady.has(part)) {
       onLogin = false;
