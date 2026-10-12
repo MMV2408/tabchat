@@ -106,7 +106,7 @@ function init() {
     console.error('Update-fout:', err && err.message);
     log('error', 'event error', err);
     // Fout tijdens installeren (bv. wachtwoord geweigerd): update blijft klaarstaan
-    if (installing) { installing = false; return set({ state: 'failed' }); }
+    if (installing) { installing = false; set({ state: 'failed' }); return require('./tray').showWindow(); }
     set({ state: 'error' });
   });
 
@@ -151,6 +151,9 @@ async function install() {
   // Logins eerst opslaan (maximaal 3 seconden wachten, zodat het nooit blijft hangen)
   await Promise.race([require('./actions').flushLogins(), new Promise(r => setTimeout(r, 3000))]);
   log('info', 'logins opgeslagen, installeren starten');
+  // Venster verbergen: tijdens het wachtwoordvenster wacht Tabchat op het installeren, en dan zou
+  // Ubuntu vragen "reageert niet: geforceerd afsluiten?". Bij een verborgen venster vraagt hij dat niet.
+  if (store.alive()) store.win.hide();
   // Afsluiten (tray weg, venster dicht) gebeurt pas via 'before-quit' als de installatie gelukt is
   try {
     autoUpdater.quitAndInstall(false, true); // false = niet stil, true = daarna opnieuw starten
@@ -161,6 +164,7 @@ async function install() {
     log('warn', 'installeren niet gelukt of afgebroken');
     installing = false;
     set({ state: 'failed' });
+    require('./tray').showWindow(); // venster terug, met de melding
   }, 3000);
 }
 

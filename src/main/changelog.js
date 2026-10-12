@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.20.3',
+    nl: ['Nu installeren: geen vraag meer van Ubuntu om Tabchat geforceerd af te sluiten terwijl je je wachtwoord invult'],
+    en: ['Install now: Ubuntu no longer asks to force quit Tabchat while you enter your password']
+  },
+  {
     v: '1.20.2',
     nl: ['Lukt het installeren van een update niet, dan zie je dat nu in het +-scherm, en houdt Tabchat een logboek bij (updater.log) dat je kunt meesturen'],
     en: ["If installing an update doesn't work, you now see it on the + screen, and Tabchat keeps a log (updater.log) you can send along"]
