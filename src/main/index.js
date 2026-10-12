@@ -8,8 +8,8 @@ const actions = require('./actions');
 // Minder geheugen voor JavaScript per tabblad
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=256');
 
-// Hardwareversnelling uit (instelling in het +-scherm → Geheugen): geen grafisch proces,
-// ~100-150 MB minder geheugen (vooral met NVIDIA), maar de processor tekent alles zelf. Moet vóór het starten.
+// Hardwareversnelling uit (instelling in het +-scherm → Algemeen): helpt bij beeldproblemen
+// (zwart scherm, flikkeren), vooral met NVIDIA of Wayland. Scheelt nauwelijks geheugen. Moet vóór het starten.
 const hwAccel = require('./config').peekSetting('hardwareAcceleration') !== false;
 require('./store').hwAtStart = hwAccel;
 if (!hwAccel) app.disableHardwareAcceleration();

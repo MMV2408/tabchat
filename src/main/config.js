@@ -26,7 +26,7 @@ const DEFAULT_SETTINGS = {
   tabBar: 'normal',      // 'normal', 'compact' (alleen icoontjes) of 'autohide' (verschijnt bovenaan bij de muis)
   hiddenServices: [],    // vaste diensten die je uit het +-scherm hebt gehaald
   cardOrder: [],         // volgorde van de kaarten in het +-scherm (versleept)
-  hardwareAcceleration: true // uit = lichter grafisch proces (~100-150 MB minder), werkt na herstart
+  hardwareAcceleration: true // uit = hulp bij beeldproblemen, werkt na herstart
 };
 
 // Eén instelling lezen vóór de app klaar is (bv. hardwareversnelling moet je vóór het starten kiezen)

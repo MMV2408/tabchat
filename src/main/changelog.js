@@ -2,9 +2,14 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.20.1',
+    nl: ['Hardwareversnelling staat nu bij Algemeen, als hulp bij beeldproblemen (zwart scherm of flikkeren). Geheugen scheelt het nauwelijks, dus laat hem gewoon aan als alles goed werkt'],
+    en: ['Hardware acceleration moved to General, as a fix for display problems (black screen or flickering). It barely saves memory, so just leave it on if everything works']
+  },
+  {
     v: '1.20.0',
-    nl: ['Nieuwe instelling Hardwareversnelling (+-scherm → Geheugen): uitzetten scheelt zo\'n 100-150 MB geheugen. Werkt het niet lekker, zet hem dan gewoon weer aan'],
-    en: ["New setting Hardware acceleration (+ screen → Memory): turning it off saves about 100-150 MB of memory. If something doesn't run smoothly, just turn it back on"]
+    nl: ['Nieuwe instelling Hardwareversnelling'],
+    en: ['New setting Hardware acceleration']
   },
   {
     v: '1.19.2',

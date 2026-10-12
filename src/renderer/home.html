@@ -285,6 +285,7 @@
     { group: 'general', key: 'tabBar', options: [['normal', 'f.tabBar.normal'], ['compact', 'f.tabBar.compact'], ['autohide', 'f.tabBar.autohide']] },
     { group: 'general', key: 'openLinks', options: 'links' }, // lijst hangt af van de browsers op deze computer
     { group: 'general', key: 'spellcheck' },
+    { group: 'general', key: 'hardwareAcceleration' },
     { group: 'accounts', key: 'stayLoggedIn' },
     { group: 'accounts', key: 'shareMicrosoft' },
     { group: 'accounts', key: 'brightspaceUrl', type: 'url' },
@@ -296,8 +297,7 @@
     { group: 'startup', key: 'autoUpdate', hideInStore: true },
     { group: 'memory', key: 'sleepEnabled' },
     { group: 'memory', key: 'sleepMinutes', options: [[15, 'f.sleepMinutes.15'], [30, 'f.sleepMinutes.30'], [60, 'f.sleepMinutes.60']] },
-    { group: 'memory', key: 'sleepOnStart' },
-    { group: 'memory', key: 'hardwareAcceleration' }
+    { group: 'memory', key: 'sleepOnStart' }
   ];
   // Functies verdeeld over tabjes; het laatst gekozen tabje onthouden we
   const FEATURE_TABS = ['general', 'accounts', 'notify', 'startup', 'memory'];
