@@ -14,6 +14,8 @@ function open() {
 
 async function ask() {
   if (store.config.donateNever || store.quitting || !store.win) return;
+  store.config.donateAskedAt = Date.now(); // feedbackvraag niet vlak hierna (feedback.js)
+  require('./config').save();
   const { response, checkboxChecked } = await dialog.showMessageBox(store.win, {
     type: 'none',
     icon: ICON,

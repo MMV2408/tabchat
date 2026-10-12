@@ -158,6 +158,7 @@
       checkUpdate: () => { upd = 'checking'; emit(); setTimeout(() => { upd = 'latest'; emit(); }, 900); },
       installUpdate: () => {},
       openDonate: () => window.open('https://github.com/sponsors/MMV2408', '_blank', 'noopener'),
+      openFeedback: () => window.open('https://tally.so/r/LZAaop', '_blank', 'noopener'),
       openWhatsNew: () => {
         const d = { updated: false, current: D.version, entries: D.changelog.slice(0, 4).map(e => ({ v: e.v, items: e[lang()] || e.en })) };
         f.wn.forEach(cb => cb(d));

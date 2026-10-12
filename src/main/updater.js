@@ -61,7 +61,10 @@ function announceUpdate() {
 }
 
 function init() {
+  // Eerste start na installatie of update? Dan geen feedbackvraag (zie feedback.js)
+  const special = app.isPackaged && store.config.lastVersion !== app.getVersion();
   announceUpdate();
+  require('./feedback').start(special);
   if (platform.storeManaged) return set({ state: 'store' }); // updates via de winkel
   if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' }); // npm start: geen updates
   autoUpdater.autoDownload = true;

@@ -38,7 +38,10 @@ function load() {
       trayNoticeShown: !!c.trayNoticeShown,
       dndUntil: c.dndUntil || null,
       lastVersion: c.lastVersion || null,
-      donateNever: !!c.donateNever
+      donateNever: !!c.donateNever,
+      donateAskedAt: c.donateAskedAt || null,
+      firstUse: c.firstUse || null,
+      feedback: c.feedback || null
     };
   } catch {
     // Geen of kapot bestand: met een lege app beginnen

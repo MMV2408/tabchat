@@ -1,0 +1,68 @@
+// Vraag om feedback: één klein venster na 7 dagen gebruik, met een link naar een kort formulier.
+// - nooit bij de eerste start na een installatie of update (dan komen "Wat is er nieuw" en de doneervraag al)
+// - nooit binnen 3 dagen na de doneervraag
+// - "Later" vraagt het over 14 dagen nog één keer; daarna nooit meer
+// Er wordt niets automatisch verstuurd: de gebruiker opent zelf het formulier. Niet bij npm start.
+const { app, dialog, shell } = require('electron');
+const path = require('path');
+const store = require('./store');
+const config = require('./config');
+const { t } = require('./i18n');
+
+const URL = 'https://tally.so/r/LZAaop';
+const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
+const DAY = 24 * 3600 * 1000;
+
+function open() {
+  shell.openExternal(URL);
+}
+
+function state() {
+  if (!store.config.feedback) store.config.feedback = { done: false, laterCount: 0, nextAt: 0 };
+  return store.config.feedback;
+}
+
+function due() {
+  const f = state();
+  const now = Date.now();
+  if (f.done || !store.config.firstUse) return false;
+  if (now < store.config.firstUse + 7 * DAY || now < (f.nextAt || 0)) return false;
+  if (store.config.donateAskedAt && now < store.config.donateAskedAt + 3 * DAY) return false;
+  return true;
+}
+
+async function ask() {
+  if (!due() || store.quitting || !store.win) return;
+  const f = state();
+  const { response, checkboxChecked } = await dialog.showMessageBox(store.win, {
+    type: 'none',
+    icon: ICON,
+    title: t('fb.title'),
+    message: t('fb.message'),
+    detail: t('fb.detail'),
+    buttons: [t('fb.yes'), t('fb.later')],
+    checkboxLabel: t('fb.never'),
+    defaultId: 0,
+    cancelId: 1
+  });
+  if (response === 0) { f.done = true; open(); }
+  else if (checkboxChecked || f.laterCount >= 1) f.done = true; // na één keer "Later" niet meer vragen
+  else { f.laterCount = 1; f.nextAt = Date.now() + 14 * DAY; }
+  if (checkboxChecked) f.done = true;
+  config.save();
+}
+
+// Bij het starten. special = eerste start na installatie of update.
+function start(special) {
+  if (!app.isPackaged) return;
+  if (!store.config.firstUse) { store.config.firstUse = Date.now(); config.save(); }
+  if (special || !due()) return;
+  // Rustig: pas na 2 minuten, en alleen als het venster zichtbaar is
+  setTimeout(() => {
+    if (!store.win) return;
+    if (store.win.isVisible()) ask();
+    else store.win.once('show', () => setTimeout(ask, 1500));
+  }, 2 * 60 * 1000);
+}
+
+module.exports = { open, start };

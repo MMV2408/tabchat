@@ -372,8 +372,10 @@
     don.onclick = () => window.tabchat.openDonate();
     const news = el('button', 'donate', T('wn.link'));
     news.onclick = () => window.tabchat.openWhatsNew();
+    const fb = el('button', 'donate', T('fb.link'));
+    fb.onclick = () => window.tabchat.openFeedback();
     const links = el('div', 'links');
-    links.append(news, don);
+    links.append(news, fb, don);
     info.append(el('div', 'ver', `Tabchat ${u.current || ''}`), el('div', 'st', st), links);
     about.append(info);
     if (u.state === 'ready') {

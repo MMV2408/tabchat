@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.16.0',
+    nl: ['Feedback geven: een link in het +-scherm, en na een week één keer de vraag hoe Tabchat bevalt. Er wordt niets automatisch verstuurd'],
+    en: ['Give feedback: a link on the + screen, and after a week a one-time question about how Tabchat is working for you. Nothing is sent automatically']
+  },
+  {
     v: '1.15.0',
     nl: ['Privé-accounts van Microsoft (Outlook.com, Hotmail, Live): kies bij Teams, Outlook en OneDrive voor School/werk of Privé. Ze staan naast elkaar, elk met een eigen login'],
     en: ['Personal Microsoft accounts (Outlook.com, Hotmail, Live): pick Work/school or Personal for Teams, Outlook and OneDrive. They sit side by side, each with its own sign-in']

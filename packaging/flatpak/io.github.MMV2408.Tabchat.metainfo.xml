@@ -108,6 +108,11 @@
   </requires>
 
   <releases>
+    <release version="1.16.0" date="2026-10-12">
+      <description>
+        <p>A feedback link on the + screen, and a one-time feedback question after a week of use.</p>
+      </description>
+    </release>
     <release version="1.15.0" date="2026-10-12">
       <description>
         <p>Personal Microsoft accounts (Outlook.com, Hotmail, Live) next to work and school accounts, each with its own sign-in.</p>
