@@ -69,10 +69,16 @@
 
   // Labels zoals in de app: "Outlook", of "Outlook 1" en "Outlook 2" bij meer van dezelfde
   function labeled() {
+    // Microsoft: labeltje School/werk of Privé, alleen als je ze allebei hebt (zoals in de app)
+    const acct = (t) => { const g = D.catalog[t.service].group; return g === 'microsoft' ? 'work' : g === 'microsoft-personal' ? 'personal' : ''; };
+    const kinds = new Set(tabs.map(acct));
+    const both = kinds.has('work') && kinds.has('personal');
     return tabs.map(t => {
       const same = tabs.filter(x => x.service === t.service);
       const name = D.catalog[t.service].name;
-      return { ...t, label: same.length > 1 ? `${name} ${same.indexOf(t) + 1}` : name, color: D.catalog[t.service].color };
+      const label = same.length > 1 ? `${name} ${same.indexOf(t) + 1}` : name;
+      const tag = both ? acct(t) : '';
+      return { ...t, label, tag, fullLabel: label + (tag ? ` (${T('acct.' + tag)})` : ''), color: D.catalog[t.service].color };
     });
   }
 
@@ -92,7 +98,7 @@
   function snapshot() {
     return JSON.parse(JSON.stringify({
       tabs: labeled(), active,
-      catalog: Object.entries(D.catalog).map(([id, c]) => ({ id, name: c.name, key: c.key, color: c.color, desc: T('svc.' + id) })),
+      catalog: Object.entries(D.catalog).map(([id, c]) => ({ id, name: c.name, key: c.key, color: c.color, base: c.base, desc: T('svc.' + (c.base || id)) })),
       settings, dnd: dndState(),
       update: { state: upd, current: D.version, version: D.version },
       platform: { kind: 'deb', storeManaged: false },

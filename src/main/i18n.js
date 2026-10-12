@@ -41,9 +41,15 @@ const STRINGS = {
     // diensten
     'svc.whatsapp': 'Chatten met je telefoonnummer',
     'svc.discord': 'Servers, vrienden en spraak',
-    'svc.teams': 'School en werk (Microsoft)',
+    'svc.teams': 'Chatten en vergaderen',
     'svc.outlook': 'E-mail en agenda',
     'svc.onedrive': 'Je bestanden in de cloud',
+    'acct.work': 'School/werk',
+    'acct.personal': 'Privé',
+    'home.addWork': '+ School/werk',
+    'home.addPersonal': '+ Privé',
+    'home.addWorkTitle': 'Voor school- en werkaccounts (Microsoft 365){k}',
+    'home.addPersonalTitle': 'Voor privé-accounts: Outlook.com, Hotmail en Live',
 
     // niet storen
     'dnd.on': '🌙 Staat aan',
@@ -259,9 +265,15 @@ const STRINGS = {
 
     'svc.whatsapp': 'Chat with your phone number',
     'svc.discord': 'Servers, friends and voice',
-    'svc.teams': 'School and work (Microsoft)',
+    'svc.teams': 'Chat and meetings',
     'svc.outlook': 'Email and calendar',
     'svc.onedrive': 'Your files in the cloud',
+    'acct.work': 'Work/school',
+    'acct.personal': 'Personal',
+    'home.addWork': '+ Work/school',
+    'home.addPersonal': '+ Personal',
+    'home.addWorkTitle': 'For work and school accounts (Microsoft 365){k}',
+    'home.addPersonalTitle': 'For personal accounts: Outlook.com, Hotmail and Live',
 
     'dnd.on': '🌙 On',
     'dnd.off': 'Off. Turn on for:',

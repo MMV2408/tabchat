@@ -85,7 +85,7 @@ function refresh() {
 
   const visible = store.win.isVisible();
   const tabItems = views.getState().tabs.map(t => ({
-    label: t.label + (typeof t.unread === 'number' && t.unread ? ` (${t.unread})` : t.unread === 'dot' ? '  •' : '') + (t.muted ? '  🔇' : '') + (t.asleep ? '  💤' : ''),
+    label: t.fullLabel + (typeof t.unread === 'number' && t.unread ? ` (${t.unread})` : t.unread === 'dot' ? '  •' : '') + (t.muted ? '  🔇' : '') + (t.asleep ? '  💤' : ''),
     click: () => { showWindow(); views.show(t.id); }
   }));
   tray.setContextMenu(Menu.buildFromTemplate([

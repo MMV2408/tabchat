@@ -6,19 +6,26 @@ const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Geck
 // key   = letter voor Alt+letter in het +-scherm
 // group = diensten in dezelfde groep kunnen één login delen (zie microsoft.js)
 // awake = standaard nooit in slaapstand (chat-apps, zodat je geen berichten mist)
+// base  = privé-variant van een dienst: in het +-scherm een tweede knop op de kaart van 'base'.
+//         Microsoft heeft voor privé-accounts (Outlook.com, Hotmail, Live) aparte websites.
 const CATALOG = {
   whatsapp: { name: 'WhatsApp', key: 'w', url: 'https://web.whatsapp.com',               color: '#25D366', desc: 'Chatten met je telefoonnummer', awake: true },
   discord:  { name: 'Discord',  key: 'd', url: 'https://discord.com/app',                color: '#5865F2', desc: 'Servers, vrienden en spraak', awake: true },
   teams:    { name: 'Teams',    key: 't', url: 'https://teams.microsoft.com',            color: '#6264A7', desc: 'School en werk (Microsoft)', group: 'microsoft', awake: true },
   outlook:  { name: 'Outlook',  key: 'o', url: 'https://outlook.office.com/mail/',       color: '#0078D4', desc: 'E-mail en agenda', group: 'microsoft' },
-  onedrive: { name: 'OneDrive', key: 'n', url: 'https://www.office.com/launch/onedrive', color: '#0364B8', desc: 'Je bestanden in de cloud', group: 'microsoft' }
+  onedrive: { name: 'OneDrive', key: 'n', url: 'https://www.office.com/launch/onedrive', color: '#0364B8', desc: 'Je bestanden in de cloud', group: 'microsoft' },
+  'teams-personal':    { name: 'Teams',    base: 'teams',    url: 'https://teams.live.com',           color: '#6264A7', group: 'microsoft-personal', awake: true },
+  'outlook-personal':  { name: 'Outlook',  base: 'outlook',  url: 'https://outlook.live.com/owa/?nlp=1', color: '#0078D4', group: 'microsoft-personal' },
+  'onedrive-personal': { name: 'OneDrive', base: 'onedrive', url: 'https://onedrive.live.com/login/', color: '#0364B8', group: 'microsoft-personal' }
 };
 
 // Inlogvensters die binnen de app mogen openen in plaats van in de browser
 const LOGIN_HOSTS = [
   'login.microsoftonline.com', 'login.microsoft.com', 'login.live.com',
   'teams.microsoft.com', 'teams.live.com', 'outlook.office.com', 'outlook.live.com',
-  'www.microsoft365.com', 'www.office.com', 'onedrive.live.com'
+  'www.microsoft365.com', 'www.office.com', 'onedrive.live.com',
+  // privé-accounts (Outlook.com, Hotmail, Live)
+  'signup.live.com', 'account.live.com', 'outlook.com', 'www.outlook.com', 'onedrive.com', 'www.onedrive.com'
 ];
 
 // Domeinen van de Microsoft-apps zelf. Alles daarbuiten (login.microsoftonline.com,
@@ -26,7 +33,7 @@ const LOGIN_HOSTS = [
 const MS_APP_DOMAINS = [
   'teams.microsoft.com', 'teams.live.com', 'teams.cloud.microsoft',
   'outlook.office.com', 'outlook.office365.com', 'outlook.live.com', 'outlook.cloud.microsoft',
-  'microsoft365.com', 'office.com', 'sharepoint.com', 'onedrive.live.com', 'cloud.microsoft'
+  'microsoft365.com', 'office.com', 'sharepoint.com', 'onedrive.live.com', 'onedrive.com', 'cloud.microsoft'
 ];
 
 function isMsAppHost(host) {
@@ -34,7 +41,7 @@ function isMsAppHost(host) {
 }
 
 function serviceByKey(key) {
-  return Object.keys(CATALOG).find(s => CATALOG[s].key === key);
+  return Object.keys(CATALOG).find(s => CATALOG[s].key && CATALOG[s].key === key);
 }
 
 module.exports = { UA, CATALOG, LOGIN_HOSTS, isMsAppHost, serviceByKey };

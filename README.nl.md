@@ -39,6 +39,7 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 - 👥 Meerdere accounts van dezelfde dienst, elk met een eigen login
 - ↔️ Tabbladen verslepen, rechtsklik voor meer opties
 - 🔐 Eén gedeelde Microsoft-login voor Teams, Outlook en OneDrive (ook voor school- en werkaccounts), en je **blijft ingelogd** na een herstart
+- 🏫 School-/werkaccounts en **privé**-accounts van Microsoft (Outlook.com, Hotmail, Live) naast elkaar, elk met een eigen login
 
 <img align="right" src="docs/screenshots/tray.png" alt="Tray-menu" width="210">
 
@@ -97,13 +98,13 @@ Tabchat zoekt zelf naar nieuwe versies en downloadt ze op de achtergrond. Staat 
 ## Aan de slag
 
 1. Open Tabchat en klik op **+** (of druk op `Alt+T`).
-2. Voeg de diensten toe die je gebruikt. Elke dienst opent in een eigen tabblad.
+2. Voeg de diensten toe die je gebruikt. Elke dienst opent in een eigen tabblad. Kies bij Teams, Outlook en OneDrive voor **School/werk** of **Privé**.
 3. Log één keer in — Tabchat onthoudt het.
 
 Al het andere — taal, slaapstand, starten bij inloggen, wit tray-icoon — staat in hetzelfde **+**-scherm.
 
 <p align="center">
-  <img src="docs/screenshots/settings.png" alt="Het +-scherm met diensten en instellingen" width="860">
+  <img src="docs/screenshots/settings.png" alt="Het +-scherm: diensten toevoegen, met een keuze tussen school/werk en privé voor Microsoft" width="860">
 </p>
 
 ## Sneltoetsen

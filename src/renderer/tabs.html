@@ -44,6 +44,9 @@
   button.asleep { opacity: .5; }
   button.asleep.active { opacity: 1; }
   .zz { font-size: 12px; }
+  /* School/werk of privé (Microsoft) */
+  .acct { font-size: 11px; padding: 1px 6px; border-radius: 6px; background: rgba(127, 127, 140, .22); color: inherit; }
+  .acct.personal { background: var(--personal-bg); color: var(--personal-text); }
   /* update */
   #update { background: #1f6f43; color: #fff; font-size: 13px; }
   #update:hover { background: #24834f; }
@@ -115,6 +118,12 @@
       dot.className = 'dot';
       dot.style.background = t.color;
       b.append(dot, document.createTextNode(t.label));
+      if (t.tag) {
+        const a = document.createElement('span');
+        a.className = 'acct ' + t.tag;
+        a.textContent = T('acct.' + t.tag);
+        b.append(a);
+      }
       if (typeof t.unread === 'number' && t.unread > 0) {
         const c = document.createElement('span');
         c.className = 'count';

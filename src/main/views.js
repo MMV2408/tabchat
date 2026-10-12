@@ -22,6 +22,16 @@ function labelFor(tab) {
   return same.length > 1 ? `${name} ${same.indexOf(tab) + 1}` : name;
 }
 
+// Labeltje "School/werk" of "Privé" bij Microsoft-tabbladen, alleen als je ze allebei hebt
+function accountOf(tab) {
+  const g = CATALOG[tab.service].group;
+  return g === 'microsoft' ? 'work' : g === 'microsoft-personal' ? 'personal' : '';
+}
+function accountTag(tab) {
+  const kinds = new Set(store.config.tabs.map(accountOf));
+  return kinds.has('work') && kinds.has('personal') ? accountOf(tab) : '';
+}
+
 function getState() {
   const { config, views, active, mutedTabs, closedTabs } = store;
   return {
@@ -34,6 +44,8 @@ function getState() {
       id: t.id,
       service: t.service,
       label: labelFor(t),
+      tag: accountTag(t), // '', 'work' of 'personal'
+      fullLabel: labelFor(t) + (accountTag(t) ? ` (${i18n.t('acct.' + accountTag(t))})` : ''),
       color: CATALOG[t.service].color,
       muted: mutedTabs.has(t.id),
       unread: unread.get(t.id), // aantal, 'dot' of 0
@@ -44,7 +56,7 @@ function getState() {
     browsers: require('./links').browsers().map(b => ({ id: b.id, name: b.name })),
     platform: { kind: require('./platform').kind, storeManaged: require('./platform').storeManaged },
     update: require('./updater').getStatus(),
-    catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, desc: i18n.t('svc.' + id) })),
+    catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, base: s.base || null, desc: i18n.t('svc.' + (s.base || id)) })),
     settings: config.settings
   };
 }

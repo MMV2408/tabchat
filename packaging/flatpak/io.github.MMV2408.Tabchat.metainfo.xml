@@ -21,6 +21,7 @@
       <li>Do not disturb, and it follows the Do not disturb setting of your desktop</li>
       <li>Clicking a notification opens the right tab</li>
       <li>One shared Microsoft sign-in for Teams, Outlook and OneDrive that stays signed in</li>
+      <li>Work/school and personal Microsoft accounts side by side</li>
       <li>Tab sleep: unused tabs are unloaded from memory and return with one click</li>
       <li>Quick search with Ctrl+K and browser-style keyboard shortcuts</li>
       <li>Screen sharing in Discord and Teams, also on Wayland</li>
@@ -59,7 +60,7 @@
       <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/quick-search.png</image>
     </screenshot>
     <screenshot>
-      <caption>Services and settings</caption>
+      <caption>Add services, with a work/school or personal choice for Microsoft</caption>
       <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/settings.png</image>
     </screenshot>
     <screenshot>
@@ -107,6 +108,11 @@
   </requires>
 
   <releases>
+    <release version="1.15.0" date="2026-10-12">
+      <description>
+        <p>Personal Microsoft accounts (Outlook.com, Hotmail, Live) next to work and school accounts, each with its own sign-in.</p>
+      </description>
+    </release>
     <release version="1.14.1" date="2026-10-11">
       <description>
         <p>The Snap Store version no longer shows a loading cursor after clicking a notification.</p>

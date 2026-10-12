@@ -22,6 +22,9 @@
   --slider-off: #4e5058;
   --scroll: #1e1f22;
   --backdrop: rgba(0, 0, 0, .5);
+  --personal-bg: #2c4a37;   /* privé-account (Microsoft) */
+  --personal-hover: #355a43;
+  --personal-text: #bff0cf;
 }
 :root[data-theme="light"] {
     color-scheme: light;
@@ -45,4 +48,7 @@
     --slider-off: #c4c7cc;
     --scroll: #c4c7cc;
     --backdrop: rgba(0, 0, 0, .3);
+    --personal-bg: #d7f2e1;
+    --personal-hover: #c6ebd4;
+    --personal-text: #1d6b3a;
   }

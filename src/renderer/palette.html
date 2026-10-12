@@ -95,13 +95,18 @@
     const present = new Set(s.tabs.map(t => t.service));
 
     s.tabs.forEach((t, i) => out.push({
-      run: { type: 'tab', id: t.id }, title: t.label, sub: T('pal.openTab'),
-      color: t.color, letter: t.label[0], hint: i < 8 ? 'Alt+' + (i + 1) : '', words: t.label
+      run: { type: 'tab', id: t.id }, title: t.fullLabel || t.label, sub: T('pal.openTab'),
+      color: t.color, letter: t.label[0], hint: i < 8 ? 'Alt+' + (i + 1) : '', words: t.fullLabel || t.label
     }));
 
+    // Microsoft: "Outlook (School/werk)" en "Outlook (Privé)"
+    const hasPersonal = (id) => s.catalog.some(x => x.base === id);
+    const cname = (c) => c.base ? `${c.name} (${T('acct.personal')})` : hasPersonal(c.id) ? `${c.name} (${T('acct.work')})` : c.name;
+    const cwords = (c) => c.base ? ' privé personal hotmail live outlook.com' : hasPersonal(c.id) ? ' school werk work' : '';
+
     for (const c of s.catalog) if (!present.has(c.id)) out.push({
-      run: { type: 'add', service: c.id }, title: T('pal.add', { name: c.name }), sub: c.desc,
-      color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen add'
+      run: { type: 'add', service: c.id }, title: T('pal.add', { name: cname(c) }), sub: c.desc,
+      color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen add' + cwords(c)
     });
 
     const action = (id, title, hint, icon, words, allowed = true) => {
@@ -130,8 +135,8 @@
     action('shortcuts', T('pal.shortcuts'), '', '⌨', 'sneltoetsen toetsen shortcuts keys help');
 
     for (const c of s.catalog) if (present.has(c.id)) out.push({
-      run: { type: 'add', service: c.id }, title: T('pal.another', { name: c.name }), sub: T('pal.anotherSub'),
-      color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen account extra another'
+      run: { type: 'add', service: c.id }, title: T('pal.another', { name: cname(c) }), sub: T('pal.anotherSub'),
+      color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen account extra another' + cwords(c)
     });
 
     action('quit', T('pal.quit'), 'Ctrl+Q', '⏻', 'afsluiten quit stoppen exit');

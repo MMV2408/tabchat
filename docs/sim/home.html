@@ -16,7 +16,7 @@
   .sub { margin: 0 0 32px; color: var(--text-muted); }
   h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 32px 0 12px; }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
   .card {
     background: var(--bg-0); border-radius: 12px; padding: 16px;
     display: flex; flex-direction: column; gap: 10px;
@@ -36,6 +36,10 @@
   }
   .add { background: #5865F2; color: #fff; }
   .add:hover { background: #4752c4; }
+  .add.personal { background: var(--personal-bg); color: var(--personal-text); }
+  .add.personal:hover { background: var(--personal-hover); }
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .btns button { white-space: nowrap; padding: 8px 6px; }
   .remove { background: transparent; color: #f23f43; }
   .remove:hover { background: var(--danger-bg); }
 
@@ -324,7 +328,7 @@
       swBox.append(inp, el('span', 'slider'));
       sw.append(T(t.asleep ? 'home.asleepMaySleep' : 'home.maySleep'), swBox);
       sw.title = T('home.sleepTitle');
-      row.append(badge(t.label, t.color), el('div', 'name', t.label), sw, rm);
+      row.append(badge(t.label, t.color), el('div', 'name', t.fullLabel || t.label), sw, rm);
       mine.append(row);
     }
 
@@ -332,13 +336,29 @@
     const cat = document.getElementById('catalog');
     cat.replaceChildren();
     for (const c of s.catalog) {
+      if (c.base) continue; // privé-variant: tweede knop op de kaart van de gewone dienst
+      const personal = s.catalog.find(x => x.base === c.id);
       const card = el('div', 'card');
       const top = el('div', 'top');
       top.append(badge(c.name, c.color), nameWithKey(c.name, c.key));
-      card.title = T('home.addTitle', { k: c.key.toUpperCase() });
-      const add = el('button', 'add', T('home.addBtn'));
-      add.onclick = () => window.tabchat.add(c.id);
-      card.append(top, el('div', 'desc', c.desc), add);
+      card.append(top, el('div', 'desc', c.desc));
+      if (personal) {
+        // Microsoft: school/werk en privé zijn aparte websites met een eigen login
+        const btns = el('div', 'btns');
+        const work = el('button', 'add', T('home.addWork'));
+        work.title = T('home.addWorkTitle', { k: ' · Alt+' + c.key.toUpperCase() });
+        work.onclick = () => window.tabchat.add(c.id);
+        const priv = el('button', 'add personal', T('home.addPersonal'));
+        priv.title = T('home.addPersonalTitle');
+        priv.onclick = () => window.tabchat.add(personal.id);
+        btns.append(work, priv);
+        card.append(btns);
+      } else {
+        card.title = T('home.addTitle', { k: c.key.toUpperCase() });
+        const add = el('button', 'add', T('home.addBtn'));
+        add.onclick = () => window.tabchat.add(c.id);
+        card.append(add);
+      }
       cat.append(card);
     }
 

@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.15.0',
+    nl: ['Privé-accounts van Microsoft (Outlook.com, Hotmail, Live): kies bij Teams, Outlook en OneDrive voor School/werk of Privé. Ze staan naast elkaar, elk met een eigen login'],
+    en: ['Personal Microsoft accounts (Outlook.com, Hotmail, Live): pick Work/school or Personal for Teams, Outlook and OneDrive. They sit side by side, each with its own sign-in']
+  },
+  {
     v: '1.14.1',
     nl: ['Ook in de Snap Store-versie laadt de muis niet meer na een klik op een melding'],
     en: ['The Snap Store version no longer shows a loading cursor after clicking a notification either']

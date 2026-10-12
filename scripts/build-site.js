@@ -31,7 +31,7 @@ const data = {
   version: JSON.parse(src('package.json')).version,
   strings: literal('src/main/i18n.js', 'STRINGS'),
   settings: literal('src/main/config.js', 'DEFAULT_SETTINGS'),
-  catalog: Object.fromEntries(Object.entries(catalog).map(([id, c]) => [id, { name: c.name, key: c.key, color: c.color, awake: !!c.awake }])),
+  catalog: Object.fromEntries(Object.entries(catalog).map(([id, c]) => [id, { name: c.name, key: c.key || null, color: c.color, awake: !!c.awake, base: c.base || null, group: c.group || null }])),
   keys: literal('src/renderer/home.html', 'KEYS'),
   changelog: literal('src/main/changelog.js', 'CHANGELOG')
 };
