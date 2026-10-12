@@ -308,8 +308,14 @@ function revealBar(on) {
 }
 // Mouse off the bar: hide again after a short pause
 function hideBarSoon() {
+  if (store.barHeld) return; // dragging a tab: stay open
   if (hideTimer) return; // already hiding: don't restart every time
   hideTimer = setTimeout(() => { hideTimer = null; revealBar(false); }, 500);
+}
+// While a tab is being dragged, the auto-hidden bar must not disappear
+function holdBar(on) {
+  store.barHeld = !!on;
+  if (on) { cancelHide(); revealBar(true); } else hideBarSoon();
 }
 function cancelHide() {
   clearTimeout(hideTimer);
@@ -379,7 +385,7 @@ function show(id) {
 }
 
 Object.assign(module.exports, {
-  revealBar, hideBarSoon, watchEdge,
+  revealBar, hideBarSoon, holdBar, watchEdge,
   page, whenReady, dropLater,
   getState, broadcast, createServiceView, destroyView, removeForSleep, reloadView, layout, focusActive, show
 });

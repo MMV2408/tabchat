@@ -298,6 +298,7 @@ const STRINGS = {
     'menu.left': 'Naar links',
     'menu.right': 'Naar rechts',
     'menu.close': 'Tabblad sluiten',
+    'menu.duplicate': 'Dupliceren (zelfde login)',
 
     // Microsoft sign-in
     'ms.title': 'Ingelogd blijven bij Microsoft',
@@ -588,6 +589,7 @@ const STRINGS = {
     'menu.left': 'Move left',
     'menu.right': 'Move right',
     'menu.close': 'Close tab',
+    'menu.duplicate': 'Duplicate (same login)',
 
     'ms.title': 'Stay signed in to Microsoft',
     'ms.message': 'Tabchat can remember your Microsoft sign-in',

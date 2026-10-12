@@ -15,14 +15,16 @@ const { t } = require('./i18n');
 // ---------- which storage (login) a tab uses ----------
 // With "One Microsoft account", Teams, Outlook and OneDrive share the same storage.
 // Second accounts (e.g. "outlook-2") share with "onedrive-2" etc.
+// A duplicated tab has `login`: the id of the tab whose login it shares.
 function partitionFor(tab) {
-  if (tab.temp) return 'temp-' + tab.id; // incognito: in memory only, gone after closing
+  const id = tab.login || tab.id;
+  if (tab.temp) return 'temp-' + id; // incognito: in memory only, gone after closing
   const group = CATALOG[tab.service].group;
   if (group && store.config.settings.shareMicrosoft) {
-    const suffix = tab.id.slice(tab.service.length); // '' or '-2'
+    const suffix = id.slice(tab.service.length); // '' or '-2'
     return 'persist:' + group + suffix;
   }
-  return 'persist:' + tab.id;
+  return 'persist:' + id;
 }
 
 // ---------- signing in one after another ----------

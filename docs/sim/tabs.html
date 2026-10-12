@@ -216,15 +216,15 @@
       b.onmousedown = (e) => { if (e.button === 0) window.tabchat.open(t.id); };
       b.oncontextmenu = (e) => { e.preventDefault(); window.tabchat.tabMenu(t.id); };
 
-      // Drag to move
       b.draggable = true;
       b.ondragstart = (e) => {
         dragId = t.id;
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', t.id);
         b.classList.add('dragging');
+        window.tabchat.barHold(true);
       };
-      b.ondragend = () => { dragId = null; b.classList.remove('dragging'); clearDrop(); };
+      b.ondragend = () => { dragId = null; b.classList.remove('dragging'); clearDrop(); window.tabchat.barHold(false); };
       dropTarget(b, i, i + 1);
 
       strip.append(b);

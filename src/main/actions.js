@@ -73,7 +73,7 @@ function updateCustom(id, data) {
   config.save();
   for (const tab of store.config.tabs) {
     if (tab.service !== id || !store.views[tab.id]) continue;
-    if (schoolChanged) { views.destroyView(tab.id); views.createServiceView(tab); } // different login
+    if (schoolChanged) { views.destroyView(tab.id); views.createServiceView(tab); }
     else if (urlChanged) store.views[tab.id].webContents.loadURL(c.url);
   }
   views.layout();
@@ -103,7 +103,7 @@ function closeTab(id = store.active) {
   const i = tabs.findIndex(t => t.id === id);
   if (i < 0) return;
   const closing = tabs[i];
-  if (!closing.temp) store.closedTabs.push({ tab: { ...closing }, index: i }); // incognito doesn't come back
+  if (!closing.temp) store.closedTabs.push({ tab: { ...closing }, index: i });
   tabs.splice(i, 1);
   config.save();
   views.destroyView(id);
@@ -121,9 +121,27 @@ function reopenTab() {
   const closed = store.closedTabs.pop();
   if (!closed) return;
   const tab = closed.tab;
-  if (store.config.tabs.some(t => t.id === tab.id)) tab.id = nextId(tab.service);
+  if (store.config.tabs.some(t => t.id === tab.id)) {
+    tab.login = tab.login || tab.id; // new id, same login
+    tab.id = nextId(tab.service);
+  }
   store.config.tabs.splice(Math.min(closed.index, store.config.tabs.length), 0, tab);
   config.save();
+  views.createServiceView(tab);
+  views.show(tab.id);
+}
+
+// Duplicate: a second tab of the same service with the same login, right after the original
+function duplicateTab(id) {
+  const tabs = store.config.tabs;
+  const i = tabs.findIndex(t => t.id === id);
+  if (i < 0) return;
+  const src = tabs[i];
+  const tab = { id: nextId(src.service), service: src.service, login: src.login || src.id };
+  if (src.url) tab.url = src.url;
+  if (src.temp) tab.temp = true;
+  tabs.splice(i + 1, 0, tab);
+  if (!tab.temp) config.save();
   views.createServiceView(tab);
   views.show(tab.id);
 }
@@ -283,7 +301,7 @@ function setSetting(key, value) {
       delete tab.url;
       if (store.views[tab.id]) store.views[tab.id].webContents.loadURL(urlFor(tab));
     }
-    require('./icons').refresh(); // logo of the new school
+    require('./icons').refresh();
   }
   if (key === 'tabBar') { store.barRevealed = false; views.layout(); views.watchEdge(); }
   if (key === 'runInBackground') require('./tray').sync();
@@ -321,7 +339,7 @@ function relaunch() {
 }
 
 Object.assign(module.exports, {
-  relaunch,
+  relaunch, duplicateTab,
   addTab, closeTab, reopenTab, removeTab, addCustom, updateCustom, removeCustom,
   moveTab, reorderTab, cycle, goToIndex,
   reload, reloadAll, toggleMute, zoom, navigate, sleepNow,

@@ -18,6 +18,7 @@ function showTabMenu(id) {
   if (i < 0) return;
   Menu.buildFromTemplate([
     { label: t('menu.reload'), accelerator: 'F5', click: () => actions.reload(id) },
+    { label: t('menu.duplicate'), click: () => actions.duplicateTab(id) },
     { label: t(store.mutedTabs.has(id) ? 'menu.unmute' : 'menu.mute'), accelerator: 'Alt+M', click: () => actions.toggleMute(id) },
     { type: 'separator' },
     { label: t('menu.sleepNow'), enabled: !sleep.isAsleep(id), click: () => actions.sleepNow(id) },
@@ -32,9 +33,8 @@ function showTabMenu(id) {
 
 function register() {
   ipcMain.handle('get-state', () => views.getState());
-  ipcMain.handle('get-strings', () => i18n.strings()); // texts in the chosen language
+  ipcMain.handle('get-strings', () => i18n.strings());
 
-  // tabs
   ipcMain.on('open', (_e, id) => { if (id === 'home' || store.config.tabs.some(t => t.id === id)) views.show(id); });
   ipcMain.on('tab-sleep', (_e, id, allowed) => sleep.setAllowed(id, allowed));
   ipcMain.on('add', (_e, service, url) => actions.addTab(service, url));
@@ -48,8 +48,8 @@ function register() {
   // Auto-hide tab bar: mouse at the top edge / off the bar
   ipcMain.on('bar-edge', () => views.revealBar(true));
   ipcMain.on('bar-hover', (_e, inside) => { if (inside) views.revealBar(true); else views.hideBarSoon(); });
+  ipcMain.on('bar-hold', (_e, on) => views.holdBar(on)); // keep the auto-hidden bar open while dragging a tab
   ipcMain.handle('check-url', (_e, url) => require('./brightspace').check(url));
-  // Your own websites
   ipcMain.handle('check-site', (_e, url) => require('./custom').check(url));
   ipcMain.on('custom-add', (_e, data, temp) => actions.addCustom(data, temp));
   ipcMain.on('custom-update', (_e, id, data) => actions.updateCustom(id, data));
@@ -59,7 +59,6 @@ function register() {
   ipcMain.on('reorder', (_e, id, to) => actions.reorderTab(id, to));
   ipcMain.on('tab-menu', (_e, id) => showTabMenu(id));
 
-  // settings
   ipcMain.on('set-setting', (_e, key, value) => actions.setSetting(key, value));
 
   // unread: badge count of a service (see preload/service.js)
@@ -68,11 +67,9 @@ function register() {
     if (id) unread.setBadge(id, n);
   });
 
-  // do not disturb
   ipcMain.on('get-dnd', (e) => { e.returnValue = dnd.isOn(); }); // asked by preload/service.js
   ipcMain.on('set-dnd', (_e, mode) => dnd.set(mode));
 
-  // updates
   ipcMain.on('update-check', () => require('./updater').check());
   ipcMain.on('update-install', () => require('./updater').install());
   ipcMain.on('donate-open', () => require('./donate').open());
@@ -108,11 +105,9 @@ function register() {
     views.show(id);
   });
 
-  // screen sharing
   ipcMain.on('share-pick', (_e, id) => require('./share').pick(id));
   ipcMain.on('share-cancel', () => require('./share').cancel());
 
-  // quick search
   ipcMain.on('palette-close', () => palette.hide());
   ipcMain.on('relaunch', () => actions.relaunch());
   ipcMain.on('palette-run', (_e, item) => palette.run(item));
