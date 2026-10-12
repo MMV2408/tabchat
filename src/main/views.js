@@ -47,8 +47,8 @@ function getState() {
       id: t.id,
       service: t.service,
       label: labelFor(t),
-      tag: accountTag(t), // '', 'work' of 'personal'
-      fullLabel: labelFor(t) + (accountTag(t) ? ` (${i18n.t('acct.' + accountTag(t))})` : ''),
+      tag: t.temp ? 'temp' : accountTag(t), // '', 'work', 'personal' of 'temp' (incognito)
+      fullLabel: labelFor(t) + (t.temp ? ` (${i18n.t('acct.temp')})` : accountTag(t) ? ` (${i18n.t('acct.' + accountTag(t))})` : ''),
       color: CATALOG[t.service].color,
       muted: mutedTabs.has(t.id),
       unread: unread.get(t.id), // aantal, 'dot' of 0
@@ -59,7 +59,12 @@ function getState() {
     browsers: require('./links').browsers().map(b => ({ id: b.id, name: b.name })),
     platform: { kind: require('./platform').kind, storeManaged: require('./platform').storeManaged },
     update: require('./updater').getStatus(),
-    catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, base: s.base || null, askUrl: !!s.askUrl, desc: i18n.t('svc.' + (s.base || id)) })),
+    catalog: Object.entries(CATALOG).filter(([, s]) => !s.temp).map(([id, s]) => ({
+      id, name: s.name, key: s.key || '', color: s.color, base: s.base || null, askUrl: !!s.askUrl,
+      custom: !!s.custom, icon: s.icon || null, school: s.group === 'microsoft',
+      url: s.custom ? s.url : null,
+      desc: s.custom ? s.desc : i18n.t('svc.' + (s.base || id))
+    })),
     settings: config.settings,
     maximized: store.win ? store.win.isMaximized() : false
   };

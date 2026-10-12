@@ -110,6 +110,11 @@
   </requires>
 
   <releases>
+    <release version="1.19.0" date="2026-10-12">
+      <description>
+        <p>Add any website as a tab, open a site once in incognito, hide built-in services and reorder the cards by dragging.</p>
+      </description>
+    </release>
     <release version="1.18.0" date="2026-10-12">
       <description>
         <p>The tab bar is now the title bar, with a compact and an auto-hide option.</p>

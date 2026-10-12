@@ -16,9 +16,10 @@ function nextId(service) {
   return id;
 }
 
-function addTab(service, url) {
+function addTab(service, url, opts = {}) {
   if (!CATALOG[service]) return;
   const tab = { id: nextId(service), service };
+  if (opts.temp) tab.temp = true;
   const svc = CATALOG[service];
   if (svc.askUrl) {
     // Adres verschilt per school: het adres uit de instellingen, anders eerst vragen
@@ -41,15 +42,71 @@ function addTab(service, url) {
   if (CATALOG[service].group && !store.config.loginNoticeShown) microsoft.showLoginNotice();
 }
 
+// ---------- eigen websites (zie custom.js) ----------
+function addCustom(data, temp) {
+  const custom = require('./custom');
+  const c = custom.clean(data);
+  if (!c) return;
+  if (temp) {
+    // Incognito: alleen dit ene tabblad, niets bewaren
+    const id = custom.newId('temp');
+    custom.register({ id, ...c, school: false, temp: true });
+    return addTab(id, null, { temp: true });
+  }
+  const id = custom.newId('custom');
+  store.config.custom.push({ id, ...c });
+  custom.register({ id, ...c });
+  config.save();
+  addTab(id);
+}
+
+function updateCustom(id, data) {
+  const custom = require('./custom');
+  const entry = store.config.custom.find(x => x.id === id);
+  const c = custom.clean(data);
+  if (!entry || !c) return;
+  const urlChanged = entry.url !== c.url;
+  const schoolChanged = !!entry.school !== c.school;
+  Object.assign(entry, c);
+  custom.register(entry);
+  config.save();
+  for (const tab of store.config.tabs) {
+    if (tab.service !== id || !store.views[tab.id]) continue;
+    if (schoolChanged) { views.destroyView(tab.id); views.createServiceView(tab); } // andere login
+    else if (urlChanged) store.views[tab.id].webContents.loadURL(c.url);
+  }
+  views.layout();
+  views.broadcast();
+}
+
+async function removeCustom(id) {
+  for (const tab of store.config.tabs.filter(t => t.service === id)) await removeTab(tab.id);
+  store.config.custom = store.config.custom.filter(x => x.id !== id);
+  store.config.settings.cardOrder = (store.config.settings.cardOrder || []).filter(x => x !== id);
+  require('./custom').unregister(id);
+  config.save();
+  views.broadcast();
+}
+
+// Incognito-tabblad dicht: dienst en tijdelijke opslag opruimen
+function forgetTemp(tab) {
+  if (!tab.temp) return;
+  if (store.config.tabs.some(t => t.service === tab.service)) return;
+  require('./custom').unregister(tab.service);
+  session.fromPartition(microsoft.partitionFor(tab)).clearStorageData().catch(() => {});
+}
+
 // Sluiten: tabblad weg, maar login blijft bewaard (dus snel weer toe te voegen)
 function closeTab(id = store.active) {
   const tabs = store.config.tabs;
   const i = tabs.findIndex(t => t.id === id);
   if (i < 0) return;
-  store.closedTabs.push({ tab: { ...tabs[i] }, index: i });
+  const closing = tabs[i];
+  if (!closing.temp) store.closedTabs.push({ tab: { ...closing }, index: i }); // incognito komt niet terug
   tabs.splice(i, 1);
   config.save();
   views.destroyView(id);
+  forgetTemp(closing);
   if (store.lastTab === id) store.lastTab = null;
   if (store.active === id) {
     const next = tabs[i] || tabs[i - 1];
@@ -76,9 +133,11 @@ async function removeTab(id) {
   const i = tabs.findIndex(t => t.id === id);
   if (i < 0) return;
   const part = microsoft.partitionFor(tabs[i]);
+  const removed = tabs[i];
   tabs.splice(i, 1);
   config.save();
   views.destroyView(id);
+  forgetTemp(removed);
   if (store.lastTab === id) store.lastTab = null;
   // Login wissen, tenzij een ander tabblad dezelfde login gebruikt
   if (!tabs.some(t => microsoft.partitionFor(t) === part)) {
@@ -196,6 +255,9 @@ function showShortcuts() {
 
 function setSetting(key, value) {
   if (!(key in config.DEFAULT_SETTINGS)) return;
+  if (key === 'hiddenServices' || key === 'cardOrder') {
+    value = Array.isArray(value) ? [...new Set(value.filter(x => typeof x === 'string' && CATALOG[x]))] : [];
+  }
   store.config.settings[key] = value;
   config.save();
   if (key === 'spellcheck') {
@@ -220,6 +282,7 @@ function setSetting(key, value) {
       delete tab.url;
       if (store.views[tab.id]) store.views[tab.id].webContents.loadURL(urlFor(tab));
     }
+    require('./icons').refresh(); // logo van de nieuwe school
   }
   if (key === 'tabBar') { store.barRevealed = false; views.layout(); views.watchEdge(); }
   if (key === 'runInBackground') require('./tray').sync();
@@ -250,7 +313,7 @@ async function quit() {
 }
 
 Object.assign(module.exports, {
-  addTab, closeTab, reopenTab, removeTab,
+  addTab, closeTab, reopenTab, removeTab, addCustom, updateCustom, removeCustom,
   moveTab, reorderTab, cycle, goToIndex,
   reload, reloadAll, toggleMute, zoom, navigate, sleepNow,
   back, toggleFullScreen, showShortcuts, setSetting, quit, flushLogins

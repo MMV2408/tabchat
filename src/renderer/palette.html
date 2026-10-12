@@ -104,7 +104,8 @@
     const cname = (c) => c.base ? `${c.name} (${T('acct.personal')})` : hasPersonal(c.id) ? `${c.name} (${T('acct.work')})` : c.name;
     const cwords = (c) => c.base ? ' privé personal hotmail live outlook.com' : hasPersonal(c.id) ? ' school werk work' : '';
 
-    for (const c of s.catalog) if (!present.has(c.id)) out.push({
+    const hidden = new Set((s.settings && s.settings.hiddenServices) || []);
+    for (const c of s.catalog) if (!present.has(c.id) && !hidden.has(c.id) && !hidden.has(c.base)) out.push({
       run: { type: 'add', service: c.id }, title: T('pal.add', { name: cname(c) }), sub: c.desc,
       color: c.color, letter: c.name[0], hint: '', words: c.name + ' toevoegen add' + cwords(c)
     });

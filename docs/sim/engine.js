@@ -78,7 +78,7 @@
       const same = tabs.filter(x => x.service === t.service);
       const name = D.catalog[t.service].name;
       const label = same.length > 1 ? `${name} ${same.indexOf(t) + 1}` : name;
-      const tag = both ? acct(t) : '';
+      const tag = t.temp ? 'temp' : both ? acct(t) : '';
       return { ...t, label, tag, fullLabel: label + (tag ? ` (${T('acct.' + tag)})` : ''), color: D.catalog[t.service].color };
     });
   }
@@ -99,7 +99,7 @@
   function snapshot() {
     return JSON.parse(JSON.stringify({
       tabs: labeled(), active,
-      catalog: Object.entries(D.catalog).map(([id, c]) => ({ id, name: c.name, key: c.key, color: c.color, base: c.base, askUrl: c.askUrl, desc: T('svc.' + (c.base || id)) })),
+      catalog: Object.entries(D.catalog).filter(([, c]) => !c.temp).map(([id, c]) => ({ id, name: c.name, key: c.key, color: c.color, base: c.base, askUrl: c.askUrl, custom: !!c.custom, icon: c.icon || null, school: !!c.school, url: c.url, desc: c.custom ? c.desc : T('svc.' + (c.base || id)) })),
       settings, dnd: dndState(),
       update: { state: upd, current: D.version, version: D.version },
       platform: { kind: 'deb', storeManaged: false },
@@ -146,8 +146,34 @@
         await new Promise(r => setTimeout(r, 600)); // even "controleren"
         return { status: 'ok', url: (/^https?:/i.test(s) ? s : 'https://' + s).replace(/\/?$/, '/') };
       },
+      checkSite: async (u) => {
+        const s = String(u || '').trim();
+        if (!/^(https?:\/\/)?[^\s/]+\.[^\s/]{2,}/i.test(s)) return { status: 'invalid', url: null };
+        await new Promise(r => setTimeout(r, 500));
+        const url = (/^https?:/i.test(s) ? s : 'https://' + s).replace(/\/?$/, '/');
+        const host = new URL(url).hostname.replace(/^www\./, '');
+        const title = host.split('.')[0].replace(/^./, x => x.toUpperCase());
+        return { status: /google\./.test(host) ? 'google' : 'ok', url, title, icon: null };
+      },
+      addCustom: (data, temp) => {
+        const id = (temp ? 'temp-' : 'custom-') + Math.random().toString(36).slice(2, 8);
+        let desc = ''; try { desc = new URL(data.url).hostname.replace(/^www\./, ''); } catch {}
+        D.catalog[id] = { name: data.name, color: data.color, icon: data.icon, url: data.url, custom: true, temp: !!temp, school: !temp && data.school, desc, awake: false };
+        const t = tab(id, temp ? { temp: true } : {}); tabs.push(t); open(t.id);
+      },
+      updateCustom: (id, data) => { const c = D.catalog[id]; if (c) { Object.assign(c, { name: data.name, color: data.color, icon: data.icon, url: data.url, school: data.school }); emit(); } },
+      removeCustom: (id) => {
+        tabs = tabs.filter(t => t.service !== id);
+        delete D.catalog[id];
+        settings.cardOrder = (settings.cardOrder || []).filter(x => x !== id);
+        if (!tabs.some(t => t.id === lastTab)) lastTab = tabs[0] ? tabs[0].id : null;
+        if (!tabs.some(t => t.id === active)) active = 'home';
+        emit();
+      },
       remove: (id) => {
+        const gone = tabs.find(t => t.id === id);
         tabs = tabs.filter(t => t.id !== id);
+        if (gone && gone.temp && !tabs.some(t => t.service === gone.service)) delete D.catalog[gone.service];
         if (lastTab === id) lastTab = tabs[0] ? tabs[0].id : null;
         if (active === id) active = 'home';
         emit();

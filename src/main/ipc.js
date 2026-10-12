@@ -49,6 +49,11 @@ function register() {
   ipcMain.on('bar-edge', () => views.revealBar(true));
   ipcMain.on('bar-hover', (_e, inside) => { if (inside) views.revealBar(true); else views.hideBarSoon(); });
   ipcMain.handle('check-url', (_e, url) => require('./brightspace').check(url));
+  // Eigen websites
+  ipcMain.handle('check-site', (_e, url) => require('./custom').check(url));
+  ipcMain.on('custom-add', (_e, data, temp) => actions.addCustom(data, temp));
+  ipcMain.on('custom-update', (_e, id, data) => actions.updateCustom(id, data));
+  ipcMain.on('custom-remove', (_e, id) => actions.removeCustom(id));
   ipcMain.on('remove', (_e, id) => actions.removeTab(id));
   ipcMain.on('back', () => actions.back());
   ipcMain.on('reorder', (_e, id, to) => actions.reorderTab(id, to));

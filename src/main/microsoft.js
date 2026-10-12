@@ -15,6 +15,7 @@ const { t } = require('./i18n');
 // Met "Eén Microsoft-account" delen Teams, Outlook en OneDrive dezelfde opslag.
 // Tweede accounts (bv. "outlook-2") delen met "onedrive-2" enz.
 function partitionFor(tab) {
+  if (tab.temp) return 'temp-' + tab.id; // incognito: alleen in het geheugen, weg na sluiten
   const group = CATALOG[tab.service].group;
   if (group && store.config.settings.shareMicrosoft) {
     const suffix = tab.id.slice(tab.service.length); // '' of '-2'

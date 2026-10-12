@@ -2,6 +2,16 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.19.0',
+    nl: ['Eigen websites: voeg elke website toe als tabblad, met naam, icoon en kleur. Ze krijgen het label Eigen en je wijzigt ze met ✎',
+         'Incognito: open een website één keer, zonder dat er iets bewaard blijft',
+         'Kies zelf welke vaste diensten je ziet (Diensten kiezen) en sleep de kaarten in je eigen volgorde',
+         'Echte logo\'s op de kaarten in het +-scherm'],
+    en: ['Your own websites: add any website as a tab, with its own name, icon and color. They get an Own label and you edit them with ✎',
+         'Incognito: open a website once, without anything being saved',
+         'Choose which built-in services you see (Choose services) and drag the cards into your own order']
+  },
+  {
     v: '1.18.0',
     nl: ['Strakker venster: de tabbalk is nu de titelbalk (slepen, − □ ✕), dus de aparte Ubuntu-balk is weg',
          'Tabbalk compact (alleen icoontjes) of automatisch verbergen: hij verschijnt als je de muis naar boven beweegt of op Alt drukt (+ scherm → Tabbalk)'],

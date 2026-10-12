@@ -39,6 +39,8 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 - 👥 Meerdere accounts van dezelfde dienst, elk met een eigen login
 - ↔️ Tabbladen verslepen, rechtsklik voor meer opties
 - 🔐 Eén gedeelde Microsoft-login voor Teams, Outlook en OneDrive (ook voor school- en werkaccounts), en je **blijft ingelogd** na een herstart
+- 🌐 **Eigen websites** als tabblad (naam, icoon en kleur), of open er één keer een **incognito**
+- 🧩 Verberg de vaste diensten die je niet gebruikt en sleep de kaarten in je eigen volgorde
 - 🎓 **Brightspace** van je school (elke school: je vult het adres in), ingelogd met hetzelfde schoolaccount als Teams en Outlook
 - 🏫 School-/werkaccounts en **privé**-accounts van Microsoft (Outlook.com, Hotmail, Live) naast elkaar, elk met een eigen login
 

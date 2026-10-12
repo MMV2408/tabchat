@@ -23,7 +23,9 @@ const DEFAULT_SETTINGS = {
   theme: 'system',       // 'system', 'dark' of 'light'
   openLinks: 'default',  // 'default', 'internal' of een browser-id (bv. 'firefox')
   brightspaceUrl: '',    // Brightspace van je school (één keer invullen in het +-scherm)
-  tabBar: 'normal'       // 'normal', 'compact' (alleen icoontjes) of 'autohide' (verschijnt bovenaan bij de muis)
+  tabBar: 'normal',      // 'normal', 'compact' (alleen icoontjes) of 'autohide' (verschijnt bovenaan bij de muis)
+  hiddenServices: [],    // vaste diensten die je uit het +-scherm hebt gehaald
+  cardOrder: []          // volgorde van de kaarten in het +-scherm (versleept)
 };
 
 function configFile() {
@@ -33,6 +35,7 @@ function configFile() {
 function load() {
   try {
     const c = JSON.parse(fs.readFileSync(configFile(), 'utf8'));
+    require('./custom').registerAll(c.custom); // eigen websites eerst, anders vallen hun tabbladen weg
     return {
       tabs: Array.isArray(c.tabs) ? c.tabs.filter(t => CATALOG[t.service]) : [],
       settings: { ...DEFAULT_SETTINGS, ...(c.settings || {}) },
@@ -43,17 +46,21 @@ function load() {
       donateNever: !!c.donateNever,
       donateAskedAt: c.donateAskedAt || null,
       firstUse: c.firstUse || null,
-      feedback: c.feedback || null
+      feedback: c.feedback || null,
+      custom: Array.isArray(c.custom) ? c.custom : [],
+      icons: c.icons && typeof c.icons === 'object' ? c.icons : {}
     };
   } catch {
     // Geen of kapot bestand: met een lege app beginnen
-    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null, lastVersion: null, donateNever: false };
+    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null, lastVersion: null, donateNever: false, custom: [], icons: {} };
   }
 }
 
 function save() {
   try {
-    fs.writeFileSync(configFile(), JSON.stringify(store.config, null, 2));
+    // Incognito-tabbladen worden nooit bewaard
+    const data = { ...store.config, tabs: store.config.tabs.filter(t => !t.temp) };
+    fs.writeFileSync(configFile(), JSON.stringify(data, null, 2));
   } catch (err) {
     console.error('Kon instellingen niet opslaan:', err);
   }

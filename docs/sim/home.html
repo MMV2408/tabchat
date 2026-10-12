@@ -11,7 +11,7 @@
     color: var(--text);
     font-family: system-ui, sans-serif;
   }
-  main { max-width: 860px; margin: 0 auto; padding: 32px 24px 48px; }
+  main { max-width: 1000px; margin: 0 auto; padding: 32px 24px 48px; }
   h1 { margin: 0 0 4px; font-size: 26px; color: var(--text-strong); }
   .sub { margin: 0 0 32px; color: var(--text-muted); }
   h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin: 32px 0 12px; }
@@ -41,6 +41,43 @@
   .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .btns button { white-space: nowrap; padding: 8px 6px; }
   .remove { background: transparent; color: #f23f43; }
+  /* kaarten: versleepbaar, eigen websites met label en ✎ */
+  .card { position: relative; }
+  .card[draggable="true"] { cursor: grab; }
+  .card.dragging { opacity: .4; }
+  .card.drop-before { box-shadow: inset 3px 0 0 #5865F2; }
+  .card.drop-after { box-shadow: inset -3px 0 0 #5865F2; }
+  .badge img { width: 24px; height: 24px; border-radius: 5px; object-fit: contain; }
+  .badge.has-icon { background: #fff !important; }
+  .own { position: absolute; top: -9px; right: 12px; background: #f0b232; color: #1b1300; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .editbtn { width: 28px; height: 28px; padding: 0; border-radius: 7px; background: var(--bg-1); color: var(--text-muted); flex-shrink: 0; }
+  .editbtn:hover { background: var(--bg-2); color: var(--text-strong); }
+  .card.addown { border: 2px dashed var(--bg-3); background: transparent; align-items: center; justify-content: center; text-align: center; cursor: pointer; min-height: 150px; }
+  .card.addown:hover { border-color: #5865F2; }
+  .card.addown .plus { width: 44px; height: 44px; border-radius: 12px; background: var(--bg-0); display: grid; place-items: center; font-size: 26px; color: var(--text-strong); }
+  .cathead { display: flex; align-items: baseline; gap: 12px; }
+  .cathead h2 { flex: 1; }
+  .linkbtn { background: none; padding: 0; color: var(--text-muted); font-size: 13px; }
+  .linkbtn:hover { color: var(--text-strong); text-decoration: underline; }
+  /* formulier eigen website */
+  .field-label { display: block; font-size: 13px; color: var(--text-muted); margin: 14px 0 6px; }
+  .seg { display: flex; gap: 6px; }
+  .seg button { flex: 1; background: var(--bg-1); color: var(--text); padding: 9px; }
+  .seg button.on { background: #5865F2; color: #fff; }
+  .seg button:disabled { opacity: .4; cursor: not-allowed; }
+  .dots { display: flex; gap: 10px; align-items: center; }
+  .dots button { width: 26px; height: 26px; border-radius: 50%; padding: 0; }
+  .dots button.on { outline: 2px solid var(--text-strong); outline-offset: 2px; }
+  .inc { display: flex; align-items: center; gap: 14px; margin-top: 16px; background: var(--bg-1); border-radius: 10px; padding: 12px 14px; }
+  .inc .text { flex: 1; } .inc .name { font-size: 14px; } .inc .desc { min-height: 0; margin-top: 2px; }
+  .sheet .foot { display: flex; align-items: center; gap: 8px; margin: 18px 0 12px; }
+  .sheet .foot .grow { flex: 1; }
+  .site-icon { width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0; object-fit: contain; background: #fff; }
+  .urlwrap { display: flex; align-items: center; gap: 10px; }
+  .urlwrap .ask-input { margin: 0; }
+  .svcrow { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--bg-1); }
+  .svcrow:last-child { border-bottom: none; }
+  .svcrow .name { flex: 1; }
   .remove:hover { background: var(--danger-bg); }
 
   .row {
@@ -84,8 +121,8 @@
   .wn-foot { display: flex; justify-content: flex-end; margin: 20px 0 12px; }
   .about .links { display: flex; gap: 14px; margin-top: 4px; }
   .about .links .donate { margin-top: 0; }
-  #modal, #wn, #ask { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
-  #modal.open, #wn.open, #ask.open { display: flex; }
+  #modal, #wn, #ask, #site, #svcs { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
+  #modal.open, #wn.open, #ask.open, #site.open, #svcs.open { display: flex; }
   /* adres vragen (Brightspace van je school) */
   .ask-input { width: 100%; margin: 14px 0 6px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--bg-3); background: var(--bg-1); color: var(--text); font: inherit; font-size: 15px; }
   .ask-input:focus { outline: 2px solid #5865F2; border-color: transparent; }
@@ -136,7 +173,10 @@
   <h2 data-i18n="home.mine"></h2>
   <div id="mine"></div>
 
-  <h2><span data-i18n="home.add"></span> <span class="hint" data-i18n="home.addHint"></span></h2>
+  <div class="cathead">
+    <h2><span data-i18n="home.add"></span> <span class="hint" data-i18n="home.addHint"></span></h2>
+    <button class="linkbtn" id="chooseSvc" data-i18n="home.chooseSvc"></button>
+  </div>
   <div class="grid" id="catalog"></div>
 
   <h2><span data-i18n="home.dnd"></span> <span class="hint" data-i18n="home.dndHint"></span></h2>
@@ -174,6 +214,41 @@
     <div class="urlstatus" id="askStatus"></div>
     <div class="ask-err" id="askErr"></div>
     <div class="ask-foot"><button class="dndbtn" id="askCancel" data-i18n="ask.cancel"></button><button class="add" id="askOk" data-i18n="ask.add"></button></div>
+  </div>
+</div>
+
+<div id="site">
+  <div class="sheet" role="dialog">
+    <div class="sheet-head"><h3 id="siteTitle"></h3><button class="close" id="siteClose" data-i18n-title="keys.close">✕</button></div>
+    <p class="wn-sub" data-i18n="site.sub"></p>
+    <label class="field-label" for="siteName" data-i18n="site.name"></label>
+    <input class="ask-input" id="siteName" data-i18n-placeholder="site.namePh" maxlength="30" style="margin:0">
+    <label class="field-label" for="siteUrl" data-i18n="site.url"></label>
+    <div class="urlwrap"><img class="site-icon" id="siteIcon" alt="" hidden><input class="ask-input" id="siteUrl" type="url" spellcheck="false" data-i18n-placeholder="site.urlPh"></div>
+    <div class="urlstatus" id="siteStatus"></div>
+    <label class="field-label" data-i18n="site.signin"></label>
+    <div class="seg" id="siteLogin"><button data-v="own" data-i18n="site.own"></button><button data-v="school" data-i18n="site.school"></button></div>
+    <label class="field-label" data-i18n="site.color"></label>
+    <div class="dots" id="siteColors"></div>
+    <div class="inc" id="siteInc">
+      <div class="text"><div class="name" data-i18n="site.incognito"></div><div class="desc" data-i18n="site.incognitoDesc"></div></div>
+      <label class="switch"><input type="checkbox" id="siteTemp"><span class="slider"></span></label>
+    </div>
+    <div class="foot">
+      <button class="remove" id="siteDelete" data-i18n="site.delete"></button>
+      <span class="grow"></span>
+      <button class="dndbtn" id="siteCancel" data-i18n="ask.cancel"></button>
+      <button class="add" id="siteOk"></button>
+    </div>
+  </div>
+</div>
+
+<div id="svcs">
+  <div class="sheet" role="dialog">
+    <div class="sheet-head"><h3 data-i18n="svc.title"></h3><button class="close" id="svcsClose" data-i18n-title="keys.close">✕</button></div>
+    <p class="wn-sub" data-i18n="svc.sub"></p>
+    <div id="svcList"></div>
+    <div class="wn-foot"><button class="add" id="svcsOk" data-i18n="wn.ok"></button></div>
   </div>
 </div>
 
@@ -235,7 +310,7 @@
   // Naam met de sneltoets-letter onderstreept, bv. O<u>n</u>eDrive
   function nameWithKey(name, key) {
     const div = el('div', 'name');
-    const i = name.toLowerCase().indexOf(key);
+    const i = key ? name.toLowerCase().indexOf(key) : -1; // geen sneltoets: niets onderstrepen
     if (i < 0) { div.textContent = name; return div; }
     div.append(name.slice(0, i), el('u', null, name[i]), name.slice(i + 1));
     return div;
@@ -377,10 +452,194 @@
   ask.onclick = (e) => { if (e.target === ask) closeAsk(); };
   window.tabchat.onAskUrl(openAsk);
 
+  // ---------- kaarten in het +-scherm: volgorde, verbergen, eigen websites ----------
+  let lastState = null;
+  const hiddenSet = (s) => new Set((s.settings && s.settings.hiddenServices) || []);
+  function visibleCards(s) {
+    const hidden = hiddenSet(s);
+    const order = (s.settings && s.settings.cardOrder) || [];
+    const cards = s.catalog.filter(c => !c.base && !hidden.has(c.id));
+    const pos = (c, i) => { const k = order.indexOf(c.id); return k < 0 ? 1000 + i : k; };
+    return cards.map((c, i) => [c, pos(c, i)]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+  }
+  function iconBadge(c) {
+    const b = el('div', 'badge has-icon');
+    const img = document.createElement('img');
+    img.src = c.icon;
+    img.alt = '';
+    img.onerror = () => { b.replaceWith(badge(c.name, c.color)); };
+    b.append(img);
+    return b;
+  }
+
+  // Slepen om de volgorde van de kaarten te veranderen
+  let dragCard = null;
+  function makeDraggable(card, id) {
+    card.draggable = true;
+    card.ondragstart = (e) => { dragCard = id; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', id); };
+    card.ondragend = () => { dragCard = null; card.classList.remove('dragging'); clearCardDrop(); };
+    card.ondragover = (e) => {
+      if (!dragCard || dragCard === id) return;
+      e.preventDefault();
+      const r = card.getBoundingClientRect();
+      clearCardDrop();
+      card.classList.add(e.clientX > r.left + r.width / 2 ? 'drop-after' : 'drop-before');
+    };
+    card.ondragleave = () => card.classList.remove('drop-before', 'drop-after');
+    card.ondrop = (e) => {
+      e.preventDefault();
+      if (!dragCard || dragCard === id || !lastState) return;
+      const after = card.classList.contains('drop-after');
+      clearCardDrop();
+      const ids = visibleCards(lastState).map(c => c.id).filter(x => x !== dragCard);
+      ids.splice(ids.indexOf(id) + (after ? 1 : 0), 0, dragCard);
+      window.tabchat.setSetting('cardOrder', ids);
+    };
+  }
+  function clearCardDrop() {
+    document.querySelectorAll('.card.drop-before, .card.drop-after').forEach(c => c.classList.remove('drop-before', 'drop-after'));
+  }
+
+  // ---------- diensten kiezen (vaste diensten tonen/verbergen) ----------
+  const svcs = document.getElementById('svcs');
+  function openSvcs() {
+    if (!lastState) return;
+    const list = document.getElementById('svcList');
+    list.replaceChildren();
+    const hidden = hiddenSet(lastState);
+    for (const c of lastState.catalog.filter(c => !c.base && !c.custom)) {
+      const row = el('div', 'svcrow');
+      const sw = el('label', 'switch');
+      const inp = document.createElement('input');
+      inp.type = 'checkbox';
+      inp.checked = !hidden.has(c.id);
+      inp.onchange = () => {
+        const h = hiddenSet(lastState);
+        if (inp.checked) h.delete(c.id); else h.add(c.id);
+        window.tabchat.setSetting('hiddenServices', [...h]);
+      };
+      sw.append(inp, el('span', 'slider'));
+      row.append(c.icon ? iconBadge(c) : badge(c.name, c.color), el('div', 'name', c.name), sw);
+      list.append(row);
+    }
+    svcs.classList.add('open');
+  }
+  const closeSvcs = () => svcs.classList.remove('open');
+  document.getElementById('chooseSvc').onclick = openSvcs;
+  document.getElementById('svcsClose').onclick = closeSvcs;
+  document.getElementById('svcsOk').onclick = closeSvcs;
+  svcs.onclick = (e) => { if (e.target === svcs) closeSvcs(); };
+
+  // ---------- eigen website toevoegen / wijzigen ----------
+  const COLORS = ['#5865F2', '#25D366', '#E8642C', '#0078D4', '#E5484D', '#A855F7', '#F0B232', '#4E5058'];
+  const site = document.getElementById('site');
+  const siteName = document.getElementById('siteName');
+  const siteUrl = document.getElementById('siteUrl');
+  const siteStatus = document.getElementById('siteStatus');
+  const siteIcon = document.getElementById('siteIcon');
+  const siteTemp = document.getElementById('siteTemp');
+  const SITE_STATUS = { checking: 'busy', ok: 'ok', google: 'warn', notFound: 'bad', invalid: 'bad', error: 'warn' };
+  let siteEdit = null, siteColor = COLORS[0], siteSchool = false, siteCheck = null, siteTimer = null, siteSeq = 0;
+
+  function showSiteStatus(status) {
+    siteStatus.className = 'urlstatus' + (status ? ' ' + SITE_STATUS[status] : '');
+    siteStatus.textContent = status ? T('site.' + status) : '';
+  }
+  function setIcon(src) { siteIcon.hidden = !src; if (src) siteIcon.src = src; }
+  function drawColors() {
+    const box = document.getElementById('siteColors');
+    box.replaceChildren();
+    for (const c of COLORS) {
+      const b = document.createElement('button');
+      b.style.background = c;
+      b.className = c === siteColor ? 'on' : '';
+      b.onclick = () => { siteColor = c; drawColors(); };
+      box.append(b);
+    }
+  }
+  function drawLogin() {
+    document.querySelectorAll('#siteLogin button').forEach(b => {
+      b.classList.toggle('on', (b.dataset.v === 'school') === siteSchool);
+      b.disabled = siteTemp.checked; // incognito heeft altijd een eigen, tijdelijke login
+    });
+  }
+  document.querySelectorAll('#siteLogin button').forEach(b => { b.onclick = () => { siteSchool = b.dataset.v === 'school'; drawLogin(); }; });
+  siteTemp.onchange = () => {
+    if (siteTemp.checked) siteSchool = false;
+    drawLogin();
+    document.getElementById('siteOk').textContent = T(siteTemp.checked ? 'site.open' : 'site.add');
+  };
+
+  async function runSiteCheck() {
+    const v = siteUrl.value.trim();
+    if (!v) { showSiteStatus(''); setIcon(null); siteCheck = null; return null; }
+    const seq = ++siteSeq;
+    showSiteStatus('checking');
+    let res;
+    try { res = await window.tabchat.checkSite(v); } catch { res = { status: 'error', url: v }; }
+    if (seq !== siteSeq) return null; // intussen verder getypt
+    siteCheck = res;
+    showSiteStatus(res.status);
+    setIcon(res.icon || null);
+    if (res.title && !siteName.value.trim()) siteName.value = res.title;
+    return res;
+  }
+  siteUrl.addEventListener('input', () => {
+    siteCheck = null;
+    clearTimeout(siteTimer);
+    siteTimer = setTimeout(() => { if (looksLikeUrl(siteUrl.value)) runSiteCheck(); }, 700);
+  });
+
+  function openSite(c) {
+    siteEdit = c;
+    document.getElementById('siteTitle').textContent = T(c ? 'site.editTitle' : 'site.addTitle');
+    siteName.value = c ? c.name : '';
+    siteUrl.value = c ? c.url : '';
+    siteColor = c ? c.color : COLORS[0];
+    siteSchool = c ? !!c.school : false;
+    siteTemp.checked = false;
+    siteCheck = c ? { status: 'ok', url: c.url, icon: c.icon } : null;
+    setIcon(c ? c.icon : null);
+    showSiteStatus('');
+    document.getElementById('siteInc').style.display = c ? 'none' : '';
+    document.getElementById('siteDelete').style.display = c ? '' : 'none';
+    document.getElementById('siteOk').textContent = T(c ? 'site.save' : 'site.add');
+    drawColors();
+    drawLogin();
+    closeKeys();
+    site.classList.add('open');
+    (c ? siteName : siteUrl).focus();
+  }
+  const closeSite = () => site.classList.remove('open');
+
+  async function submitSite() {
+    if (!looksLikeUrl(siteUrl.value)) { showSiteStatus('invalid'); siteUrl.focus(); return; }
+    const res = siteCheck && siteCheck.url ? siteCheck : await runSiteCheck();
+    if (!res || res.status === 'notFound' || res.status === 'invalid') { siteUrl.focus(); return; }
+    let host = '';
+    try { host = new URL(res.url).hostname.replace(/^www\./, ''); } catch {}
+    const data = { name: siteName.value.trim() || res.title || host, url: res.url, color: siteColor, icon: res.icon || null, school: siteSchool };
+    if (siteEdit) window.tabchat.updateCustom(siteEdit.id, data);
+    else window.tabchat.addCustom(data, siteTemp.checked);
+    closeSite();
+  }
+  document.getElementById('siteOk').onclick = submitSite;
+  document.getElementById('siteCancel').onclick = closeSite;
+  document.getElementById('siteClose').onclick = closeSite;
+  document.getElementById('siteDelete').onclick = () => {
+    if (!siteEdit) return;
+    if (confirm(T('site.deleteConfirm', { name: siteEdit.name }))) { window.tabchat.removeCustom(siteEdit.id); closeSite(); }
+  };
+  siteUrl.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitSite(); });
+  siteName.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitSite(); });
+  site.onclick = (e) => { if (e.target === site) closeSite(); };
+
   // Esc: eerst het venster sluiten, anders terug naar je tabblad
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (ask.classList.contains('open')) closeAsk();
+    if (site.classList.contains('open')) closeSite();
+    else if (svcs.classList.contains('open')) closeSvcs();
+    else if (ask.classList.contains('open')) closeAsk();
     else if (wn.classList.contains('open')) closeWn();
     else if (modal.classList.contains('open')) closeKeys();
     else window.tabchat.back();
@@ -409,20 +668,30 @@
       swBox.append(inp, el('span', 'slider'));
       sw.append(T(t.asleep ? 'home.asleepMaySleep' : 'home.maySleep'), swBox);
       sw.title = T('home.sleepTitle');
-      row.append(badge(t.label, t.color), el('div', 'name', t.fullLabel || t.label), sw, rm);
+      const icon = (s.catalog.find(c => c.id === t.service) || {}).icon; // logo van de dienst, als die gevonden is
+      row.append(icon ? iconBadge({ name: t.label, color: t.color, icon }) : badge(t.label, t.color), el('div', 'name', t.fullLabel || t.label), sw, rm);
       mine.append(row);
     }
 
     // Dienst toevoegen
     const cat = document.getElementById('catalog');
     cat.replaceChildren();
-    for (const c of s.catalog) {
-      if (c.base) continue; // privé-variant: tweede knop op de kaart van de gewone dienst
+    lastState = s;
+    for (const c of visibleCards(s)) {
       const personal = s.catalog.find(x => x.base === c.id);
       const card = el('div', 'card');
       const top = el('div', 'top');
-      top.append(badge(c.name, c.color), nameWithKey(c.name, c.key));
+      top.append(c.icon ? iconBadge(c) : badge(c.name, c.color), nameWithKey(c.name, c.key));
+      if (c.custom) {
+        // Eigen website: label "Eigen" en ✎ om te wijzigen of te verwijderen
+        card.append(el('span', 'own', T('own.badge')));
+        const ed = el('button', 'editbtn', '✎');
+        ed.title = T('own.edit');
+        ed.onclick = (e) => { e.stopPropagation(); openSite(c); };
+        top.append(ed);
+      }
       card.append(top, el('div', 'desc', c.desc));
+      makeDraggable(card, c.id);
       if (personal) {
         // Microsoft: school/werk en privé zijn aparte websites met een eigen login
         const btns = el('div', 'btns');
@@ -435,13 +704,22 @@
         btns.append(work, priv);
         card.append(btns);
       } else {
-        card.title = T('home.addTitle', { k: c.key.toUpperCase() });
+        if (c.key) card.title = T('home.addTitle', { k: c.key.toUpperCase() });
         const add = el('button', 'add', T('home.addBtn'));
         add.onclick = () => window.tabchat.add(c.id); // adres nodig en nog niet bekend? Dan vraagt de app erom
         card.append(add);
       }
       cat.append(card);
     }
+    // Laatste kaart: zelf een website toevoegen
+    const own = el('div', 'card addown');
+    own.append(el('div', 'plus', '+'), el('div', 'name', T('own.card')), el('div', 'desc', T('own.cardDesc')));
+    own.onclick = () => openSite(null);
+    cat.append(own);
+    // Kolommen: zo gelijk mogelijk over twee rijen, maximaal 4 naast elkaar (5 kaarten = 3 + 2, 7 = 4 + 3)
+    const n = cat.children.length;
+    const cols = n <= 2 ? n : Math.min(4, Math.ceil(n / 2));
+    cat.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
 
     // Over Tabchat / updates
     const about = document.getElementById('about');
@@ -491,7 +769,11 @@
     feat.replaceChildren();
     for (const f of FEATURES) {
       if (f.hideInStore && s.platform && s.platform.storeManaged) continue; // Flathub/Snap regelt dit zelf
-      if (f.type === 'url') { feat.append(urlRow(f, s)); continue; }
+      if (f.type === 'url') {
+        if (f.key === 'brightspaceUrl' && hiddenSet(s).has('brightspace')) continue; // Brightspace verborgen
+        feat.append(urlRow(f, s));
+        continue;
+      }
       const row = el('div', 'feature');
       const text = el('div', 'text');
       const title = el('div', 'name', T(`f.${f.key}.name`));

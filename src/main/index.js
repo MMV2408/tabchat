@@ -36,7 +36,7 @@ if (!app.requestSingleInstanceLock()) {
 
   ipc.register();
 
-  app.whenReady().then(window.create);
+  app.whenReady().then(() => { window.create(); require('./icons').start(); });
   // Bij elk afsluiten (ook uitloggen of afsluiten van de computer)
   app.on('before-quit', () => {
     require('./store').quitting = true;

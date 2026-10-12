@@ -39,6 +39,8 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 - 👥 Multiple accounts of the same service, each with its own sign-in
 - ↔️ Drag tabs to reorder them, right-click for more options
 - 🔐 One shared Microsoft sign-in for Teams, Outlook and OneDrive (school and work accounts too), and it **stays signed in** after a restart
+- 🌐 **Your own websites** as tabs (name, icon and color), or open one once in **incognito**
+- 🧩 Hide the built-in services you don't use and drag the cards into your own order
 - 🎓 **Brightspace** from your school (any school: you enter its address), signed in with the same school account as Teams and Outlook
 - 🏫 Work/school and **personal** Microsoft accounts (Outlook.com, Hotmail, Live) side by side, each with its own sign-in
 
