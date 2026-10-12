@@ -25,8 +25,17 @@ const DEFAULT_SETTINGS = {
   brightspaceUrl: '',    // Brightspace van je school (één keer invullen in het +-scherm)
   tabBar: 'normal',      // 'normal', 'compact' (alleen icoontjes) of 'autohide' (verschijnt bovenaan bij de muis)
   hiddenServices: [],    // vaste diensten die je uit het +-scherm hebt gehaald
-  cardOrder: []          // volgorde van de kaarten in het +-scherm (versleept)
+  cardOrder: [],         // volgorde van de kaarten in het +-scherm (versleept)
+  hardwareAcceleration: true // uit = lichter grafisch proces (~100-150 MB minder), werkt na herstart
 };
+
+// Eén instelling lezen vóór de app klaar is (bv. hardwareversnelling moet je vóór het starten kiezen)
+function peekSetting(key) {
+  try {
+    const s = JSON.parse(require('fs').readFileSync(configFile(), 'utf8')).settings || {};
+    return key in s ? s[key] : DEFAULT_SETTINGS[key];
+  } catch { return DEFAULT_SETTINGS[key]; }
+}
 
 function configFile() {
   return path.join(app.getPath('userData'), 'config.json');
@@ -66,4 +75,4 @@ function save() {
   }
 }
 
-module.exports = { DEFAULT_SETTINGS, load, save };
+module.exports = { DEFAULT_SETTINGS, load, save, peekSetting };

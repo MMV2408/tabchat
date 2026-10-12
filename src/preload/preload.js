@@ -54,5 +54,6 @@ contextBridge.exposeInMainWorld('tabchat', {
   // snelzoeken
   onPaletteOpen: (cb) => ipcRenderer.on('palette-open', (_e, s) => cb(s)),
   paletteRun: (item) => ipcRenderer.send('palette-run', item),
-  paletteClose: () => ipcRenderer.send('palette-close')
+  paletteClose: () => ipcRenderer.send('palette-close'),
+  relaunch: () => ipcRenderer.send('relaunch')
 });

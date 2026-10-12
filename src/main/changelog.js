@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.20.0',
+    nl: ['Nieuwe instelling Hardwareversnelling (+-scherm → Geheugen): uitzetten scheelt zo\'n 100-150 MB geheugen. Werkt het niet lekker, zet hem dan gewoon weer aan'],
+    en: ["New setting Hardware acceleration (+ screen → Memory): turning it off saves about 100-150 MB of memory. If something doesn't run smoothly, just turn it back on"]
+  },
+  {
     v: '1.19.2',
     nl: ['Zuiniger met geheugen: het +-scherm, snelzoeken (Ctrl+K), scherm delen en de meldingen laden pas als je ze nodig hebt en ruimen zichzelf weer op (ongeveer 300 MB minder)'],
     en: ['Uses less memory: the + screen, quick search (Ctrl+K), screen sharing and notifications load only when needed and clean up after themselves (about 300 MB less)']

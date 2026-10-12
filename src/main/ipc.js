@@ -114,6 +114,7 @@ function register() {
 
   // snelzoeken
   ipcMain.on('palette-close', () => palette.hide());
+  ipcMain.on('relaunch', () => actions.relaunch());
   ipcMain.on('palette-run', (_e, item) => palette.run(item));
 }
 

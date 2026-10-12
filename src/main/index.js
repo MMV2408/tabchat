@@ -8,6 +8,12 @@ const actions = require('./actions');
 // Minder geheugen voor JavaScript per tabblad
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=256');
 
+// Hardwareversnelling uit (instelling in het +-scherm → Geheugen): geen grafisch proces,
+// ~100-150 MB minder geheugen (vooral met NVIDIA), maar de processor tekent alles zelf. Moet vóór het starten.
+const hwAccel = require('./config').peekSetting('hardwareAcceleration') !== false;
+require('./store').hwAtStart = hwAccel;
+if (!hwAccel) app.disableHardwareAcceleration();
+
 // Vangnet: een onverwachte fout komt in een logbestand in plaats van in een foutvenster.
 // Zo ziet een gebruiker nooit "A JavaScript error occurred", en kunnen we het toch terugvinden.
 function logError(err) {

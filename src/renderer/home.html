@@ -61,6 +61,7 @@
   .linkbtn:hover { color: var(--text-strong); text-decoration: underline; }
   /* formulier eigen website */
   .field-label { display: block; font-size: 13px; color: var(--text-muted); margin: 14px 0 6px; }
+  .restartbtn { background: #5865F2; color: #fff; padding: 7px 12px; margin-right: 12px; white-space: nowrap; }
   .ftabs { display: flex; gap: 4px; margin: 0 0 12px; padding: 4px; background: var(--bg-0); border-radius: 10px; overflow-x: auto; }
   .ftabs button { flex: 1; background: transparent; color: var(--text); padding: 8px 12px; border-radius: 7px; white-space: nowrap; font-weight: 500; }
   .ftabs button:hover { background: var(--bg-2); }
@@ -295,7 +296,8 @@
     { group: 'startup', key: 'autoUpdate', hideInStore: true },
     { group: 'memory', key: 'sleepEnabled' },
     { group: 'memory', key: 'sleepMinutes', options: [[15, 'f.sleepMinutes.15'], [30, 'f.sleepMinutes.30'], [60, 'f.sleepMinutes.60']] },
-    { group: 'memory', key: 'sleepOnStart' }
+    { group: 'memory', key: 'sleepOnStart' },
+    { group: 'memory', key: 'hardwareAcceleration' }
   ];
   // Functies verdeeld over tabjes; het laatst gekozen tabje onthouden we
   const FEATURE_TABS = ['general', 'accounts', 'notify', 'startup', 'memory'];
@@ -821,7 +823,12 @@
       input.checked = !!s.settings[f.key];
       input.onchange = () => window.tabchat.setSetting(f.key, input.checked);
       label.append(input, el('span', 'slider'));
-      row.append(text, label);
+      if (f.key === 'hardwareAcceleration' && s.restartNeeded) {
+        // Werkt pas na opnieuw starten
+        const rb = el('button', 'restartbtn', T('f.hardwareAcceleration.restart'));
+        rb.onclick = () => window.tabchat.relaunch();
+        row.append(text, rb, label);
+      } else row.append(text, label);
       feat.append(row);
     }
   }

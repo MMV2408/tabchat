@@ -119,6 +119,7 @@ function getState() {
       desc: s.custom ? s.desc : i18n.t('svc.' + (s.base || id))
     })),
     settings: config.settings,
+    restartNeeded: config.settings.hardwareAcceleration !== false ? !store.hwAtStart : !!store.hwAtStart, // hardwareversnelling veranderd
     maximized: store.win ? store.win.isMaximized() : false
   };
 }

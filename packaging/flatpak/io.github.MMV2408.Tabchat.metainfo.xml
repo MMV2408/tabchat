@@ -119,6 +119,11 @@
   </requires>
 
   <releases>
+    <release version="1.20.0" date="2026-10-12">
+      <description>
+        <p>New setting to turn off hardware acceleration and save memory.</p>
+      </description>
+    </release>
     <release version="1.19.2" date="2026-10-12">
       <description>
         <p>Uses less memory: built-in screens and the notification helper load only when needed.</p>

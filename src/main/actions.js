@@ -312,7 +312,15 @@ async function quit() {
   app.quit();
 }
 
+// Opnieuw starten (bv. na het aan/uitzetten van hardwareversnelling)
+function relaunch() {
+  // AppImage: het programma zelf staat in $APPIMAGE (de uitgepakte map verdwijnt bij afsluiten)
+  app.relaunch(process.env.APPIMAGE ? { execPath: process.env.APPIMAGE } : undefined);
+  quit();
+}
+
 Object.assign(module.exports, {
+  relaunch,
   addTab, closeTab, reopenTab, removeTab, addCustom, updateCustom, removeCustom,
   moveTab, reorderTab, cycle, goToIndex,
   reload, reloadAll, toggleMute, zoom, navigate, sleepNow,

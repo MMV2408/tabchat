@@ -165,6 +165,9 @@ const STRINGS = {
     'f.sleepMinutes.60': '1 uur',
     'f.sleepOnStart.name': 'Slapend opstarten',
     'f.sleepOnStart.desc': 'Tabbladen die mogen slapen, starten meteen slapend. Sneller opstarten en minder geheugen; hun tellers zie je pas als je ze een keer opent.',
+    'f.hardwareAcceleration.name': 'Hardwareversnelling',
+    'f.hardwareAcceleration.desc': 'Uitzetten scheelt zo\'n 100-150 MB geheugen, maar de processor doet dan meer werk en videobellen kan minder soepel lopen. Werkt na opnieuw starten.',
+    'f.hardwareAcceleration.restart': 'Nu herstarten',
     'f.autoUpdate.name': 'Automatisch updaten',
     'f.autoUpdate.desc': 'Tabchat zoekt zelf naar nieuwe versies en downloadt ze op de achtergrond. Installeren doe je zelf met één klik.',
 
@@ -457,6 +460,9 @@ const STRINGS = {
     'f.sleepMinutes.60': '1 hour',
     'f.sleepOnStart.name': 'Start asleep',
     'f.sleepOnStart.desc': 'Tabs that may sleep start asleep right away. Faster startup and less memory; their counters appear once you open them.',
+    'f.hardwareAcceleration.name': 'Hardware acceleration',
+    'f.hardwareAcceleration.desc': 'Turning it off saves about 100-150 MB of memory, but the processor does more work and video calls may be less smooth. Takes effect after a restart.',
+    'f.hardwareAcceleration.restart': 'Restart now',
     'f.autoUpdate.name': 'Automatic updates',
     'f.autoUpdate.desc': 'Tabchat looks for new versions and downloads them in the background. You install them yourself with one click.',
 
