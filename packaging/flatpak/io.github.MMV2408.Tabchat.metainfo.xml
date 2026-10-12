@@ -119,6 +119,11 @@
   </requires>
 
   <releases>
+    <release version="1.19.1" date="2026-10-12">
+      <description>
+        <p>Settings on the + screen are split into tabs.</p>
+      </description>
+    </release>
     <release version="1.19.0" date="2026-10-12">
       <description>
         <p>Add any website as a tab, open a site once in incognito, hide built-in services and reorder the cards by dragging.</p>

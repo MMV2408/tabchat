@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.19.1',
+    nl: ['Functies in het +-scherm netjes verdeeld over tabjes: Algemeen, Accounts, Meldingen, Opstarten en Geheugen'],
+    en: ['Features on the + screen neatly split into tabs: General, Accounts, Notifications, Startup and Memory']
+  },
+  {
     v: '1.19.0',
     nl: ['Eigen websites: voeg elke website toe als tabblad, met naam, icoon en kleur. Ze krijgen het label Eigen en je wijzigt ze met ✎',
          'Incognito: open een website één keer, zonder dat er iets bewaard blijft',

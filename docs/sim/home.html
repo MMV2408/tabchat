@@ -61,6 +61,10 @@
   .linkbtn:hover { color: var(--text-strong); text-decoration: underline; }
   /* formulier eigen website */
   .field-label { display: block; font-size: 13px; color: var(--text-muted); margin: 14px 0 6px; }
+  .ftabs { display: flex; gap: 4px; margin: 0 0 12px; padding: 4px; background: var(--bg-0); border-radius: 10px; overflow-x: auto; }
+  .ftabs button { flex: 1; background: transparent; color: var(--text); padding: 8px 12px; border-radius: 7px; white-space: nowrap; font-weight: 500; }
+  .ftabs button:hover { background: var(--bg-2); }
+  .ftabs button.on { background: #5865F2; color: #fff; }
   .seg { display: flex; gap: 6px; }
   .seg button { flex: 1; background: var(--bg-1); color: var(--text); padding: 9px; }
   .seg button.on { background: #5865F2; color: #fff; }
@@ -183,6 +187,7 @@
   <div class="dndrow" id="dndrow"></div>
 
   <h2 data-i18n="home.features"></h2>
+  <div class="ftabs" id="featTabs"></div>
   <div id="features"></div>
 
   <h2 data-i18n="home.about"></h2>
@@ -275,24 +280,28 @@
   // Functies: de teksten staan in i18n.js onder f.<key>.name en f.<key>.desc.
   // options = keuzelijst in plaats van schakelaar.
   const FEATURES = [
-    { key: 'language', options: [['auto', 'f.language.auto'], ['nl', '!Nederlands'], ['en', '!English']] },
-    { key: 'theme', options: [['system', 'f.theme.system'], ['dark', 'f.theme.dark'], ['light', 'f.theme.light']] },
-    { key: 'tabBar', options: [['normal', 'f.tabBar.normal'], ['compact', 'f.tabBar.compact'], ['autohide', 'f.tabBar.autohide']] },
-    { key: 'openLinks', options: 'links' }, // lijst hangt af van de browsers op deze computer
-    { key: 'spellcheck' },
-    { key: 'stayLoggedIn' },
-    { key: 'shareMicrosoft' },
-    { key: 'brightspaceUrl', type: 'url' },
-    { key: 'autostart', hideInStore: true },
-    { key: 'runInBackground' },
-    { key: 'whiteTray' },
-    { key: 'followSystemDnd', hideInStore: true },
-    { key: 'unreadBadges' },
-    { key: 'sleepEnabled' },
-    { key: 'sleepMinutes', options: [[15, 'f.sleepMinutes.15'], [30, 'f.sleepMinutes.30'], [60, 'f.sleepMinutes.60']] },
-    { key: 'sleepOnStart' },
-    { key: 'autoUpdate', hideInStore: true }
+    { group: 'general', key: 'language', options: [['auto', 'f.language.auto'], ['nl', '!Nederlands'], ['en', '!English']] },
+    { group: 'general', key: 'theme', options: [['system', 'f.theme.system'], ['dark', 'f.theme.dark'], ['light', 'f.theme.light']] },
+    { group: 'general', key: 'tabBar', options: [['normal', 'f.tabBar.normal'], ['compact', 'f.tabBar.compact'], ['autohide', 'f.tabBar.autohide']] },
+    { group: 'general', key: 'openLinks', options: 'links' }, // lijst hangt af van de browsers op deze computer
+    { group: 'general', key: 'spellcheck' },
+    { group: 'accounts', key: 'stayLoggedIn' },
+    { group: 'accounts', key: 'shareMicrosoft' },
+    { group: 'accounts', key: 'brightspaceUrl', type: 'url' },
+    { group: 'notify', key: 'unreadBadges' },
+    { group: 'notify', key: 'followSystemDnd', hideInStore: true },
+    { group: 'notify', key: 'whiteTray' },
+    { group: 'startup', key: 'autostart', hideInStore: true },
+    { group: 'startup', key: 'runInBackground' },
+    { group: 'startup', key: 'autoUpdate', hideInStore: true },
+    { group: 'memory', key: 'sleepEnabled' },
+    { group: 'memory', key: 'sleepMinutes', options: [[15, 'f.sleepMinutes.15'], [30, 'f.sleepMinutes.30'], [60, 'f.sleepMinutes.60']] },
+    { group: 'memory', key: 'sleepOnStart' }
   ];
+  // Functies verdeeld over tabjes; het laatst gekozen tabje onthouden we
+  const FEATURE_TABS = ['general', 'accounts', 'notify', 'startup', 'memory'];
+  let featTab = 'general';
+  try { if (FEATURE_TABS.includes(localStorage.getItem('featTab'))) featTab = localStorage.getItem('featTab'); } catch {}
 
   const el = (tag, cls, text) => {
     const e = document.createElement(tag);
@@ -767,7 +776,15 @@
     // Functies
     const feat = document.getElementById('features');
     feat.replaceChildren();
+    const ftabs = document.getElementById('featTabs');
+    ftabs.replaceChildren();
+    for (const g of FEATURE_TABS) {
+      const b = el('button', g === featTab ? 'on' : '', T('ftab.' + g));
+      b.onclick = () => { featTab = g; try { localStorage.setItem('featTab', g); } catch {} render(s); };
+      ftabs.append(b);
+    }
     for (const f of FEATURES) {
+      if (f.group !== featTab) continue;
       if (f.hideInStore && s.platform && s.platform.storeManaged) continue; // Flathub/Snap regelt dit zelf
       if (f.type === 'url') {
         if (f.key === 'brightspaceUrl' && hiddenSet(s).has('brightspace')) continue; // Brightspace verborgen
@@ -846,6 +863,8 @@
     return row;
   }
   window.tabchat.onFocusSetting((key) => {
+    const f = FEATURES.find(x => x.key === key);
+    if (f && f.group !== featTab && lastState) { featTab = f.group; render(lastState); } // naar het juiste tabje
     const r = urlRows[key];
     if (!r) return;
     r.row.scrollIntoView({ block: 'center', behavior: 'smooth' });
