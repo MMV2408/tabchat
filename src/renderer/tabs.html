@@ -50,11 +50,19 @@
   button.active .pill { background: var(--bg-3); color: var(--text-strong); }
   button.insplit:not(.focused) .pill { background: color-mix(in srgb, var(--bg-3) 55%, transparent); }
   .dot { width: 9px; height: 9px; border-radius: 50%; }
-  .nav { display: flex; gap: 2px; margin-left: 2px; padding-left: 6px; border-left: 1px solid rgba(127, 127, 140, .35); }
-  .navbtn { width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; font-size: 13px; }
-  .navbtn:hover { background: rgba(127, 127, 140, .3); }
-  .navbtn.off { opacity: .35; }
+  /* ← → ⟳ ⌂ on the left */
+  .navbar { display: flex; align-items: center; height: 100%; gap: 2px; padding-right: 8px; margin-right: 2px; border-right: 1px solid var(--line); flex-shrink: 0; -webkit-app-region: no-drag; }
+  .navbtn { width: 30px; justify-content: center; font-size: 15px; }
+  .navbtn:hover { background: var(--bg-1); border-radius: 7px; }
+  .navbtn.off { opacity: .35; cursor: default; }
   .navbtn.off:hover { background: transparent; }
+  /* split view: the two tabs in one quiet frame */
+  .pair { display: flex; align-items: center; gap: 2px; height: 36px; padding: 2px; border-radius: 10px; background: var(--bg-1); flex-shrink: 0; }
+  .pair .pill { height: 28px; border-radius: 7px; padding: 0 11px; background: transparent; }
+  .pair button:hover .pill { background: var(--bg-2); }
+  .pair button.focused .pill { background: var(--bg-3); }
+  .pairicon { font-size: 12px; opacity: .7; padding: 0 2px 0 6px; }
+  body.compact .pair .pill { width: 28px; padding: 0; }
   .muted { font-size: 12px; opacity: .8; }
   /* unread */
   .count { background: #f23f43; color: #fff; font-size: 11px; font-weight: 700; border-radius: 9px; padding: 1px 6px; min-width: 18px; text-align: center; }
@@ -169,7 +177,26 @@
     const compact = s.settings && s.settings.tabBar === 'compact';
     document.body.classList.toggle('compact', compact);
 
-    s.tabs.forEach((t, i) => {
+    // ← → ⟳ ⌂ on a fixed spot on the left; they work on the active tab
+    const at = s.tabs.find(t => t.id === s.active);
+    const navBox = document.createElement('div');
+    navBox.className = 'navbar';
+    for (const [what, icon, key] of [['back', '←', 'nav.back'], ['forward', '→', 'nav.forward'], ['reload', '⟳', 'nav.reload'], ['home', '⌂', 'nav.home']]) {
+      const ok = !!(at && at.nav) && (what === 'back' ? at.nav.back : what === 'forward' ? at.nav.forward : true);
+      const n = document.createElement('button');
+      n.className = 'navbtn' + (ok ? '' : ' off');
+      n.textContent = icon;
+      n.title = T(key);
+      n.onmousedown = (e) => { if (e.button === 0 && ok) window.tabchat.tabNav(at.id, what); };
+      navBox.append(n);
+    }
+    document.body.insertBefore(navBox, strip);
+
+    // Split view: the two tabs sit together in one frame (left half first), wherever they are in the bar
+    const pairIds = s.split ? [s.split.left, s.split.right] : [];
+    let pairDone = false;
+
+    const makeTab = (t, i) => {
       const b = document.createElement('button');
       const pill = document.createElement('span');
       pill.className = 'pill';
@@ -212,20 +239,6 @@
         z.textContent = '💤';
         pill.append(z);
       }
-      // ← → ⟳ ⌂ on the active tab (not in compact mode)
-      if (s.active === t.id && t.nav && !compact) {
-        const nav = document.createElement('span');
-        nav.className = 'nav';
-        for (const [what, icon, key, ok] of [['back', '←', 'nav.back', t.nav.back], ['forward', '→', 'nav.forward', t.nav.forward], ['reload', '⟳', 'nav.reload', true], ['home', '⌂', 'nav.home', true]]) {
-          const n = document.createElement('span');
-          n.className = 'navbtn' + (ok ? '' : ' off');
-          n.textContent = icon;
-          n.title = T(key);
-          n.onmousedown = (e) => { e.stopPropagation(); if (e.button === 0 && ok) window.tabchat.tabNav(t.id, what); };
-          nav.append(n);
-        }
-        pill.append(nav);
-      }
       if (t.muted && !compact) {
         const m = document.createElement('span');
         m.className = 'muted';
@@ -246,8 +259,25 @@
       };
       b.ondragend = () => { dragId = null; b.classList.remove('dragging'); clearDrop(); window.tabchat.barHold(false); };
       dropTarget(b, i, i + 1);
+      return b;
+    };
 
-      strip.append(b);
+    s.tabs.forEach((t, i) => {
+      if (!pairIds.includes(t.id)) return strip.append(makeTab(t, i));
+      if (pairDone) return;
+      pairDone = true;
+      const group = document.createElement('div');
+      group.className = 'pair';
+      const ic = document.createElement('span');
+      ic.className = 'pairicon';
+      ic.textContent = '◫';
+      ic.title = T('keys.split');
+      group.append(ic);
+      for (const id of pairIds) {
+        const j = s.tabs.findIndex(x => x.id === id);
+        group.append(makeTab(s.tabs[j], j));
+      }
+      strip.append(group);
     });
 
     const plus = document.createElement('button');
