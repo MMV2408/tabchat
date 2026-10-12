@@ -50,4 +50,7 @@ if (!m) throw new Error('licht thema niet gevonden in theme.css');
 fs.writeFileSync(path.join(out, 'theme.css'),
   theme.slice(0, m.index) + `:root[data-theme="light"] {${m[1]}}\n`);
 
+// Versie achter de sim-bestanden in index.html, zodat browsers na een release niet een oude, bewaarde versie gebruiken
+const idx = path.join(__dirname, '..', 'docs', 'index.html');
+fs.writeFileSync(idx, fs.readFileSync(idx, 'utf8').replace(/(src="sim\/[\w.-]+\.(?:js|html))(\?v=[\w.-]+)?"/g, `$1?v=${data.version}"`));
 console.log('Klaar: docs/sim (versie ' + data.version + ')');
