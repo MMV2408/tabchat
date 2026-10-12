@@ -1,5 +1,13 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+// Muis tegen de bovenrand (in het +-scherm): verborgen tabbalk tonen
+let lastEdge = 0;
+window.addEventListener('mousemove', (e) => {
+  if (e.clientY > 24 || Date.now() - lastEdge < 400) return;
+  lastEdge = Date.now();
+  ipcRenderer.send('bar-edge');
+}, { passive: true, capture: true });
+
 contextBridge.exposeInMainWorld('tabchat', {
   // status
   getState: () => ipcRenderer.invoke('get-state'),
@@ -11,6 +19,8 @@ contextBridge.exposeInMainWorld('tabchat', {
   add: (service, url) => ipcRenderer.send('add', service, url),
   onAskUrl: (cb) => ipcRenderer.on('ask-url', (_e, service) => cb(service)),
   checkUrl: (url) => ipcRenderer.invoke('check-url', url),
+  winControl: (action) => ipcRenderer.send('win-control', action),
+  barHover: (inside) => ipcRenderer.send('bar-hover', inside),
   onFocusSetting: (cb) => ipcRenderer.on('focus-setting', (_e, key) => cb(key)),
   remove: (id) => ipcRenderer.send('remove', id),
   back: () => ipcRenderer.send('back'),

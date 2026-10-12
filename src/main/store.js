@@ -10,6 +10,7 @@ module.exports = {
 
   views: {},              // tabblad-id -> scherm van die dienst
   active: 'home',         // wat er nu zichtbaar is: een tabblad-id of 'home'
+  barRevealed: false,     // tabbalk tijdelijk zichtbaar bij "automatisch verbergen"
   lastTab: null,          // laatst geopende tabblad (voor Esc in het +-scherm)
   paletteOpen: false,
   shareOpen: false,

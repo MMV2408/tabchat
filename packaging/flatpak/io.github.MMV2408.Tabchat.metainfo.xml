@@ -110,6 +110,11 @@
   </requires>
 
   <releases>
+    <release version="1.18.0" date="2026-10-12">
+      <description>
+        <p>The tab bar is now the title bar, with a compact and an auto-hide option.</p>
+      </description>
+    </release>
     <release version="1.17.0" date="2026-10-12">
       <description>
         <p>Your school's Brightspace as a tab, signed in with the same school account as Teams and Outlook.</p>

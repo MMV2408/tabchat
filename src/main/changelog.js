@@ -2,6 +2,13 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.18.0',
+    nl: ['Strakker venster: de tabbalk is nu de titelbalk (slepen, − □ ✕), dus de aparte Ubuntu-balk is weg',
+         'Tabbalk compact (alleen icoontjes) of automatisch verbergen: hij verschijnt als je de muis naar boven beweegt of op Alt drukt (+ scherm → Tabbalk)'],
+    en: ['Cleaner window: the tab bar is now the title bar (drag, − □ ✕), so the separate Ubuntu bar is gone',
+         'Compact tab bar (icons only) or auto-hide: it appears when you move the mouse to the top or press Alt (+ screen → Tab bar)']
+  },
+  {
     v: '1.17.0',
     nl: ['Brightspace van je school als tabblad, ingelogd met hetzelfde schoolaccount als Teams en Outlook. Het adres vul je één keer in het +-scherm in; een groen vinkje laat zien dat het werkt'],
     en: ["Your school's Brightspace as a tab, signed in with the same school account as Teams and Outlook. Enter its address once on the + screen; a green check shows it works"]

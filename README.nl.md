@@ -66,6 +66,7 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 - ☀️ Licht en donker thema dat je systeem volgt
 - 🔗 Kies waar links openen: je standaardbrowser, een andere browser of Tabchat zelf
 - 🎨 Gekleurd of wit tray-icoon
+- 🧹 Rustig venster: de tabbalk is de titelbalk, met een compacte (alleen icoontjes) of automatisch verborgen variant
 
 <p align="center">
   <img src="docs/screenshots/quick-search.png" alt="Snelzoeken met Ctrl+K" width="860">

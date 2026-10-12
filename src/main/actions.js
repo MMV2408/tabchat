@@ -221,6 +221,7 @@ function setSetting(key, value) {
       if (store.views[tab.id]) store.views[tab.id].webContents.loadURL(urlFor(tab));
     }
   }
+  if (key === 'tabBar') { store.barRevealed = false; views.layout(); views.watchEdge(); }
   if (key === 'runInBackground') require('./tray').sync();
   if (key === 'unreadBadges') require('./unread').changed();
   if (key === 'autostart') require('./autostart').sync();

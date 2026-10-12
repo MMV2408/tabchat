@@ -22,7 +22,8 @@ const DEFAULT_SETTINGS = {
   followSystemDnd: true, // Niet storen van Ubuntu/GNOME volgen
   theme: 'system',       // 'system', 'dark' of 'light'
   openLinks: 'default',  // 'default', 'internal' of een browser-id (bv. 'firefox')
-  brightspaceUrl: ''     // Brightspace van je school (één keer invullen in het +-scherm)
+  brightspaceUrl: '',    // Brightspace van je school (één keer invullen in het +-scherm)
+  tabBar: 'normal'       // 'normal', 'compact' (alleen icoontjes) of 'autohide' (verschijnt bovenaan bij de muis)
 };
 
 function configFile() {

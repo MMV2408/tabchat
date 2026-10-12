@@ -6,6 +6,14 @@
 // 4. Meldingen gaan (als het kan) via Ubuntu zelf, zie main/notifier.js.
 const { ipcRenderer, webFrame } = require('electron');
 
+// Muis tegen de bovenrand: verborgen tabbalk tonen (alleen als die instelling aanstaat; de app beslist)
+let lastEdge = 0;
+window.addEventListener('mousemove', (e) => {
+  if (e.clientY > 24 || Date.now() - lastEdge < 400) return;
+  lastEdge = Date.now();
+  ipcRenderer.send('bar-edge');
+}, { passive: true, capture: true });
+
 const dndAtStart = ipcRenderer.sendSync('get-dnd') === true;
 const nativeNotify = ipcRenderer.sendSync('notify-available') === true;
 

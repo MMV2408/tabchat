@@ -15,6 +15,11 @@ function handler(source) {
     const { alt, shift } = input;
     const run = (fn) => { event.preventDefault(); fn(); };
 
+    // Alt (alleen) toont de verborgen tabbalk
+    if (key === 'Alt' && !ctrl && !shift && store.config.settings.tabBar === 'autohide') {
+      views.revealBar(!store.barRevealed);
+      return;
+    }
     // Werkt overal, ook in het snelzoekvenster
     if (ctrl && !alt && !shift && key === 'k') return run(palette.toggle);
     if (ctrl && !alt && !shift && key === 'q') return run(actions.quit);

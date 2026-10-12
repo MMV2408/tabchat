@@ -7,56 +7,85 @@
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    height: 44px;
+    height: 100vh;
+    -webkit-app-region: drag; /* lege plekken: venster slepen, dubbelklik = maximaliseren */
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 0 8px;
+    padding: 0 0 0 8px;
     background: var(--bg-0);
     font-family: system-ui, sans-serif;
     user-select: none;
-    overflow-x: auto;
+    overflow: hidden;
   }
+  /* Elke knop is zo hoog als de hele balk (dus overal klikbaar, ook helemaal bovenin);
+     het zichtbare "pilletje" zit erbinnen. */
   button {
-    height: 32px;
+    -webkit-app-region: no-drag;
+    height: 100%;
     border: none;
-    border-radius: 8px;
-    padding: 0 14px;
-    background: var(--bg-1);
+    padding: 0;
+    margin: 0;
+    background: transparent;
     color: var(--tab-text);
+    font: inherit;
     font-size: 14px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
-    white-space: nowrap;
     flex-shrink: 0;
   }
-  button:hover { background: var(--bg-2); }
-  button.active { background: var(--bg-3); color: var(--text-strong); }
+  .pill {
+    height: 32px;
+    border-radius: 8px;
+    padding: 0 14px;
+    background: var(--bg-1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    position: relative;
+  }
+  button:hover .pill { background: var(--bg-2); }
+  button.active .pill { background: var(--bg-3); color: var(--text-strong); }
   .dot { width: 9px; height: 9px; border-radius: 50%; }
   .muted { font-size: 12px; opacity: .8; }
   /* ongelezen */
   .count { background: #f23f43; color: #fff; font-size: 11px; font-weight: 700; border-radius: 9px; padding: 1px 6px; min-width: 18px; text-align: center; }
   .udot { width: 8px; height: 8px; border-radius: 50%; background: #f23f43; }
-  #plus { width: 32px; padding: 0; justify-content: center; font-size: 20px; }
+  #plus .pill { width: 32px; padding: 0; justify-content: center; font-size: 20px; }
   /* slaapstand */
-  button.asleep { opacity: .5; }
-  button.asleep.active { opacity: 1; }
+  button.asleep .pill { opacity: .5; }
+  button.asleep.active .pill { opacity: 1; }
   .zz { font-size: 12px; }
   /* School/werk of privé (Microsoft) */
   .acct { font-size: 11px; padding: 1px 6px; border-radius: 6px; background: rgba(127, 127, 140, .22); color: inherit; }
   .acct.personal { background: var(--personal-bg); color: var(--personal-text); }
   /* update */
-  #update { background: #1f6f43; color: #fff; font-size: 13px; }
-  #update:hover { background: #24834f; }
+  #update .pill { background: #1f6f43; color: #fff; font-size: 13px; }
+  #update:hover .pill { background: #24834f; }
   /* niet storen */
-  #dnd { margin-left: auto; background: var(--dnd-bg); color: var(--dnd-text); font-size: 13px; }
-  #dnd:hover { background: var(--dnd-hover); }
+  #dnd .pill { background: var(--dnd-bg); color: var(--dnd-text); font-size: 13px; }
+  #dnd:hover .pill { background: var(--dnd-hover); }
+  /* tabbladen links (scrollen als het er veel zijn); lege ruimte erachter = venster slepen */
+  .tabs { -webkit-app-region: no-drag; flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; gap: 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .spacer { flex: 1; min-width: 12px; height: 100%; -webkit-app-region: drag; }
+  .right { display: flex; align-items: center; gap: 6px; height: 100%; -webkit-app-region: no-drag; }
+  /* − □ ✕: volle hoogte, zoals Ubuntu-knoppen */
+  .ctl { width: 42px; justify-content: center; }
+  .ctl:hover { background: var(--bg-2); }
+  .ctl.close:hover { background: #e5484d; color: #fff; }
+  .ctl svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 1.4; fill: none; }
+  /* compact: alleen een gekleurd icoontje per tabblad */
+  body.compact button.tab .pill { width: 32px; padding: 0; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; }
+  body.compact button.tab.active .pill { box-shadow: 0 0 0 2px var(--text-strong); }
+  body.compact button.tab .count, body.compact button.tab .udot { position: absolute; top: -4px; right: -6px; }
+  body.compact button.tab .count { font-size: 9px; padding: 0 4px; min-width: 15px; }
   /* slepen */
   .dragging { opacity: .4; }
-  .drop-before { box-shadow: inset 3px 0 0 #5865F2; }
-  .drop-after { box-shadow: inset -3px 0 0 #5865F2; }
+  .drop-before .pill { box-shadow: inset 3px 0 0 #5865F2; }
+  .drop-after .pill { box-shadow: inset -3px 0 0 #5865F2; }
 </style>
 </head>
 <body>
@@ -106,47 +135,83 @@
     };
   }
 
+  const ICONS = {
+    minimize: '<svg viewBox="0 0 12 12"><path d="M2 6.5h8"/></svg>',
+    maximize: '<svg viewBox="0 0 12 12"><rect x="2" y="2" width="8" height="8" rx="1"/></svg>',
+    restore: '<svg viewBox="0 0 12 12"><rect x="2" y="3.5" width="6.5" height="6.5" rx="1"/><path d="M4 3.5V2h6v6H8.5"/></svg>',
+    close: '<svg viewBox="0 0 12 12"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>'
+  };
+  function control(kind, action, title) {
+    const b = document.createElement('button');
+    b.className = 'ctl' + (kind === 'close' ? ' close' : '');
+    b.innerHTML = ICONS[kind];
+    b.title = title;
+    b.onclick = () => window.tabchat.winControl(action);
+    return b;
+  }
+
+  // Automatisch verbergen: de app weet zo wanneer de muis op de balk is
+  document.documentElement.addEventListener('mouseenter', () => window.tabchat.barHover(true));
+  document.documentElement.addEventListener('mouseleave', () => window.tabchat.barHover(false));
+
   function render(s) {
     document.body.replaceChildren();
+    const strip = document.createElement('div');
+    strip.className = 'tabs';
+    document.body.append(strip);
+    const compact = s.settings && s.settings.tabBar === 'compact';
+    document.body.classList.toggle('compact', compact);
 
     s.tabs.forEach((t, i) => {
       const b = document.createElement('button');
+      const pill = document.createElement('span');
+      pill.className = 'pill';
+      b.append(pill);
       b.title = (i < 8 ? 'Alt+' + (i + 1) + ' · ' : '') + T('tabs.hint');
       if (s.active === t.id) b.classList.add('active');
       if (t.asleep) { b.classList.add('asleep'); b.title = T('tabs.asleep') + ' · ' + b.title; }
-      const dot = document.createElement('span');
-      dot.className = 'dot';
-      dot.style.background = t.color;
-      b.append(dot, document.createTextNode(t.label));
-      if (t.tag) {
+      b.classList.add('tab');
+      if (compact) {
+        // Alleen een gekleurde letter; de naam staat in de tooltip
+        pill.style.background = t.color;
+        pill.append(document.createTextNode(t.label[0]));
+        b.title = (t.fullLabel || t.label) + ' · ' + b.title;
+      } else {
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.style.background = t.color;
+        pill.append(dot, document.createTextNode(t.label));
+      }
+      if (t.tag && !compact) {
         const a = document.createElement('span');
         a.className = 'acct ' + t.tag;
         a.textContent = T('acct.' + t.tag);
-        b.append(a);
+        pill.append(a);
       }
       if (typeof t.unread === 'number' && t.unread > 0) {
         const c = document.createElement('span');
         c.className = 'count';
         c.textContent = t.unread > 99 ? '99+' : t.unread;
-        b.append(c);
+        pill.append(c);
       } else if (t.unread === 'dot') {
         const d = document.createElement('span');
         d.className = 'udot';
-        b.append(d);
+        pill.append(d);
       }
-      if (t.asleep) {
+      if (t.asleep && !compact) {
         const z = document.createElement('span');
         z.className = 'zz';
         z.textContent = '💤';
-        b.append(z);
+        pill.append(z);
       }
-      if (t.muted) {
+      if (t.muted && !compact) {
         const m = document.createElement('span');
         m.className = 'muted';
         m.textContent = '🔇';
-        b.append(m);
+        pill.append(m);
       }
-      b.onclick = () => window.tabchat.open(t.id);
+      // Bij indrukken kiezen (zoals in een browser): werkt ook als de balk net verschijnt
+      b.onmousedown = (e) => { if (e.button === 0) window.tabchat.open(t.id); };
       b.oncontextmenu = (e) => { e.preventDefault(); window.tabchat.tabMenu(t.id); };
 
       // Slepen om te verplaatsen
@@ -160,29 +225,35 @@
       b.ondragend = () => { dragId = null; b.classList.remove('dragging'); clearDrop(); };
       dropTarget(b, i, i + 1);
 
-      document.body.append(b);
+      strip.append(b);
     });
 
     const plus = document.createElement('button');
     plus.id = 'plus';
-    plus.textContent = '+';
+    plus.innerHTML = '<span class="pill">+</span>';
     plus.title = T('tabs.plus');
     if (s.active === 'home') plus.classList.add('active');
-    plus.onclick = () => window.tabchat.open('home');
+    plus.onmousedown = (e) => { if (e.button === 0) window.tabchat.open('home'); };
     dropTarget(plus, s.tabs.length, null); // neerzetten op + = helemaal achteraan
-    document.body.append(plus);
+    strip.append(plus);
 
-    // Update klaar: knop rechts
-    let right = false; // eerste knop rechts krijgt margin-left:auto
+    // Lege ruimte: hier sleep je het venster
+    const spacer = document.createElement('div');
+    spacer.className = 'spacer';
+    strip.append(spacer);
+
+    // Rechts: update, Niet storen, − □ ✕
+    const rightBox = document.createElement('div');
+    rightBox.className = 'right';
+    document.body.append(rightBox);
+    const pillText = (btn, text) => { const p = document.createElement('span'); p.className = 'pill'; p.textContent = text; btn.append(p); };
     if (s.update && s.update.state === 'ready') {
       const u = document.createElement('button');
       u.id = 'update';
-      u.textContent = T('tabs.update', { v: s.update.version });
+      pillText(u, T('tabs.update', { v: s.update.version }));
       u.title = T('tabs.updateTitle');
-      u.style.marginLeft = 'auto';
       u.onclick = () => window.tabchat.installUpdate();
-      document.body.append(u);
-      right = true;
+      rightBox.append(u);
     }
 
     // Niet storen: label rechts, klik = uitzetten
@@ -190,21 +261,36 @@
       const d = document.createElement('button');
       d.id = 'dnd';
       if (s.dnd.manual) {
-        d.textContent = T('tabs.dnd', { label: s.dnd.label });
+        pillText(d, T('tabs.dnd', { label: s.dnd.label }));
         d.title = T('tabs.dndTitle');
         d.onclick = () => window.tabchat.setDnd(null);
       } else {
         // Via Ubuntu aangezet: uitzetten kan alleen in Ubuntu zelf
-        d.textContent = T('tabs.dndSystem');
+        pillText(d, T('tabs.dndSystem'));
         d.title = T('tabs.dndSystemTitle');
         d.style.cursor = 'default';
       }
-      if (right) d.style.marginLeft = '0';
-      document.body.append(d);
+      rightBox.append(d);
     }
+
+    // − □ ✕ (de Ubuntu-titelbalk is weg)
+    rightBox.append(
+      control('minimize', 'minimize', T('win.minimize')),
+      control(s.maximized ? 'restore' : 'maximize', 'maximize', T(s.maximized ? 'win.restore' : 'win.maximize')),
+      control('close', 'close', T('win.close'))
+    );
   }
 
-  const update = async (s) => { await loadStrings(s.lang); render(s); };
+  // Alleen opnieuw opbouwen als er voor de balk iets veranderd is; een klik die halverwege
+  // een nieuwe opbouw valt, gaat anders verloren
+  let lastKey = '';
+  const update = async (s) => {
+    await loadStrings(s.lang);
+    const key = JSON.stringify([s.lang, s.active, s.tabs, s.update && s.update.state, s.update && s.update.version, s.dnd, s.maximized, s.settings && s.settings.tabBar]);
+    if (key === lastKey) return;
+    lastKey = key;
+    render(s);
+  };
   window.tabchat.onState(update);
   window.tabchat.getState().then(update);
 </script>

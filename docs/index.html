@@ -73,8 +73,12 @@
   .titlebar { height: 38px; display: flex; align-items: center; justify-content: center; position: relative; background: #2a2a2e; color: #e8e8ea; font: 700 14px system-ui, sans-serif; }
   .win.light .titlebar { background: #ebebed; color: #2e2e33; }
   .titlebar .ctl { position: absolute; right: 12px; display: flex; gap: 14px; opacity: .75; font-size: 13px; }
-  .tabsframe { display: block; width: 100%; height: 44px; border: 0; }
+  .tabsframe { display: block; width: 100%; height: 44px; border: 0; position: relative; z-index: 2; }
   .content { position: relative; height: 646px; background: #2b2d31; }
+  .win[data-bar="autohide"] .tabsframe { position: absolute; top: 0; left: 0; transform: translateY(-100%); transition: transform .18s ease; }
+  .win[data-bar="autohide"].reveal .tabsframe { transform: none; }
+  .win[data-bar="autohide"] .content { height: 690px; }
+  .win[data-bar="autohide"]::before { content: ''; position: absolute; z-index: 1; top: 0; left: 0; right: 0; height: 3px; background: #5865F2; opacity: .6; }
   .win.light .content { background: #f2f3f5; }
   .content > * { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
   .content img { object-fit: cover; object-position: top left; }
@@ -207,7 +211,6 @@
       <p class="try" data-i18n-html="sim.try"></p>
       <div class="simbox" id="simbox">
         <div class="win" id="win" role="application" aria-label="Tabchat demo">
-          <div class="titlebar"><span id="wintitle">Tabchat</span><span class="ctl" aria-hidden="true">–&nbsp;&nbsp;□&nbsp;&nbsp;✕</span></div>
           <iframe class="tabsframe" src="sim/tabs.html" title="Tabs" scrolling="no"></iframe>
           <div class="content">
             <iframe id="home" src="sim/home.html" title="Settings" hidden></iframe>
@@ -346,7 +349,7 @@ const TEXT = {
     'feat.intro': 'Tabchat shows the official web versions of your apps, and adds what you expect from a real desktop app.',
     'feat.g1': 'Never miss a message', 'feat.g1l': ['Unread counters on tabs, the tray icon and the dock', 'Keeps running in the background when you close the window', 'Click a notification to jump straight to that chat', 'Starts hidden when you log in, if you want'],
     'feat.g2': 'Made for school and work', 'feat.g2l': ['One shared Microsoft sign-in for Teams, Outlook and OneDrive', 'Work/school and personal Microsoft accounts side by side', 'Brightspace from your school, with the same school sign-in', 'Stays signed in after a restart, also with school accounts', 'Several accounts of the same service, side by side', 'Screen sharing in Discord and Teams'],
-    'feat.g3': 'Quiet when you need it', 'feat.g3l': ['Do not disturb for an hour, until tomorrow or until you turn it off', 'Follows Ubuntu\u2019s own Do not disturb', 'Tabs you don\u2019t use go to sleep and free up memory', 'Light and dark theme that follows your system'],
+    'feat.g3': 'Quiet when you need it', 'feat.g3l': ['Do not disturb for an hour, until tomorrow or until you turn it off', 'Follows Ubuntu\u2019s own Do not disturb', 'Tabs you don\u2019t use go to sleep and free up memory', 'Light and dark theme that follows your system', 'A minimal tab bar: compact icons or auto-hide'],
     'keys.title': 'Fast with the keyboard.',
     'keys.p1': 'Press <kbd>Ctrl+K</kbd> to jump to any tab or action. Switch tabs with <kbd>Alt+1–9</kbd> or <kbd>Ctrl+Tab</kbd>, close one with <kbd>Ctrl+W</kbd> and bring it back with <kbd>Ctrl+Shift+T</kbd>, just like in your browser.',
     'keys.p2': 'Everything else is one click away in the tray menu, right next to your clock.',
@@ -400,7 +403,7 @@ const TEXT = {
     'feat.intro': 'Tabchat toont de officiële webversies van je apps, en voegt toe wat je van een echte desktop-app verwacht.',
     'feat.g1': 'Nooit een bericht missen', 'feat.g1l': ['Ongelezen-tellers op tabbladen, het tray-icoon en het dock', 'Blijft op de achtergrond draaien als je het venster sluit', 'Klik op een melding en je zit meteen in die chat', 'Start desgewenst verborgen als je inlogt'],
     'feat.g2': 'Gemaakt voor school en werk', 'feat.g2l': ['Eén gedeelde Microsoft-login voor Teams, Outlook en OneDrive', 'School-/werk- en privé-accounts van Microsoft naast elkaar', 'Brightspace van je school, met dezelfde schoollogin', 'Blijft ingelogd na een herstart, ook met schoolaccounts', 'Meerdere accounts van dezelfde dienst naast elkaar', 'Scherm delen in Discord en Teams'],
-    'feat.g3': 'Rust als je dat wilt', 'feat.g3l': ['Niet storen voor een uur, tot morgen of tot je het uitzet', 'Volgt Niet storen van Ubuntu zelf', 'Tabbladen die je niet gebruikt, gaan slapen en maken geheugen vrij', 'Licht en donker thema dat je systeem volgt'],
+    'feat.g3': 'Rust als je dat wilt', 'feat.g3l': ['Niet storen voor een uur, tot morgen of tot je het uitzet', 'Volgt Niet storen van Ubuntu zelf', 'Tabbladen die je niet gebruikt, gaan slapen en maken geheugen vrij', 'Licht en donker thema dat je systeem volgt', 'Een rustige tabbalk: compacte icoontjes of automatisch verbergen'],
     'keys.title': 'Snel met het toetsenbord.',
     'keys.p1': 'Druk op <kbd>Ctrl+K</kbd> om naar elk tabblad of elke actie te springen. Wissel met <kbd>Alt+1–9</kbd> of <kbd>Ctrl+Tab</kbd>, sluit met <kbd>Ctrl+W</kbd> en haal terug met <kbd>Ctrl+Shift+T</kbd>, net als in je browser.',
     'keys.p2': 'Al het andere zit één klik verder in het tray-menu, naast je klok.',
@@ -505,7 +508,8 @@ function renderSim(s) {
   const simTheme = s.settings.theme === 'system' ? theme : s.settings.theme;
   win.classList.toggle('light', simTheme === 'light');
   const unread = s.tabs.reduce((n, t) => n + (typeof t.unread === 'number' ? t.unread : 0), 0);
-  document.getElementById('wintitle').textContent = unread ? `Tabchat (${unread})` : 'Tabchat';
+  win.dataset.bar = s.settings.tabBar || 'normal';
+  if (win.dataset.bar !== 'autohide') win.classList.remove('reveal');
   const home = document.getElementById('home'), shot = document.getElementById('shot'), ph = document.getElementById('ph');
   const t = s.tabs.find(x => x.id === s.active);
   home.hidden = !!t; shot.hidden = true; ph.hidden = true;
@@ -555,6 +559,19 @@ addEventListener('mousedown', (e) => { if (menu && !menu.contains(e.target)) clo
 addEventListener('blur', () => setTimeout(() => { if (menu && !menu.contains(document.activeElement)) closeMenu(); }, 0));
 addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 addEventListener('scroll', closeMenu, { passive: true });
+
+// Automatisch verbergen in de demo: muis naar de bovenrand = balk verschijnt
+let barTimer = null;
+win.addEventListener('mousemove', (e) => {
+  if (win.dataset.bar !== 'autohide') return;
+  const r = win.getBoundingClientRect(), k = r.height / win.offsetHeight;
+  if ((e.clientY - r.top) / k < 12) { clearTimeout(barTimer); win.classList.add('reveal'); }
+});
+TabchatSim.onBarHover((inside) => {
+  clearTimeout(barTimer);
+  if (inside) win.classList.add('reveal');
+  else barTimer = setTimeout(() => win.classList.remove('reveal'), 500);
+});
 
 applyTheme();
 applyText();

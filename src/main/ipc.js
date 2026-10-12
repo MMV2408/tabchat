@@ -38,6 +38,16 @@ function register() {
   ipcMain.on('open', (_e, id) => { if (id === 'home' || store.config.tabs.some(t => t.id === id)) views.show(id); });
   ipcMain.on('tab-sleep', (_e, id, allowed) => sleep.setAllowed(id, allowed));
   ipcMain.on('add', (_e, service, url) => actions.addTab(service, url));
+  // Eigen titelbalk: − □ ✕
+  ipcMain.on('win-control', (_e, action) => {
+    if (!store.alive()) return;
+    if (action === 'minimize') store.win.minimize();
+    else if (action === 'maximize') store.win.isMaximized() ? store.win.unmaximize() : store.win.maximize();
+    else if (action === 'close') store.win.close(); // met tray: verbergen (zie tray.js)
+  });
+  // Tabbalk automatisch verbergen: muis aan de bovenrand / van de balk af
+  ipcMain.on('bar-edge', () => views.revealBar(true));
+  ipcMain.on('bar-hover', (_e, inside) => { if (inside) views.revealBar(true); else views.hideBarSoon(); });
   ipcMain.handle('check-url', (_e, url) => require('./brightspace').check(url));
   ipcMain.on('remove', (_e, id) => actions.removeTab(id));
   ipcMain.on('back', () => actions.back());

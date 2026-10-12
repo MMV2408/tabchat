@@ -23,6 +23,7 @@
   let dnd = null;         // null, 'forever' of een tijdstip (ms)
   let upd = 'idle';
   let menuHandler = null;
+  let barHoverCb = null;
 
   // Het rechtsklikmenu van een tabblad, net als in de app (src/main/ipc.js)
   function menuItems(id) {
@@ -103,6 +104,7 @@
       update: { state: upd, current: D.version, version: D.version },
       platform: { kind: 'deb', storeManaged: false },
       browsers: [{ id: 'firefox', name: 'Firefox' }, { id: 'chromium', name: 'Chromium' }],
+      maximized: false,
       lang: lang()
     }));
   }
@@ -136,6 +138,8 @@
       },
       onAskUrl: (cb) => f.ask.push(cb),
       onFocusSetting: () => {},
+      winControl: () => {},
+      barHover: (inside) => { if (barHoverCb) barHoverCb(inside); },
       checkUrl: async (u) => {
         const s = String(u || '').trim();
         if (!/^(https?:\/\/)?[^\s/]+\.[^\s/]{2,}/i.test(s)) return { status: 'invalid', url: null };
@@ -193,6 +197,7 @@
       return api(f);
     },
     onTabMenu(cb) { menuHandler = cb; },
+    onBarHover(cb) { barHoverCb = cb; },
     menuItems, tabAction,
     subscribe(cb) { listeners.add(cb); cb(snapshot()); },
     open,

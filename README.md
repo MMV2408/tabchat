@@ -66,6 +66,7 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 - ☀️ Light and dark theme that follows your system
 - 🔗 Choose where links open: your default browser, another browser or Tabchat itself
 - 🎨 Colored or white tray icon
+- 🧹 Minimal window: the tab bar is the title bar, with a compact (icons only) or auto-hide option
 
 <p align="center">
   <img src="docs/screenshots/quick-search.png" alt="Quick search with Ctrl+K" width="860">

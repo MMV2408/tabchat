@@ -29,6 +29,9 @@ function create() {
     height: 800,
     title: 'Tabchat',
     autoHideMenuBar: true,
+    frame: false, // geen Ubuntu-titelbalk: de tabbalk is de titelbalk (slepen, − □ ✕)
+    minWidth: 480,
+    minHeight: 360,
     backgroundColor: theme.background(),
     icon: ICON,
     show: !hidden
@@ -66,11 +69,16 @@ function create() {
   if (store.active !== 'home') store.lastTab = store.active;
 
   win.on('resize', views.layout);
+  // Maximaliseren: icoon van de knop □ bijwerken
+  win.on('maximize', views.broadcast);
+  win.on('unmaximize', views.broadcast);
+  win.on('blur', () => views.revealBar(false));
   win.on('focus', views.focusActive);
   home.webContents.on('focus', () => {
     if (store.active !== 'home' || store.paletteOpen || store.shareOpen) setImmediate(views.focusActive);
   });
   views.layout();
+  views.watchEdge(); // tabbalk automatisch verbergen: bovenrand in de gaten houden
   tray.init(); // tray-icoon + kruisje = verbergen
   dnd.apply(); // Niet storen van vorige keer (bv. "tot morgen") weer toepassen
   dnd.watchSystem(); // Niet storen van Ubuntu volgen

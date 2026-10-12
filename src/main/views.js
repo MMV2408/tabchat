@@ -12,7 +12,10 @@ const dnd = require('./dnd');
 const sleep = require('./sleep');
 const i18n = require('./i18n');
 
-const BAR = 44; // hoogte tabbalk in pixels
+// Hoogte tabbalk: altijd 44 pixels (compact = alleen icoontjes, even hoog). Bij "automatisch verbergen"
+// neemt de balk geen ruimte in en schuift hij over de dienst heen als je de muis naar boven beweegt.
+const barMode = () => (store.config && store.config.settings.tabBar) || 'normal';
+const barHeight = () => 44;
 const ERROR_PAGE = path.join(__dirname, '..', 'renderer', 'error.html');
 
 // ---------- status naar de schermen ----------
@@ -57,7 +60,8 @@ function getState() {
     platform: { kind: require('./platform').kind, storeManaged: require('./platform').storeManaged },
     update: require('./updater').getStatus(),
     catalog: Object.entries(CATALOG).map(([id, s]) => ({ id, name: s.name, key: s.key, color: s.color, base: s.base || null, askUrl: !!s.askUrl, desc: i18n.t('svc.' + (s.base || id)) })),
-    settings: config.settings
+    settings: config.settings,
+    maximized: store.win ? store.win.isMaximized() : false
   };
 }
 
@@ -85,6 +89,12 @@ function createServiceView(tab) {
   v.webContents.on('before-input-event', shortcuts.handler('tab'));
   unread.watch(tab, v);
 
+  // Sommige sites (zoals Discord) markeren hun bovenbalk als "sleepgebied" voor hun eigen desktop-app.
+  // In een venster zonder titelbalk zou je daar het hele Tabchat-venster mee slepen, en bij een
+  // automatisch verborgen tabbalk vangt dat de klikken bovenin af. Dat zetten we voor elke site uit.
+  v.webContents.on('dom-ready', () => {
+    v.webContents.insertCSS('*, *::before, *::after { -webkit-app-region: no-drag !important; }').catch(() => {});
+  });
   v.webContents.on('did-finish-load', () => {
     const url = v.webContents.getURL();
     if (url.startsWith('file:')) {
@@ -221,13 +231,62 @@ function reloadView(id) {
   }
 }
 
+// ---------- tabbalk tonen bij "automatisch verbergen" ----------
+let hideTimer = null;
+function revealBar(on) {
+  if (!store.alive()) return;
+  if (on) cancelHide();
+  if (barMode() !== 'autohide') { store.barRevealed = false; return; }
+  if (on === store.barRevealed) return;
+  if (on && (store.paletteOpen || store.shareOpen)) return;
+  store.barRevealed = on;
+  if (on) {
+    // Balk bovenop de dienst leggen (snelzoeken en scherm delen blijven daarboven)
+    const cv = store.win.contentView;
+    for (const v of [store.bar, store.palette, store.share]) { cv.removeChildView(v); cv.addChildView(v); }
+  }
+  layout();
+}
+// Muis van de balk af: na een korte pauze weer verbergen
+function hideBarSoon() {
+  if (hideTimer) return; // al bezig met verbergen: niet steeds opnieuw beginnen
+  hideTimer = setTimeout(() => { hideTimer = null; revealBar(false); }, 500);
+}
+function cancelHide() {
+  clearTimeout(hideTimer);
+  hideTimer = null;
+}
+
+// De muis zelf in de gaten houden (de rand van een venster zonder titelbalk vangt de muis af,
+// dus de pagina merkt de bovenrand niet altijd). Alleen bij "automatisch verbergen".
+let edgeTimer = null;
+function watchEdge() {
+  clearInterval(edgeTimer);
+  edgeTimer = null;
+  if (barMode() !== 'autohide') return;
+  const { screen } = require('electron');
+  edgeTimer = setInterval(() => {
+    if (!store.alive() || !store.win.isVisible() || store.win.isMinimized()) return;
+    const p = screen.getCursorScreenPoint();
+    const b = store.win.getContentBounds();
+    const insideX = p.x >= b.x && p.x <= b.x + b.width;
+    if (!insideX) return;
+    if (p.y >= b.y - 2 && p.y <= b.y + 24) revealBar(true);                                // bovenste strook
+    else if (store.barRevealed && p.y >= b.y && p.y <= b.y + barHeight()) cancelHide();        // op de balk
+    else if (store.barRevealed) hideBarSoon();                                              // van de balk af
+  }, 120);
+}
+
 // ---------- tonen ----------
 function layout() {
   if (!store.alive()) return;
   const { win, bar, home, palette: pal, views, active, paletteOpen } = store;
   const { width, height } = win.getContentBounds();
-  const area = { x: 0, y: BAR, width, height: height - BAR };
-  bar.setBounds({ x: 0, y: 0, width, height: BAR });
+  const h = barHeight();
+  const top = barMode() === 'autohide' ? 0 : h;
+  const area = { x: 0, y: top, width, height: height - top };
+  bar.setBounds({ x: 0, y: 0, width, height: h });
+  bar.setVisible(barMode() !== 'autohide' || store.barRevealed);
   home.setBounds(area);
   home.setVisible(active === 'home');
   for (const [id, v] of Object.entries(views)) {
@@ -262,5 +321,6 @@ function show(id) {
 }
 
 Object.assign(module.exports, {
+  revealBar, hideBarSoon, watchEdge,
   getState, broadcast, createServiceView, destroyView, removeForSleep, reloadView, layout, focusActive, show
 });
