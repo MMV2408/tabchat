@@ -248,7 +248,7 @@
     rightBox.className = 'right';
     document.body.append(rightBox);
     const pillText = (btn, text) => { const p = document.createElement('span'); p.className = 'pill'; p.textContent = text; btn.append(p); };
-    if (s.update && s.update.state === 'ready') {
+    if (s.update && (s.update.state === 'ready' || s.update.state === 'failed')) {
       const u = document.createElement('button');
       u.id = 'update';
       pillText(u, T('tabs.update', { v: s.update.version }));

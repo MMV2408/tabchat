@@ -2,6 +2,11 @@
 // Nieuwe versie? Zet bovenaan een blok erbij (en in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.20.2',
+    nl: ['Lukt het installeren van een update niet, dan zie je dat nu in het +-scherm, en houdt Tabchat een logboek bij (updater.log) dat je kunt meesturen'],
+    en: ["If installing an update doesn't work, you now see it on the + screen, and Tabchat keeps a log (updater.log) you can send along"]
+  },
+  {
     v: '1.20.1',
     nl: ['Hardwareversnelling staat nu bij Algemeen, als hulp bij beeldproblemen (zwart scherm of flikkeren). Geheugen scheelt het nauwelijks, dus laat hem gewoon aan als alles goed werkt'],
     en: ['Hardware acceleration moved to General, as a fix for display problems (black screen or flickering). It barely saves memory, so just leave it on if everything works']

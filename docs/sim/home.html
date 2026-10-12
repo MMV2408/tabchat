@@ -748,7 +748,7 @@
     links.append(news, fb, don);
     info.append(el('div', 'ver', `Tabchat ${u.current || ''}`), el('div', 'st', st), links);
     about.append(info);
-    if (u.state === 'ready') {
+    if (u.state === 'ready' || u.state === 'failed') {
       const ib = el('button', 'add', T('upd.install'));
       ib.onclick = () => window.tabchat.installUpdate();
       about.append(ib);

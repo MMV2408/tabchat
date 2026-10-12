@@ -18,12 +18,31 @@ try {
 }
 
 const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
+
+// Logboek van de updater: ~/.config/tabchat/updater.log (bij problemen kan een gebruiker dit meesturen)
+const LOG = path.join(app.getPath('userData'), 'updater.log');
+function log(level, ...parts) {
+  try {
+    const fs = require('fs');
+    try { if (fs.statSync(LOG).size > 256 * 1024) fs.renameSync(LOG, LOG + '.old'); } catch {}
+    const text = parts.map(x => (x instanceof Error ? x.stack : typeof x === 'string' ? x : JSON.stringify(x))).join(' ');
+    fs.appendFileSync(LOG, `${new Date().toISOString()} ${app.getVersion()} [${level}] ${text}\n`);
+  } catch {}
+}
+if (autoUpdater) {
+  autoUpdater.logger = {
+    info: (...a) => log('info', ...a),
+    warn: (...a) => log('warn', ...a),
+    error: (...a) => log('error', ...a),
+    debug: () => {}
+  };
+}
 let timer = null;
 
 // Status voor het +-scherm, de tabbalk en het tray-menu
 const status = {
   current: app.getVersion(),
-  state: 'idle',   // idle | checking | latest | downloading | ready | error | dev | off | store
+  state: 'idle',   // idle | checking | latest | downloading | ready | failed | error | dev | off | store
   store: platform.storeName, // Flathub / Snap Store: die regelen de updates
   version: null,   // nieuwe versie, als die er is
   percent: 0
@@ -85,8 +104,9 @@ function init() {
   });
   autoUpdater.on('error', (err) => {
     console.error('Update-fout:', err && err.message);
+    log('error', 'event error', err);
     // Fout tijdens installeren (bv. wachtwoord geweigerd): update blijft klaarstaan
-    if (installing) { installing = false; return set({ state: 'ready' }); }
+    if (installing) { installing = false; return set({ state: 'failed' }); }
     set({ state: 'error' });
   });
 
@@ -125,16 +145,22 @@ function showUpdate() {
 // en staat de update de volgende keer weer klaar.
 let installing = false;
 async function install() {
-  if (status.state !== 'ready' || !autoUpdater || installing) return;
+  log('info', `Nu installeren geklikt (status ${status.state}, versie ${status.version}, bezig ${installing})`);
+  if ((status.state !== 'ready' && status.state !== 'failed') || !autoUpdater || installing) return;
   installing = true;
-  await require('./actions').flushLogins(); // logins eerst opslaan
+  // Logins eerst opslaan (maximaal 3 seconden wachten, zodat het nooit blijft hangen)
+  await Promise.race([require('./actions').flushLogins(), new Promise(r => setTimeout(r, 3000))]);
+  log('info', 'logins opgeslagen, installeren starten');
   // Afsluiten (tray weg, venster dicht) gebeurt pas via 'before-quit' als de installatie gelukt is
-  autoUpdater.quitAndInstall(false, true); // false = niet stil, true = daarna opnieuw starten
-  // Nog steeds hier na een paar seconden? Dan is het afgebroken: knop weer tonen
+  try {
+    autoUpdater.quitAndInstall(false, true); // false = niet stil, true = daarna opnieuw starten
+  } catch (e) { log('error', 'quitAndInstall', e); }
+  // Nog steeds hier na een paar seconden? Dan is het mislukt of afgebroken: melden en knop weer tonen
   setTimeout(() => {
     if (store.quitting) return;
+    log('warn', 'installeren niet gelukt of afgebroken');
     installing = false;
-    set({ state: 'ready' });
+    set({ state: 'failed' });
   }, 3000);
 }
 

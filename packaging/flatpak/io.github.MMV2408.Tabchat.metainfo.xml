@@ -119,6 +119,11 @@
   </requires>
 
   <releases>
+    <release version="1.20.2" date="2026-10-12">
+      <description>
+        <p>Clearer message when installing an update fails, plus an update log.</p>
+      </description>
+    </release>
     <release version="1.20.1" date="2026-10-12">
       <description>
         <p>The hardware acceleration setting moved to General, as a fix for display problems.</p>
