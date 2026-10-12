@@ -8,12 +8,13 @@
   let siteLang = 'en', siteTheme = 'dark';
   let nextId = 1;
 
-  const settings = { ...D.settings };
+  const settings = { ...D.settings, brightspaceUrl: 'https://brightspace.example.edu/' }; // voorbeeldschool
   const tab = (service, extra = {}) => ({ id: 't' + nextId++, service, canSleep: !D.catalog[service].awake, asleep: false, unread: 0, muted: false, ...extra });
   let tabs = [
     // Zelfde aantallen als op de screenshots (sim/shots)
     tab('whatsapp', { unread: 45 }),
     tab('discord', { unread: 'dot' }),
+    tab('brightspace'),
     tab('teams', { unread: 2 }),
     tab('outlook'),
     tab('onedrive', { asleep: true, canSleep: true })

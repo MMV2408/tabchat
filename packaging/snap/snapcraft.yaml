@@ -2,7 +2,7 @@ name: tabchat
 base: core24
 version: '0.0.0' # wordt door build.sh gelijk gezet aan package.json
 title: Tabchat
-summary: WhatsApp, Discord, Teams, Outlook and OneDrive in one window
+summary: WhatsApp, Discord, Teams, Brightspace and any website in one window
 description: |
   Tabchat puts your chat and work apps in one lightweight window with tabs.
 
@@ -12,6 +12,8 @@ description: |
   - One shared Microsoft sign-in for Teams, Outlook and OneDrive that stays signed in
   - Work/school and personal Microsoft accounts (Outlook.com, Hotmail) side by side
   - Your school's Brightspace, signed in with the same school account
+  - Add any website as a tab, or open one once in incognito
+  - Hide the services you don't use and drag them into your own order
   - WhatsApp voice and video calls
   - Tab sleep, quick search (Ctrl+K) and browser-style shortcuts
   - Screen sharing in Discord and Teams

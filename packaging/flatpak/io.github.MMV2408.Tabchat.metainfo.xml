@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>io.github.MMV2408.Tabchat</id>
   <name>Tabchat</name>
-  <summary>WhatsApp, Discord, Teams, Outlook and OneDrive in one window</summary>
+  <summary>WhatsApp, Discord, Teams, Brightspace and any website in one window</summary>
   <developer id="io.github.MMV2408">
     <name>Mike Vijverberg</name>
   </developer>
@@ -23,6 +23,7 @@
       <li>One shared Microsoft sign-in for Teams, Outlook and OneDrive that stays signed in</li>
       <li>Work/school and personal Microsoft accounts side by side</li>
       <li>Your school's Brightspace, with the same school sign-in</li>
+      <li>Add any website as a tab, or open one once in incognito</li>
       <li>Tab sleep: unused tabs are unloaded from memory and return with one click</li>
       <li>Quick search with Ctrl+K and browser-style keyboard shortcuts</li>
       <li>Screen sharing in Discord and Teams, also on Wayland</li>
@@ -45,12 +46,16 @@
 
   <screenshots>
     <screenshot type="default">
-      <caption>WhatsApp, Discord, Outlook, Teams and OneDrive in tabs</caption>
+      <caption>WhatsApp, Discord, Brightspace, Teams, Outlook and OneDrive in tabs</caption>
       <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/main.png</image>
     </screenshot>
     <screenshot>
       <caption>Discord right next to your other chats</caption>
       <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/discord.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Your school's Brightspace with the same school sign-in</caption>
+      <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/brightspace.png</image>
     </screenshot>
     <screenshot>
       <caption>Outlook in a tab</caption>
@@ -61,8 +66,12 @@
       <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/quick-search.png</image>
     </screenshot>
     <screenshot>
-      <caption>Add services, with a work/school or personal choice for Microsoft</caption>
+      <caption>Add services and your own websites, in your own order</caption>
       <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/settings.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Add any website as a tab, or open it once in incognito</caption>
+      <image>https://raw.githubusercontent.com/MMV2408/tabchat/main/docs/screenshots/own-website.png</image>
     </screenshot>
     <screenshot>
       <caption>OneDrive, Outlook and Teams with one shared Microsoft sign-in</caption>

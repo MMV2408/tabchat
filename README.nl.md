@@ -5,7 +5,7 @@
 <h1 align="center">Tabchat</h1>
 
 <p align="center">
-  <b>WhatsApp, Discord, Teams, Outlook en OneDrive in één venster — gemaakt voor Linux.</b><br>
+  <b>WhatsApp, Discord, Teams, Outlook, Brightspace en elke andere website in één venster — gemaakt voor Linux.</b><br>
   Licht, handig met het toetsenbord en gebouwd om je ingelogd te houden.
 </p>
 
@@ -104,11 +104,13 @@ Tabchat zoekt zelf naar nieuwe versies en downloadt ze op de achtergrond. Staat 
 1. Open Tabchat en klik op **+** (of druk op `Alt+T`).
 2. Voeg de diensten toe die je gebruikt. Elke dienst opent in een eigen tabblad. Kies bij Teams, Outlook en OneDrive voor **School/werk** of **Privé**. Vul bij Brightspace één keer het Brightspace-adres van je school in (aan te passen in het +-scherm; een groen vinkje laat zien dat het werkt).
 3. Log één keer in — Tabchat onthoudt het.
+4. Mis je een website? Klik op **Eigen website**, plak het adres en hij wordt een tabblad. Zet **Incognito** aan om hem maar één keer te openen.
 
 Al het andere — taal, slaapstand, starten bij inloggen, wit tray-icoon — staat in hetzelfde **+**-scherm.
 
 <p align="center">
   <img src="docs/screenshots/settings.png" alt="Het +-scherm: diensten toevoegen, met een keuze tussen school/werk en privé voor Microsoft" width="860">
+  <img src="docs/screenshots/own-website.png" alt="Een eigen website toevoegen, of één keer incognito openen" width="860">
 </p>
 
 ## Sneltoetsen
