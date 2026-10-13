@@ -3,8 +3,10 @@
 const CHANGELOG = [
   {
     v: '1.23.0',
-    nl: ['Tabchat draait nu ook op ARM-computers (64-bit), zoals de Raspberry Pi 4 en 5'],
-    en: ['Tabchat now also runs on ARM computers (64-bit), like the Raspberry Pi 4 and 5']
+    nl: ['Tabchat draait nu ook op ARM-computers (64-bit), zoals de Raspberry Pi 4 en 5',
+         'Bijgewerkt naar de nieuwste browser-engine (Electron 44, Chrome 152): veiliger, en Brightspace meldt niet meer dat je browser verouderd is'],
+    en: ['Tabchat now also runs on ARM computers (64-bit), like the Raspberry Pi 4 and 5',
+         'Updated to the latest browser engine (Electron 44, Chrome 152): more secure, and Brightspace no longer says your browser is outdated']
   },
   {
     v: '1.22.0',

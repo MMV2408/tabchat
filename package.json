@@ -43,11 +43,11 @@
     ]
   },
   "devDependencies": {
-    "electron": "^38.0.0",
+    "electron": "^44.7.0",
     "electron-builder": "^26.0.0"
   },
   "dependencies": {
-    "electron-updater": "^6.6.2",
-    "dbus-next": "^0.10.2"
+    "dbus-next": "^0.10.2",
+    "electron-updater": "^6.6.2"
   }
 }

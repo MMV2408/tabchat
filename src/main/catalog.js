@@ -1,7 +1,10 @@
 // All services a user can add, and their web addresses.
 // Adding a new service = one line in CATALOG.
 
-const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
+// Look like a normal Chrome of the same version as our engine (major version only, like Chrome itself),
+// so sites like Brightspace don't call it outdated as long as Electron is up to date
+const CHROME_MAJOR = (process.versions.chrome || '140').split('.')[0];
+const UA = `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROME_MAJOR}.0.0.0 Safari/537.36`;
 
 // key   = letter for Alt+letter on the + screen
 // group = services in the same group can share one login (see microsoft.js)
