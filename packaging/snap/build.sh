@@ -10,6 +10,7 @@ VERSION=$(node -p "require('./package.json').version")
 STAGE=dist/snap-stage
 
 ARCH=$(dpkg --print-architecture)       # amd64 or arm64
+bash scripts/build-helper.sh              # native helper (Rust) for this architecture
 npx electron-builder --linux dir          # -> dist/linux-unpacked or dist/linux-arm64-unpacked
 UNPACKED=dist/linux-unpacked
 [ "$ARCH" = "arm64" ] && UNPACKED=dist/linux-arm64-unpacked

@@ -23,6 +23,9 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Install Rust (for the native helper)
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Build the app and stage the snap folder
         run: |
           npm ci

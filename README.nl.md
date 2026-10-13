@@ -178,14 +178,15 @@ Open een [issue](https://github.com/MMV2408/tabchat/issues) en voeg de logbestan
 
 ## Zelf bouwen
 
-Nodig: [Node.js](https://nodejs.org) 20 of nieuwer.
+Nodig: [Node.js](https://nodejs.org) 20 of nieuwer, en [Rust](https://rustup.rs) voor de kleine native helper die meldingen verstuurt.
 
 ```bash
 git clone https://github.com/MMV2408/tabchat.git
 cd tabchat
 npm install
 npm start          # starten om te testen
-npm run dist       # .deb en .AppImage bouwen in dist/
+npm run helper     # native helper bouwen (voor npm start niet verplicht: zonder gebruikt Tabchat de Node-helper)
+npm run dist       # eerst de helper, dan .deb en .AppImage (x64 + arm64) in dist/
 ```
 
 Meer over de mappenstructuur, iets toevoegen en een nieuwe versie uitbrengen staat in de [Engelse README](README.md#building-from-source).

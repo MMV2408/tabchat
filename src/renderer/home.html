@@ -38,8 +38,9 @@
   .add:hover { background: #4752c4; }
   .add.personal { background: var(--personal-bg); color: var(--personal-text); }
   .add.personal:hover { background: var(--personal-hover); }
-  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .btns button { white-space: nowrap; padding: 8px 6px; }
+  /* two buttons side by side, below each other when the card is narrow (small window) */
+  .btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 6px; }
+  .btns button { white-space: nowrap; padding: 8px 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .remove { background: transparent; color: #f23f43; }
   /* cards: draggable, own websites with label and ✎ */
   .card { position: relative; }

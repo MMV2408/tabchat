@@ -119,6 +119,11 @@
   </requires>
 
   <releases>
+    <release version="1.25.0" date="2026-10-14">
+      <description>
+        <p>Notifications are sent by a small native helper instead of a JavaScript process, using about 30 MB less memory.</p>
+      </description>
+    </release>
     <release version="1.24.0" date="2026-10-13">
       <description>
         <p>Uses less memory with fewer background processes, and shows the memory use of each tab on the + screen.</p>

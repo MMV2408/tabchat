@@ -2,13 +2,14 @@
 //
 // Electron notifications (and ones Tabchat sends itself) show a loading cursor for ~15 seconds
 // after a click: GNOME links the notification to Tabchat and "starts" the app on a click.
-// That's why a small helper without a window sends the notifications (notify-helper.js):
+// That's why a small helper without a window sends the notifications: the native tabchat-helper
+// (Rust, see helper/, ~2 MB), or notify-helper.js (Node, ~30 MB) when that program isn't there:
 // GNOME then links them to no app at all and starts nothing. The click reaches us via the
 // helper, and we bring the window and the right tab to the front ourselves.
 //
 // If that fails, or in Flathub, Tabchat simply uses Electron's notifications.
 const { nativeImage, Notification } = require('electron');
-const { fork } = require('child_process');
+const { fork, spawn } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -31,29 +32,85 @@ function isAvailable() {
   return available;
 }
 
+// The native helper: next to the app when installed, or helper/target/release in a dev build
+function nativeHelper() {
+  const spots = [
+    process.resourcesPath && path.join(process.resourcesPath, 'helper', 'tabchat-helper'),
+    path.join(__dirname, '..', '..', 'helper', 'target', 'release', 'tabchat-helper')
+  ];
+  for (const f of spots) {
+    try { if (f) { fs.accessSync(f, fs.constants.X_OK); return f; } } catch (e) { /* not here, try the next spot */ }
+  }
+  return null;
+}
+let useNative = true; // false after the native helper failed once: use the Node helper from then on
+
+// Messages to the helper: JSON lines to the native one, IPC to the Node one
+function post(m) {
+  if (child.stdin) child.stdin.write(JSON.stringify(m) + '\n');
+  else child.send(m);
+}
+
+function spawnNative(file) {
+  const c = spawn(file, [], { stdio: ['pipe', 'pipe', 'ignore'] });
+  c.stdin.on('error', (e) => log.warn('native helper stdin:', e));
+  let buf = '';
+  c.stdout.setEncoding('utf8');
+  c.stdout.on('data', (d) => {
+    buf += d;
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i);
+      buf = buf.slice(i + 1);
+      try { onMessage(JSON.parse(line)); } catch (e) { log.warn('native helper message:', e); }
+    }
+  });
+  return c;
+}
+
 let stopping = false;
 function start() {
   if (child) return true;
   try {
     stopping = false;
-    child = fork(path.join(__dirname, 'notify-helper.js'), [], {
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
-      stdio: ['ignore', 'ignore', 'ignore', 'ipc']
-    });
-    child.on('message', onMessage);
-    child.on('exit', () => {
-      if (!stopping) available = false; // stopped unexpectedly: continue via Electron
-      child = null;
+    const file = useNative && nativeHelper();
+    if (file) {
+      child = spawnNative(file);
+    } else {
+      child = fork(path.join(__dirname, 'notify-helper.js'), [], {
+        env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+        stdio: ['ignore', 'ignore', 'ignore', 'ipc']
+      });
+      child.on('message', onMessage);
+    }
+    const native = !!file;
+    const me = child;
+    let ended = false;
+    const onEnd = (code) => {
+      if (ended) return;
+      ended = true;
+      if (native && !stopping) {
+        // Native helper stopped unexpectedly: try the Node helper next time instead of giving up
+        log.warn('native helper exited with', code, '- using the Node helper');
+        useNative = false;
+      } else if (!stopping) available = false; // stopped unexpectedly: continue via Electron
+      if (child === me) child = null;
       for (const p of pending.values()) failed(p); // not shown yet: show via Electron instead
       pending.clear();
       items.clear();
+    };
+    child.on('exit', onEnd);
+    child.on('error', (e) => {
+      // Could not start (e.g. the program is missing): use the Node helper next time
+      log.warn('notify helper error:', e);
+      if (native) useNative = false;
+      if (child === me && me.exitCode === null && !me.pid) onEnd(null); // never started, so no 'exit' follows
     });
-    child.on('error', () => {});
     return true;
   } catch { available = false; child = null; return false; }
 }
 
-// No notifications open anymore? Then stop the helper after 10 minutes (saves ~90 MB)
+// No notifications open anymore? Then stop the helper after 10 minutes (saves ~2 MB native, ~30 MB Node)
 const IDLE = 10 * 60 * 1000;
 let idleTimer = null;
 function idleCheck() {
@@ -138,13 +195,13 @@ function show(opts, cb) {
   const key = nextKey++;
   pending.set(key, { opts, file, cb });
   try {
-    child.send({ type: 'show', key, icon: 'tabchat', title: String(title ?? ''), body: markup(body), image: file });
+    post({ type: 'show', key, icon: 'tabchat', title: String(title ?? ''), body: markup(body), image: file });
   } catch { pending.delete(key); failed({ opts, file, cb }); }
 }
 
 function close(id) {
   if (!items.has(id) || !child) return;
-  try { child.send({ type: 'close', id }); } catch (e) { log.warn('notify helper close:', e); }
+  try { post({ type: 'close', id }); } catch (e) { log.warn('notify helper close:', e); }
   forget(id, false);
 }
 

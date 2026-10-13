@@ -178,14 +178,23 @@ Open an [issue](https://github.com/MMV2408/tabchat/issues) and attach the log fi
 
 ## Building from source
 
-Requirements: [Node.js](https://nodejs.org) 20 or newer.
+Requirements: [Node.js](https://nodejs.org) 20 or newer, and [Rust](https://rustup.rs) for the small native helper that sends notifications.
 
 ```bash
 git clone https://github.com/MMV2408/tabchat.git
 cd tabchat
 npm install
 npm start          # run in development
-npm run dist       # build .deb and .AppImage into dist/
+npm run helper     # build the native helper (optional for npm start: without it the Node helper is used)
+npm run dist       # build the helper, then .deb and .AppImage (x64 + arm64) into dist/
+```
+
+Building for both x64 and arm64 from one PC needs [cargo-zigbuild](https://github.com/rust-cross/cargo-zigbuild):
+
+```bash
+rustup target add aarch64-unknown-linux-gnu
+cargo install cargo-zigbuild
+pip install --user ziglang
 ```
 
 ### Project structure
@@ -216,6 +225,7 @@ src/
     preload.js       Bridge between Tabchat's own screens and the app
     service.js       Runs inside each service tab (unread badge, Do not disturb)
   renderer/          Tabchat's own screens (HTML)
+helper/              tabchat-helper: native notification helper (Rust, D-Bus)
 assets/              Logo and tray icons
 ```
 

@@ -2,6 +2,13 @@
 // New version? Add a block at the top (and in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.25.0',
+    nl: ['Meldingen worden nu verstuurd door een klein eigen programma in Rust in plaats van een JavaScript-proces: zo\'n 30 MB minder geheugen en sneller',
+         'In een smal venster passen de knoppen op het + scherm weer netjes in hun kaart'],
+    en: ['Notifications are now sent by a small native program written in Rust instead of a JavaScript process: about 30 MB less memory and faster',
+         'In a narrow window the buttons on the + screen fit their card again']
+  },
+  {
     v: '1.24.0',
     nl: ['Zuiniger: minder processen op de achtergrond, zo\'n 25 tot 40 MB minder geheugen',
          'Op het + scherm zie je per tabblad hoeveel geheugen het gebruikt, plus het totaal',
