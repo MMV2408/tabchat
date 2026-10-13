@@ -40,7 +40,13 @@
         "owner": "MMV2408",
         "repo": "tabchat"
       }
-    ]
+    ],
+    "deb": {
+      "recommends": [
+        "libappindicator3-1",
+        "dunst | notification-daemon"
+      ]
+    }
   },
   "devDependencies": {
     "electron": "^44.7.0",
