@@ -108,6 +108,10 @@ Use the files with `arm64` in the name: `tabchat_*_arm64.deb` (Raspberry Pi OS, 
 
 Tabchat checks for new versions by itself and downloads them in the background. When an update is ready, a green button appears in the tab bar — click it and Tabchat restarts on the new version. You can turn this off on the **+** screen.
 
+## Other platforms
+
+**macOS:** [Tabchat for Mac](https://github.com/narendranag/tabchat) by [@narendranag](https://github.com/narendranag) is an independent community port, written from scratch in Swift. It uses the built-in web engine of macOS and follows the same idea and features. It is a separate project, maintained by its own author.
+
 ## Getting started
 
 1. Open Tabchat and click **+** (or press `Alt+T`).
