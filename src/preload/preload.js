@@ -11,6 +11,7 @@ window.addEventListener('mousemove', (e) => {
 contextBridge.exposeInMainWorld('tabchat', {
   getState: () => ipcRenderer.invoke('get-state'),
   getStrings: () => ipcRenderer.invoke('get-strings'),
+  memStats: () => ipcRenderer.invoke('mem-stats'),
   onState: (cb) => ipcRenderer.on('state', (_e, s) => cb(s)),
 
   open: (id) => ipcRenderer.send('open', id),

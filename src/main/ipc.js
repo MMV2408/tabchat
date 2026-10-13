@@ -42,6 +42,7 @@ function showTabMenu(id) {
 function register() {
   ipcMain.handle('get-state', () => views.getState());
   ipcMain.handle('get-strings', () => i18n.strings());
+  ipcMain.handle('mem-stats', () => require('./memory').stats());
 
   ipcMain.on('open', (_e, id) => { if (id === 'home' || store.config.tabs.some(t => t.id === id)) views.show(id); });
   ipcMain.on('tab-sleep', (_e, id, allowed) => sleep.setAllowed(id, allowed));

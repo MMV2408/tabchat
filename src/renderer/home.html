@@ -90,6 +90,10 @@
     background: var(--bg-0); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
   }
   .row .name { flex: 1; }
+  .row .mem { font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .memsum { font-size: 13px; color: var(--text-muted); margin: 0 4px 8px; font-variant-numeric: tabular-nums; }
+  .memsum:empty { display: none; }
+  .mem-text { color: var(--text); font-size: 14px; line-height: 1.55; margin: 0 0 10px; }
   .row .sleepsw { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-right: 8px; }
   select { background: var(--bg-1); color: var(--text); border: 1px solid var(--bg-3); border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 14px; }
   .empty { color: var(--text-muted); background: var(--bg-0); border-radius: 10px; padding: 16px; }
@@ -126,8 +130,8 @@
   .wn-foot { display: flex; justify-content: flex-end; margin: 20px 0 12px; }
   .about .links { display: flex; gap: 14px; margin-top: 4px; }
   .about .links .donate { margin-top: 0; }
-  #modal, #wn, #ask, #site, #svcs { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
-  #modal.open, #wn.open, #ask.open, #site.open, #svcs.open { display: flex; }
+  #modal, #wn, #ask, #site, #svcs, #memwin { position: fixed; inset: 0; background: var(--backdrop); display: none; align-items: flex-start; justify-content: center; padding: 48px 16px; overflow-y: auto; }
+  #modal.open, #wn.open, #ask.open, #site.open, #svcs.open, #memwin.open { display: flex; }
   /* ask for an address (your school's Brightspace) */
   .ask-input { width: 100%; margin: 14px 0 6px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--bg-3); background: var(--bg-1); color: var(--text); font: inherit; font-size: 15px; }
   .ask-input:focus { outline: 2px solid #5865F2; border-color: transparent; }
@@ -176,6 +180,7 @@
 
   <h2 data-i18n="home.mine"></h2>
   <div id="mine"></div>
+  <div class="memsum" id="memsum"></div>
 
   <div class="cathead">
     <h2><span data-i18n="home.add"></span> <span class="hint" data-i18n="home.addHint"></span></h2>
@@ -652,13 +657,69 @@
   // Esc: close the dialog first, otherwise back to your tab
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (site.classList.contains('open')) closeSite();
+    const mw = document.getElementById('memwin');
+    if (mw && mw.classList.contains('open')) mw.classList.remove('open');
+    else if (site.classList.contains('open')) closeSite();
     else if (svcs.classList.contains('open')) closeSvcs();
     else if (ask.classList.contains('open')) closeAsk();
     else if (wn.classList.contains('open')) closeWn();
     else if (modal.classList.contains('open')) closeKeys();
     else window.tabchat.back();
   });
+
+  // ---------- memory per tab (same measurement as tools/memstat.js, see memory.js) ----------
+  let memLast = null;
+  function showMem() {
+    const m = memLast;
+    for (const span of document.querySelectorAll('#mine .mem')) {
+      if (span.dataset.asleep) span.textContent = T('mem.asleep');
+      else span.textContent = m && m.exact && m.tabs[span.dataset.id] != null ? m.tabs[span.dataset.id] + ' MB' : '';
+    }
+    const sum = document.getElementById('memsum');
+    if (!m) { sum.textContent = ''; return; }
+    if (!m.exact) { sum.textContent = T('mem.approx'); return; }
+    const parts = [`${T('mem.self')} ${m.self} MB`];
+    if (m.background) parts.push(`${T('mem.background')} ${m.background} MB`);
+    parts.push(`${T('mem.total')} ${m.total} MB`);
+    sum.textContent = parts.join(' · ');
+  }
+  async function refreshMem() {
+    if (document.visibilityState === 'hidden') return;
+    try { memLast = await window.tabchat.memStats(); } catch (e) { memLast = null; }
+    showMem();
+  }
+  setInterval(refreshMem, 5000);
+  setTimeout(refreshMem, 800);
+
+  // Explanation: only built when you click the link, so it costs nothing until then
+  function openMemHelp() {
+    let w = document.getElementById('memwin');
+    if (!w) {
+      w = el('div');
+      w.id = 'memwin';
+      const sheet = el('div', 'sheet');
+      sheet.setAttribute('role', 'dialog');
+      const head = el('div', 'sheet-head');
+      const close = el('button', 'close', '✕');
+      close.title = T('keys.close');
+      close.onclick = () => w.classList.remove('open');
+      head.append(el('h3', null, T('mem.title')), close);
+      sheet.append(head);
+      for (const [h, ps] of [['mem.h1', ['mem.p1', 'mem.p2']], ['mem.h2', ['mem.p3', 'mem.p4']], ['mem.h3', ['mem.p5']], ['mem.h4', ['mem.p6']]]) {
+        sheet.append(el('h4', null, T(h)));
+        for (const p of ps) sheet.append(el('p', 'mem-text', T(p)));
+      }
+      const foot = el('div', 'wn-foot');
+      const ok = el('button', 'add', T('svc.done'));
+      ok.onclick = () => w.classList.remove('open');
+      foot.append(ok);
+      sheet.append(foot);
+      w.append(sheet);
+      w.onclick = (e) => { if (e.target === w) w.classList.remove('open'); };
+      document.body.append(w);
+    }
+    w.classList.add('open');
+  }
 
   function render(s) {
     const mine = document.getElementById('mine');
@@ -682,9 +743,13 @@
       sw.append(T(t.asleep ? 'home.asleepMaySleep' : 'home.maySleep'), swBox);
       sw.title = T('home.sleepTitle');
       const icon = (s.catalog.find(c => c.id === t.service) || {}).icon; // logo of the service, if one was found
-      row.append(icon ? iconBadge({ name: t.label, color: t.color, icon }) : badge(t.label, t.color), el('div', 'name', t.fullLabel || t.label), sw, rm);
+      const mem = el('span', 'mem', '');
+      mem.dataset.id = t.id;
+      mem.dataset.asleep = t.asleep ? '1' : '';
+      row.append(icon ? iconBadge({ name: t.label, color: t.color, icon }) : badge(t.label, t.color), el('div', 'name', t.fullLabel || t.label), mem, sw, rm);
       mine.append(row);
     }
+    showMem();
 
     const cat = document.getElementById('catalog');
     cat.replaceChildren();
@@ -745,7 +810,9 @@
     const fb = el('button', 'donate', T('fb.link'));
     fb.onclick = () => window.tabchat.openFeedback();
     const links = el('div', 'links');
-    links.append(news, fb, don);
+    const memLink = el('button', 'donate', T('mem.link'));
+    memLink.onclick = openMemHelp;
+    links.append(news, fb, memLink, don);
     info.append(el('div', 'ver', `Tabchat ${u.current || ''}`), el('div', 'st', st), links);
     about.append(info);
     if (u.state === 'ready' || u.state === 'failed') {

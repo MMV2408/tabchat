@@ -57,7 +57,7 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 
 **Peace and quiet**
 - 🌙 Do not disturb for 1 hour, until tomorrow 08:00 or until you turn it off — blocks all notifications and sound. Also follows Ubuntu's own Do not disturb
-- 💤 Tab sleep: tabs you have not used for a while are removed from memory and come back with one click. You choose per tab which ones may sleep
+- 💤 Tab sleep: tabs you have not used for a while are removed from memory and come back with one click. You choose per tab which ones may sleep, and you see how much memory each tab uses
 
 **Keyboard first**
 - ⌨️ `Ctrl+K` quick search for every service and action
@@ -100,7 +100,9 @@ chmod +x Tabchat-*.AppImage
 
 ### Raspberry Pi and other ARM computers (64-bit)
 
-Use the files with `arm64` in the name: `tabchat_*_arm64.deb` (Raspberry Pi OS, Ubuntu) or `Tabchat-*-arm64.AppImage`. You need a 64-bit system; a Raspberry Pi 4 or 5 with at least 4 GB of memory works best.
+Use the files with `arm64` in the name: `tabchat_*_arm64.deb` (Raspberry Pi OS, Ubuntu) or `Tabchat-*-arm64.AppImage`. You need a 64-bit system; a Raspberry Pi 5 with 8 GB works great (with 4 GB, let unused tabs sleep). Tested on a Raspberry Pi 5.
+
+**No notifications?** Some Raspberry Pi OS desktops have no notification service. Install one with `sudo apt install dunst` and restart Tabchat.
 
 ### Updates
 
@@ -163,6 +165,9 @@ That is expected: a sleeping tab is fully unloaded. Turn off **May sleep** for t
 
 **Can I add other websites?**
 Yes: click **Your own website** on the + screen and paste the address. Google services (Gmail, Drive) usually block signing in from apps like Tabchat, so those may not work.
+
+**Why does my task manager say Tabchat uses 2 GB?**
+Tools like `htop` and `ps` count memory that processes share (the Chromium libraries) once for every process, and Tabchat runs about 15 of them. System Monitor does the opposite and leaves the shared part out. The + screen shows the real use per tab (PSS: shared memory divided fairly). To check it yourself: `sudo apt install smem`, then `smem -k -t -P tabchat`.
 
 **Something doesn't work. How do I report it?**
 Open an [issue](https://github.com/MMV2408/tabchat/issues) and attach the log files from `~/.config/tabchat/`: `tabchat.log` (general) and `updater.log` (updates).

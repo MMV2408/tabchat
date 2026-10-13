@@ -130,6 +130,14 @@
     return {
       getState: async () => snapshot(),
       getStrings: async () => ({ strings: D.strings[lang()], lang: lang() }),
+      // Example numbers, roughly what a real Tabchat with these services uses
+      memStats: async () => {
+        const typical = { whatsapp: 320, discord: 190, teams: 260, outlook: 210, onedrive: 140, brightspace: 160 };
+        const m = { tabs: {}, background: 45, self: 210, exact: true };
+        for (const t of tabs) if (!t.asleep) m.tabs[t.id] = typical[t.service] || 120;
+        m.total = m.self + m.background + Object.values(m.tabs).reduce((a, b) => a + b, 0);
+        return m;
+      },
       onState: (cb) => f.state.push(cb),
       open,
       add: (service, url) => {

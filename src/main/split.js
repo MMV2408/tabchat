@@ -73,7 +73,11 @@ function restore() {
 // Returns { id: bounds } for the two halves, or null when the split isn't shown.
 function place(area) {
   const s = pair();
-  if (!s || !isShown()) {
+  if (!s) {
+    dropDivider(); // split closed: free its renderer (~20 MB)
+    return null;
+  }
+  if (!isShown()) {
     if (divider) divider.setVisible(false);
     return null;
   }
@@ -86,6 +90,15 @@ function place(area) {
     [s.left]: { x: area.x, y: area.y, width: leftW, height: area.height },
     [s.right]: { x: area.x + leftW + DIVIDER, y: area.y, width: area.width - leftW - DIVIDER, height: area.height }
   };
+}
+
+function dropDivider() {
+  if (!divider) return;
+  const d = divider;
+  divider = null;
+  dragging = false;
+  try { store.win.contentView.removeChildView(d); } catch (e) { require('./log').warn('divider remove:', e); }
+  if (!d.webContents.isDestroyed()) d.webContents.close();
 }
 
 function ensureDivider() {
@@ -136,4 +149,4 @@ function menu() {
   ]).popup({ window: store.win });
 }
 
-module.exports = { pair, has, isShown, visible, open, close, toggle, forget, restore, place, drag, even, menu };
+module.exports = { dividerView: () => divider, pair, has, isShown, visible, open, close, toggle, forget, restore, place, drag, even, menu };

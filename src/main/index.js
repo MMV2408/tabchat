@@ -8,6 +8,13 @@ const actions = require('./actions');
 // Less JavaScript memory per tab
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=256');
 
+// Fewer processes, each one has its own fixed overhead (measured with tools/memstat.js):
+// - sound runs inside the main process instead of a separate audio process (~10 MB)
+// - one renderer per site: our own screens (tab bar, + screen, divider, search) share one,
+//   and so do duplicated tabs with the same login (~25 MB, more with duplicates)
+app.commandLine.appendSwitch('disable-features', 'AudioServiceOutOfProcess');
+app.commandLine.appendSwitch('process-per-site');
+
 // Hardware acceleration off (setting on the + screen → General): helps with display problems
 // (black screen, flickering), mostly with NVIDIA or Wayland. Barely saves memory. Must be set before startup.
 const hwAccel = require('./config').peekSetting('hardwareAcceleration') !== false;

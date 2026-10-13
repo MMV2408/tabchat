@@ -61,8 +61,11 @@ function load() {
       split: c.split && typeof c.split === 'object' ? c.split : null
     };
   } catch {
-    // No file or a broken one: start with an empty app
-    return { tabs: [], settings: { ...DEFAULT_SETTINGS }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null, lastVersion: null, donateNever: false, custom: [], icons: {} };
+    // No file or a broken one: start with an empty app.
+    // On computers with little memory (8 GB or less, like a Raspberry Pi) tab sleep starts on;
+    // chat apps stay awake anyway (see catalog.js). Existing installs keep their own choice.
+    const lowMemory = require('os').totalmem() <= 8.5 * 1024 ** 3;
+    return { tabs: [], settings: { ...DEFAULT_SETTINGS, sleepEnabled: lowMemory }, loginNoticeShown: false, trayNoticeShown: false, dndUntil: null, lastVersion: null, donateNever: false, custom: [], icons: {} };
   }
 }
 

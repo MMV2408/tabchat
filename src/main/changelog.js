@@ -2,6 +2,17 @@
 // New version? Add a block at the top (and in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.24.0',
+    nl: ['Zuiniger: minder processen op de achtergrond, zo\'n 25 tot 40 MB minder geheugen',
+         'Op het + scherm zie je per tabblad hoeveel geheugen het gebruikt, plus het totaal',
+         'Onderaan uitleg waarom je taakbeheerder een ander getal laat zien',
+         'Op computers met 8 GB of minder (zoals een Raspberry Pi) staat de slaapstand standaard aan bij een nieuwe installatie. Chat-apps blijven wakker'],
+    en: ['Lighter: fewer background processes, about 25 to 40 MB less memory',
+         'The + screen shows how much memory each tab uses, plus the total',
+         'At the bottom: why your task manager shows a different number',
+         'On computers with 8 GB or less (like a Raspberry Pi) tab sleep is on by default for new installs. Chat apps stay awake']
+  },
+  {
     v: '1.23.0',
     nl: ['Tabchat draait nu ook op ARM-computers (64-bit), zoals de Raspberry Pi 4 en 5',
          'Bijgewerkt naar de nieuwste browser-engine (Electron 44, Chrome 152): veiliger, en Brightspace meldt niet meer dat je browser verouderd is'],

@@ -57,7 +57,7 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 
 **Rust**
 - 🌙 Niet storen voor 1 uur, tot morgen 08:00 of tot je het uitzet — houdt alle meldingen en geluid tegen. Volgt ook Niet storen van Ubuntu zelf
-- 💤 Slaapstand: tabbladen die je een tijd niet gebruikt, gaan uit het geheugen en komen met één klik terug. Per tabblad kies je wat mag slapen
+- 💤 Slaapstand: tabbladen die je een tijd niet gebruikt, gaan uit het geheugen en komen met één klik terug. Per tabblad kies je wat mag slapen, en je ziet hoeveel geheugen elk tabblad gebruikt
 
 **Toetsenbord eerst**
 - ⌨️ `Ctrl+K` om elke dienst en actie snel te zoeken
@@ -100,7 +100,9 @@ chmod +x Tabchat-*.AppImage
 
 ### Raspberry Pi en andere ARM-computers (64-bit)
 
-Gebruik de bestanden met `arm64` in de naam: `tabchat_*_arm64.deb` (Raspberry Pi OS, Ubuntu) of `Tabchat-*-arm64.AppImage`. Je hebt een 64-bit systeem nodig; een Raspberry Pi 4 of 5 met minstens 4 GB geheugen werkt het best.
+Gebruik de bestanden met `arm64` in de naam: `tabchat_*_arm64.deb` (Raspberry Pi OS, Ubuntu) of `Tabchat-*-arm64.AppImage`. Je hebt een 64-bit systeem nodig; een Raspberry Pi 5 met 8 GB werkt prima (met 4 GB: laat tabbladen die je niet gebruikt slapen). Getest op een Raspberry Pi 5.
+
+**Geen meldingen?** Sommige Raspberry Pi OS-bureaubladen hebben geen meldingen-dienst. Installeer er een met `sudo apt install dunst` en start Tabchat opnieuw.
 
 ### Updates
 
@@ -163,6 +165,9 @@ Dat klopt: een slapend tabblad is helemaal uitgeschakeld. Zet **Mag slapen** uit
 
 **Kan ik andere sites toevoegen?**
 Ja: klik in het +-scherm op **Eigen website** en plak het adres. Google-diensten (Gmail, Drive) blokkeren het inloggen in apps zoals Tabchat meestal, dus die werken misschien niet.
+
+**Waarom zegt mijn taakbeheerder dat Tabchat 2 GB gebruikt?**
+Programma's als `htop` en `ps` tellen geheugen dat processen delen (de bibliotheken van Chromium) voor elk proces opnieuw mee, en Tabchat draait er zo'n 15. Systeembronnen doet het omgekeerde en laat het gedeelde deel weg. Het + scherm toont het echte gebruik per tabblad (PSS: gedeeld geheugen eerlijk verdeeld). Zelf controleren: `sudo apt install smem`, daarna `smem -k -t -P tabchat`.
 
 **Er werkt iets niet. Hoe meld ik dat?**
 Open een [issue](https://github.com/MMV2408/tabchat/issues) en voeg de logbestanden uit `~/.config/tabchat/` toe: `tabchat.log` (algemeen) en `updater.log` (updates).
