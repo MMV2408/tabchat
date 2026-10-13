@@ -98,6 +98,10 @@ chmod +x Tabchat-*.AppImage
 ./Tabchat-*.AppImage
 ```
 
+### Raspberry Pi and other ARM computers (64-bit)
+
+Use the files with `arm64` in the name: `tabchat_*_arm64.deb` (Raspberry Pi OS, Ubuntu) or `Tabchat-*-arm64.AppImage`. You need a 64-bit system; a Raspberry Pi 4 or 5 with at least 4 GB of memory works best.
+
 ### Updates
 
 Tabchat checks for new versions by itself and downloads them in the background. When an update is ready, a green button appears in the tab bar — click it and Tabchat restarts on the new version. You can turn this off on the **+** screen.

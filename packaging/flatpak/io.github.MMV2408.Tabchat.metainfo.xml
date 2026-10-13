@@ -119,6 +119,11 @@
   </requires>
 
   <releases>
+    <release version="1.23.0" date="2026-10-13">
+      <description>
+        <p>Builds for 64-bit ARM computers, like the Raspberry Pi 4 and 5.</p>
+      </description>
+    </release>
     <release version="1.22.0" date="2026-10-12">
       <description>
         <p>Split view, back and forward buttons, find on page, duplicate tabs with the same sign-in, and download notifications.</p>

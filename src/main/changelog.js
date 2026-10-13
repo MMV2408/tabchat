@@ -2,6 +2,11 @@
 // New version? Add a block at the top (and in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.23.0',
+    nl: ['Tabchat draait nu ook op ARM-computers (64-bit), zoals de Raspberry Pi 4 en 5'],
+    en: ['Tabchat now also runs on ARM computers (64-bit), like the Raspberry Pi 4 and 5']
+  },
+  {
     v: '1.22.0',
     nl: ['Gesplitst scherm: twee tabbladen naast elkaar (rechtsklik → Naast elkaar openen, of Ctrl+\\). Sleep de lijn om te verdelen, ✕ om te stoppen',
          'Terug, vooruit, herladen en startpagina bij het actieve tabblad, en de zijknoppen van je muis werken',

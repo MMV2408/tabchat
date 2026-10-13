@@ -1,6 +1,6 @@
 {
   "name": "tabchat",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "description": "WhatsApp, Discord, Teams, Outlook en OneDrive in één venster",
   "main": "src/main/index.js",
   "homepage": "https://github.com/MMV2408/tabchat",
@@ -12,7 +12,7 @@
   "desktopName": "tabchat.desktop",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --linux deb AppImage",
+    "dist": "electron-builder --linux deb AppImage --x64 --arm64",
     "dist:snap": "bash packaging/snap/build.sh"
   },
   "build": {
