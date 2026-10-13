@@ -36,7 +36,11 @@ if (!app.requestSingleInstanceLock()) {
 
   ipc.register();
 
-  app.whenReady().then(() => { window.create(); require('./icons').start(); });
+  app.whenReady().then(() => {
+    window.create();
+    require('./icons').start();
+    if (process.env.TABCHAT_PIDS) require('./pids').start();
+  });
   // On every quit (also logging out or shutting down the computer)
   app.on('before-quit', () => {
     require('./store').quitting = true;

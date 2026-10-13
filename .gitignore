@@ -3,3 +3,4 @@ dist/
 packaging/flatpak/repo/
 packaging/flatpak/build/
 packaging/flatpak/.flatpak-builder/
+tools/
