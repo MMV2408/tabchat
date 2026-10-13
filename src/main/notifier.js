@@ -137,7 +137,9 @@ function onMessage(m) {
   } else if (m.type === 'log') {
     log.warn('notify helper:', m.text);
   } else if (m.type === 'closed') {
-    forget(m.id, true); // a click always arrives before the close, so this is a dismiss or a timeout
+    // GNOME sends the click before the close, but some notification daemons (like dunst on a
+    // Raspberry Pi) send the close first. Wait a moment, so a click that follows still works.
+    setTimeout(() => forget(m.id, true), 1000);
   }
 }
 
@@ -158,7 +160,7 @@ function forget(id, notifyClose) {
 
 function runClick(id) {
   const it = items.get(id);
-  if (!it) return;
+  if (!it) { log.warn('click on an unknown notification:', id); return; }
   forget(id, false);
   if (it.onClick) it.onClick();
 }
