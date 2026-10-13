@@ -15,6 +15,11 @@ app.commandLine.appendSwitch('js-flags', '--max-old-space-size=256');
 app.commandLine.appendSwitch('disable-features', 'AudioServiceOutOfProcess');
 app.commandLine.appendSwitch('process-per-site');
 
+// No passkeys / Windows Hello: Electron on Linux has no window for them, so a Microsoft
+// sign-in that asks for "Face, fingerprint, PIN or security key" hangs and ends in
+// AADSTS10040141. Without WebAuthn, sites offer password or the Authenticator app instead.
+app.commandLine.appendSwitch('disable-blink-features', 'WebAuth');
+
 // Hardware acceleration off (setting on the + screen → General): helps with display problems
 // (black screen, flickering), mostly with NVIDIA or Wayland. Barely saves memory. Must be set before startup.
 const hwAccel = require('./config').peekSetting('hardwareAcceleration') !== false;

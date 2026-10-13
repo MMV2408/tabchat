@@ -6,11 +6,13 @@ const CHANGELOG = [
     nl: ['Zuiniger: minder processen op de achtergrond, zo\'n 25 tot 40 MB minder geheugen',
          'Op het + scherm zie je per tabblad hoeveel geheugen het gebruikt, plus het totaal',
          'Onderaan uitleg waarom je taakbeheerder een ander getal laat zien',
-         'Op computers met 8 GB of minder (zoals een Raspberry Pi) staat de slaapstand standaard aan bij een nieuwe installatie. Chat-apps blijven wakker'],
+         'Op computers met 8 GB of minder (zoals een Raspberry Pi) staat de slaapstand standaard aan bij een nieuwe installatie. Chat-apps blijven wakker',
+         'Inloggen bij Microsoft blijft niet meer hangen op "Gezicht, vingerafdruk, pincode of beveiligingssleutel": je krijgt dan wachtwoord of de Authenticator-app'],
     en: ['Lighter: fewer background processes, about 25 to 40 MB less memory',
          'The + screen shows how much memory each tab uses, plus the total',
          'At the bottom: why your task manager shows a different number',
-         'On computers with 8 GB or less (like a Raspberry Pi) tab sleep is on by default for new installs. Chat apps stay awake']
+         'On computers with 8 GB or less (like a Raspberry Pi) tab sleep is on by default for new installs. Chat apps stay awake',
+         'Microsoft sign-in no longer hangs on "Face, fingerprint, PIN or security key": you get password or the Authenticator app instead']
   },
   {
     v: '1.23.0',
