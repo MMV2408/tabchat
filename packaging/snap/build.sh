@@ -1,29 +1,33 @@
 #!/bin/bash
-# Bouwt de snap: eerst de app met electron-builder, dan inpakken met snapcraft.
-# Nodig (eenmalig): sudo snap install snapcraft --classic, en LXD (zie README.md).
-# Met --stage-only wordt alleen dist/snap-stage klaargezet (gebruikt door GitHub Actions).
+# Builds the snap: first the app with electron-builder, then packs it with snapcraft.
+# Needed once: sudo snap install snapcraft --classic, and LXD (see README.md).
+# With --stage-only only dist/snap-stage is prepared (used by GitHub Actions).
+# Builds for the architecture of this machine (amd64 on a PC, arm64 on a Pi or ARM runner).
 set -e
 cd "$(dirname "$0")/../.."
 
 VERSION=$(node -p "require('./package.json').version")
 STAGE=dist/snap-stage
 
-npx electron-builder --linux dir          # -> dist/linux-unpacked
+ARCH=$(dpkg --print-architecture)       # amd64 or arm64
+npx electron-builder --linux dir          # -> dist/linux-unpacked or dist/linux-arm64-unpacked
+UNPACKED=dist/linux-unpacked
+[ "$ARCH" = "arm64" ] && UNPACKED=dist/linux-arm64-unpacked
 rm -rf "$STAGE"
 mkdir -p "$STAGE/snap/gui"
 mkdir -p "$STAGE/src"
-cp -r dist/linux-unpacked "$STAGE/src/app"
+cp -r "$UNPACKED" "$STAGE/src/app"
 sed "s/^version: .*/version: '$VERSION'/" packaging/snap/snapcraft.yaml > "$STAGE/snap/snapcraft.yaml"
-# snap/gui/ = snelkoppeling en icoon voor het app-menu
+# snap/gui/ = shortcut and icon for the app menu
 cp packaging/snap/tabchat.desktop "$STAGE/snap/gui/"
 cp assets/icon.png "$STAGE/snap/gui/tabchat.png"
 
-# Alleen klaarzetten (GitHub Actions pakt de map daarna zelf in)
-if [ "$1" = "--stage-only" ]; then echo "Klaargezet: $STAGE"; exit 0; fi
+# Only prepare (GitHub Actions packs the folder itself)
+if [ "$1" = "--stage-only" ]; then echo "Staged: $STAGE ($ARCH)"; exit 0; fi
 
 cd "$STAGE"
 rm -f ./*.snap
-snapcraft pack                            # snapcraft wil de snap binnen deze map maken
-mv ./*.snap "../tabchat_${VERSION}_amd64.snap"
+snapcraft pack                            # snapcraft wants to create the snap inside this folder
+mv ./*.snap "../tabchat_${VERSION}_${ARCH}.snap"
 echo
-echo "Klaar: dist/tabchat_${VERSION}_amd64.snap"
+echo "Done: dist/tabchat_${VERSION}_${ARCH}.snap"

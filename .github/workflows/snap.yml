@@ -1,15 +1,20 @@
-# Bij elke nieuwe release op GitHub: snap bouwen en in de Snap Store (App Centrum) zetten.
-# Nodig: geheim SNAPCRAFT_STORE_CREDENTIALS (zie packaging/snap/README.md).
+# On every new GitHub release: build the snap and publish it to the Snap Store (App Center),
+# for regular PCs (amd64) and for ARM computers like the Raspberry Pi (arm64).
+# Needs the secret SNAPCRAFT_STORE_CREDENTIALS (see packaging/snap/README.md).
 name: Snap
 
 on:
   release:
     types: [published]
-  workflow_dispatch:   # ook met de hand te starten via het tabblad Actions
+  workflow_dispatch:   # can also be started by hand from the Actions tab
 
 jobs:
   snap:
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false   # if one architecture fails, the other still gets published
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
 
@@ -18,18 +23,18 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: App bouwen en snap-map klaarzetten
+      - name: Build the app and stage the snap folder
         run: |
           npm ci
           bash packaging/snap/build.sh --stage-only
 
-      - name: Snap bouwen
+      - name: Build the snap
         uses: snapcore/action-build@v1
         id: build
         with:
           path: dist/snap-stage
 
-      - name: Naar de Snap Store (stable)
+      - name: Publish to the Snap Store (stable)
         uses: snapcore/action-publish@v1
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}

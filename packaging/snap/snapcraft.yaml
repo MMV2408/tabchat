@@ -1,6 +1,6 @@
 name: tabchat
 base: core24
-version: '0.0.0' # wordt door build.sh gelijk gezet aan package.json
+version: '0.0.0' # set to the package.json version by build.sh
 title: Tabchat
 summary: WhatsApp, Discord, Teams, Brightspace and any website in one window
 description: |
@@ -32,6 +32,7 @@ confinement: strict
 
 platforms:
   amd64:
+  arm64:
 
 plugs:
   shmem:
