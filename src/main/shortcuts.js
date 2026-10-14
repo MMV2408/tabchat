@@ -23,6 +23,8 @@ function handler(source) {
     // Works everywhere, also in the quick search window
     if (ctrl && !alt && !shift && key === 'k') return run(palette.toggle);
     if (ctrl && !alt && !shift && key === 'q') return run(actions.quit);
+    // Esc always closes quick search, also when the focus never reached its window
+    if (key === 'Escape' && store.paletteOpen && !ctrl && !alt) return run(palette.hide);
     if (source === 'palette') return; // the quick search window handles the rest itself
 
     if (alt && !ctrl && !shift) {

@@ -2,6 +2,13 @@
 // New version? Add a block at the top (and in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.25.1',
+    nl: ['Snel zoeken (Ctrl+K) kon onzichtbaar open blijven staan, waardoor je nergens meer op kon klikken: opgelost. Esc sluit het nu altijd',
+         'Reageert een tabblad of Tabchat zelf niet meer, dan kun je wachten, dat deel opnieuw starten of het probleem melden'],
+    en: ['Quick search (Ctrl+K) could stay open but invisible, so nothing could be clicked: fixed. Esc now always closes it',
+         'If a tab or Tabchat itself stops responding, you can wait, restart that part or report the problem']
+  },
+  {
     v: '1.25.0',
     nl: ['Meldingen worden nu verstuurd door een klein eigen programma in Rust in plaats van een JavaScript-proces: zo\'n 30 MB minder geheugen en sneller',
          'In een smal venster passen de knoppen op het + scherm weer netjes in hun kaart'],

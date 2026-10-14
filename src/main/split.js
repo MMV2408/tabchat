@@ -109,7 +109,7 @@ function ensureDivider() {
   const cv = store.win.contentView;
   cv.addChildView(divider);
   // The tab bar, quick search and screen sharing stay on top
-  for (const v of [store.bar, store.palette, store.share]) if (v) { cv.removeChildView(v); cv.addChildView(v); }
+  for (const v of [store.bar, store.palette, store.share]) if (v) cv.addChildView(v); // to the top, see palette.js
   return divider;
 }
 

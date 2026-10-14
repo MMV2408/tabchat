@@ -30,8 +30,7 @@ async function request(callback) {
 function open(sources) {
   store.shareOpen = true;
   const v = views.page('share'); // only load it when needed
-  store.win.contentView.removeChildView(v); // put it on top of everything
-  store.win.contentView.addChildView(v);
+  store.win.contentView.addChildView(v); // put it on top of everything (no remove first, see palette.js)
   views.layout();
   const list = sources.map(s => ({
     id: s.id,

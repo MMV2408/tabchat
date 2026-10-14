@@ -49,6 +49,7 @@ if (!app.requestSingleInstanceLock()) {
   ipc.register();
 
   app.whenReady().then(() => {
+    require('./hang').start(); // before the window, so it also watches the first screens
     window.create();
     require('./icons').start();
     if (process.env.TABCHAT_PIDS) require('./pids').start();

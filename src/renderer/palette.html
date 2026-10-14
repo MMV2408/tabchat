@@ -188,12 +188,25 @@
         k.textContent = it.hint;
         li.append(k);
       }
-      li.onmousemove = () => { if (sel !== i) { sel = i; render(); } };
+      li.onmousemove = (e) => hover(i, e);
       li.onclick = () => window.tabchat.paletteRun(it.run);
       list.append(li);
     });
     const cur = list.children[sel];
     if (cur) cur.scrollIntoView({ block: 'nearest' });
+  }
+
+  // Mouse over a row: only move the highlight. Rebuilding the list here (and scrolling it) made
+  // the browser send a new mouse move under the cursor, which rebuilt the list again: an endless
+  // loop that froze Ctrl+K and the tab bar. Also ignore "moves" where the mouse didn't move.
+  let lastMouse = '';
+  function hover(i, e) {
+    const at = e.screenX + ',' + e.screenY;
+    if (at === lastMouse || sel === i) { lastMouse = at; return; }
+    lastMouse = at;
+    if (list.children[sel]) list.children[sel].classList.remove('sel');
+    sel = i;
+    if (list.children[sel]) list.children[sel].classList.add('sel');
   }
 
   q.addEventListener('input', filter);

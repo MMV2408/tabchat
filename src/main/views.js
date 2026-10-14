@@ -39,6 +39,15 @@ function page(name) {
       if (store.active !== 'home' || store.paletteOpen || store.shareOpen) setImmediate(focusActive);
     });
   }
+  // Remember when the page has really loaded. Right after loadFile() isLoading() can still be
+  // false (seen with process-per-site, where the renderer already exists): a message sent then
+  // got lost, and Ctrl+K stayed open but empty and invisible, catching every click.
+  v.ready = false;
+  v.waiting = [];
+  v.webContents.once('did-finish-load', () => {
+    v.ready = true;
+    for (const fn of v.waiting.splice(0)) fn();
+  });
   v.webContents.loadFile(path.join(__dirname, '..', 'renderer', PAGES[name]));
   v.setVisible(false);
   const cv = store.win.contentView;
@@ -46,7 +55,7 @@ function page(name) {
   store[name] = v;
   // Put whatever belongs above this screen back on top
   for (const other of STACK.slice(STACK.indexOf(name) + 1)) {
-    if (store[other]) { cv.removeChildView(store[other]); cv.addChildView(store[other]); }
+    if (store[other]) cv.addChildView(store[other]); // to the top, see palette.js
   }
   return v;
 }
@@ -55,8 +64,8 @@ function page(name) {
 function whenReady(name, fn) {
   const v = page(name);
   const go = () => setTimeout(() => { if (store[name] === v) fn(v); }, name === 'home' ? 250 : 0);
-  if (v.webContents.isLoading()) v.webContents.once('did-finish-load', go);
-  else fn(v);
+  if (v.ready) fn(v);
+  else v.waiting.push(go);
 }
 
 function dropLater(name, ms) {
@@ -330,7 +339,7 @@ function revealBar(on) {
   if (on) {
     // Put the bar on top of the service (quick search and screen sharing stay above it)
     const cv = store.win.contentView;
-    for (const v of [store.bar, store.palette, store.share]) if (v) { cv.removeChildView(v); cv.addChildView(v); }
+    for (const v of [store.bar, store.palette, store.share]) if (v) cv.addChildView(v); // to the top, see palette.js
   }
   layout();
 }

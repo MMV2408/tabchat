@@ -29,9 +29,11 @@ const ACTIONS = {
 
 function bringToFront() {
   if (!store.palette) return;
-  store.win.contentView.removeChildView(store.palette);
+  // addChildView on a view that is already there moves it to the top. Don't remove it first:
+  // with Electron 44 a removed and re-added screen stays "hidden" for good (no drawing, no input),
+  // which made Ctrl+K an invisible layer over the whole window.
   store.win.contentView.addChildView(store.palette);
-  if (store.share) { store.win.contentView.removeChildView(store.share); store.win.contentView.addChildView(store.share); }
+  if (store.share) store.win.contentView.addChildView(store.share);
 }
 
 function open() {
