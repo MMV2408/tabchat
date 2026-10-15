@@ -27,7 +27,8 @@ const DEFAULT_SETTINGS = {
   hiddenServices: [],    // built-in services hidden from the + screen
   cardOrder: [],         // order of the cards on the + screen (dragged)
   hardwareAcceleration: true, // off = fix for display problems, takes effect after a restart
-  pdfInTabchat: true         // downloaded PDFs open in Tabchat's own viewer (off = only download)
+  pdfInTabchat: true,        // downloaded PDFs open in Tabchat's own viewer (off = only download)
+  lowEndMode: true           // Chromium's low-memory mode (~15-20% less memory), takes effect after a restart
 };
 
 // Read one setting before the app is ready (e.g. hardware acceleration must be chosen before startup)

@@ -357,7 +357,17 @@ async function quit() {
 // Restart (e.g. after toggling hardware acceleration)
 function relaunch() {
   // AppImage: the program itself is in $APPIMAGE (the extracted folder disappears on quit)
-  app.relaunch(process.env.APPIMAGE ? { execPath: process.env.APPIMAGE } : undefined);
+  // --relaunched=<pid>: the new Tabchat waits until this one is really gone (see index.js),
+  // otherwise it finds us still running and closes itself right away
+  // We start the new one ourselves as a separate process: Electron's app.relaunch() didn't
+  // always start it (seen on Ubuntu 26.04)
+  const args = process.argv.slice(1).filter(a => !a.startsWith('--relaunched=')).concat('--relaunched=' + process.pid);
+  try {
+    require('child_process').spawn(process.env.APPIMAGE || process.execPath, args, { detached: true, stdio: 'ignore' }).unref();
+  } catch (e) {
+    log.warn('restart:', e);
+    app.relaunch({ args });
+  }
   quit();
 }
 

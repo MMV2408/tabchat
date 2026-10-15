@@ -133,7 +133,11 @@ function getState() {
       desc: s.custom ? s.desc : i18n.t('svc.' + (s.base || id))
     })),
     settings: config.settings,
-    restartNeeded: config.settings.hardwareAcceleration !== false ? !store.hwAtStart : !!store.hwAtStart, // hardware acceleration changed
+    // Settings that changed but only take effect after a restart
+    restartNeeded: [
+      (config.settings.hardwareAcceleration !== false) !== store.hwAtStart && 'hardwareAcceleration',
+      (config.settings.lowEndMode !== false) !== store.lowEndAtStart && 'lowEndMode'
+    ].filter(Boolean),
     maximized: store.win ? store.win.isMaximized() : false
   };
 }

@@ -309,6 +309,7 @@
     { group: 'general', key: 'tabBar', options: [['normal', 'f.tabBar.normal'], ['compact', 'f.tabBar.compact'], ['autohide', 'f.tabBar.autohide']] },
     { group: 'general', key: 'openLinks', options: 'links' }, // list depends on the browsers on this computer
     { group: 'general', key: 'spellcheck' },
+    { group: 'general', key: 'lowEndMode' },
     { group: 'general', key: 'hardwareAcceleration' },
     { group: 'general', key: 'pdfInTabchat' },
     { group: 'accounts', key: 'stayLoggedIn' },
@@ -960,7 +961,7 @@
       input.checked = !!s.settings[f.key];
       input.onchange = () => window.tabchat.setSetting(f.key, input.checked);
       label.append(input, el('span', 'slider'));
-      if (f.key === 'hardwareAcceleration' && s.restartNeeded) {
+      if ((s.restartNeeded || []).includes(f.key)) {
         // Only takes effect after a restart
         const rb = el('button', 'restartbtn', T('f.hardwareAcceleration.restart'));
         rb.onclick = () => window.tabchat.relaunch();

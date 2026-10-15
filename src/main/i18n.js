@@ -168,6 +168,8 @@ const STRINGS = {
     'f.hardwareAcceleration.name': 'Hardwareversnelling',
     'f.hardwareAcceleration.desc': 'Laat aan, tenzij je beeldproblemen hebt (zwart scherm, flikkeren of haperend beeld). Uitzetten werkt na opnieuw starten.',
     'f.hardwareAcceleration.restart': 'Nu herstarten',
+    'f.lowEndMode.name': 'Zuinige modus',
+    'f.lowEndMode.desc': 'Kleinere caches en minder tekengeheugen per tab: ongeveer 15–20% minder geheugen. Zet uit als afbeeldingen of scrollen er slechter uitzien. Werkt na opnieuw starten.',
     'f.autoUpdate.name': 'Automatisch updaten',
     'f.autoUpdate.desc': 'Tabchat zoekt zelf naar nieuwe versies en downloadt ze op de achtergrond. Installeren doe je zelf met één klik.',
 
@@ -519,6 +521,8 @@ const STRINGS = {
     'f.hardwareAcceleration.name': 'Hardware acceleration',
     'f.hardwareAcceleration.desc': 'Leave on unless you have display problems (black screen, flickering or stuttering). Turning it off takes effect after a restart.',
     'f.hardwareAcceleration.restart': 'Restart now',
+    'f.lowEndMode.name': 'Saving mode',
+    'f.lowEndMode.desc': 'Smaller caches and less drawing memory per tab: about 15–20% less memory. Turn off if images or scrolling look worse. Takes effect after a restart.',
     'f.autoUpdate.name': 'Automatic updates',
     'f.autoUpdate.desc': 'Tabchat looks for new versions and downloads them in the background. You install them yourself with one click.',
 
