@@ -2,6 +2,13 @@
 // New version? Add a block at the top (and in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.27.0',
+    nl: ['Zuinige modus: Tabchat gebruikt ongeveer 20% minder geheugen (gemeten met WhatsApp, Discord en Teams: van 1,6 naar 1,25 GB). Staat standaard aan, uit te zetten bij Instellingen → Algemeen',
+         '"Nu herstarten" (na het wijzigen van een instelling) start Tabchat nu altijd weer op'],
+    en: ['Saving mode: Tabchat uses about 20% less memory (measured with WhatsApp, Discord and Teams: from 1.6 to 1.25 GB). On by default, can be turned off under Settings → General',
+         '"Restart now" (after changing a setting) now always starts Tabchat again']
+  },
+  {
     v: '1.26.0',
     nl: ['Downloads: je ziet de voortgang rechtsboven (⬇), en op het + scherm staat een lijst met je laatste downloads om te openen of in de map te tonen',
          'PDF\'s openen in een eigen Tabchat-venster om te lezen, zoeken en printen (uit te zetten bij Instellingen → Algemeen)',

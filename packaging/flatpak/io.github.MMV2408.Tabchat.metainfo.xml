@@ -119,6 +119,11 @@
   </requires>
 
   <releases>
+    <release version="1.27.0" date="2026-10-15">
+      <description>
+        <p>Saving mode, on by default: about 20% less memory. "Restart now" after changing a setting now always starts Tabchat again.</p>
+      </description>
+    </release>
     <release version="1.26.0" date="2026-10-15">
       <description>
         <p>A downloads list with progress, PDFs open in a built-in viewer, and a "New in" button after updates instead of a popup.</p>

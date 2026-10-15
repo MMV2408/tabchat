@@ -58,6 +58,7 @@ Tabchat puts them all in **one window with tabs**, sharing a single browser engi
 **Peace and quiet**
 - 🌙 Do not disturb for 1 hour, until tomorrow 08:00 or until you turn it off — blocks all notifications and sound. Also follows Ubuntu's own Do not disturb
 - 💤 Tab sleep: tabs you have not used for a while are removed from memory and come back with one click. You choose per tab which ones may sleep, and you see how much memory each tab uses
+- 🪶 Saving mode (on by default): Chromium's low-memory mode, about 20% less memory
 - ⬇ Downloads go straight to your Downloads folder, with progress in the tab bar and a list of recent downloads. PDFs open in a built-in viewer
 
 **Keyboard first**

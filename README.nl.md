@@ -58,6 +58,7 @@ Tabchat zet ze allemaal in **één venster met tabbladen**, met één gedeelde b
 **Rust**
 - 🌙 Niet storen voor 1 uur, tot morgen 08:00 of tot je het uitzet — houdt alle meldingen en geluid tegen. Volgt ook Niet storen van Ubuntu zelf
 - 💤 Slaapstand: tabbladen die je een tijd niet gebruikt, gaan uit het geheugen en komen met één klik terug. Per tabblad kies je wat mag slapen, en je ziet hoeveel geheugen elk tabblad gebruikt
+- 🪶 Zuinige modus (staat standaard aan): de geheugenbesparende stand van Chromium, ongeveer 20% minder geheugen
 - ⬇ Downloads gaan direct naar je map Downloads, met voortgang in de tabbalk en een lijst met recente downloads. PDF's openen in een ingebouwde viewer
 
 **Toetsenbord eerst**
