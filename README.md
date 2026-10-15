@@ -173,7 +173,7 @@ That is expected: a sleeping tab is fully unloaded. Turn off **May sleep** for t
 Yes: click **Your own website** on the + screen and paste the address. Google services (Gmail, Drive) usually block signing in from apps like Tabchat, so those may not work.
 
 **Why does my task manager say Tabchat uses 2 GB?**
-Tools like `htop` and `ps` count memory that processes share (the Chromium libraries) once for every process, and Tabchat runs about 15 of them. System Monitor does the opposite and leaves the shared part out. The + screen shows the real use per tab (PSS: shared memory divided fairly). To check it yourself: `sudo apt install smem`, then `smem -k -t -P tabchat`.
+Tools like `htop` and `ps` count memory that processes share (the Chromium libraries) once for every process, and Tabchat runs about 15 of them. The apps view of System Monitor counts the whole app group, including file cache: the Chromium libraries and the sites' disk cache that Linux keeps in memory but frees right away when another program needs it. The + screen shows the real use per tab (PSS: shared memory divided fairly). To check it yourself: `sudo apt install smem`, then `smem -k -t -P tabchat`.
 
 **Something doesn't work. How do I report it?**
 Open an [issue](https://github.com/MMV2408/tabchat/issues) and attach the log files from `~/.config/tabchat/`: `tabchat.log` (general) and `updater.log` (updates).

@@ -173,7 +173,7 @@ Dat klopt: een slapend tabblad is helemaal uitgeschakeld. Zet **Mag slapen** uit
 Ja: klik in het +-scherm op **Eigen website** en plak het adres. Google-diensten (Gmail, Drive) blokkeren het inloggen in apps zoals Tabchat meestal, dus die werken misschien niet.
 
 **Waarom zegt mijn taakbeheerder dat Tabchat 2 GB gebruikt?**
-Programma's als `htop` en `ps` tellen geheugen dat processen delen (de bibliotheken van Chromium) voor elk proces opnieuw mee, en Tabchat draait er zo'n 15. Systeembronnen doet het omgekeerde en laat het gedeelde deel weg. Het + scherm toont het echte gebruik per tabblad (PSS: gedeeld geheugen eerlijk verdeeld). Zelf controleren: `sudo apt install smem`, daarna `smem -k -t -P tabchat`.
+Programma's als `htop` en `ps` tellen geheugen dat processen delen (de bibliotheken van Chromium) voor elk proces opnieuw mee, en Tabchat draait er zo'n 15. De app-weergave van Systeembronnen telt de hele app-groep, inclusief bestandscache: de bibliotheken van Chromium en de schijfcache van de sites, die Linux in het geheugen houdt maar meteen vrijgeeft als een ander programma het nodig heeft. Het + scherm toont het echte gebruik per tabblad (PSS: gedeeld geheugen eerlijk verdeeld). Zelf controleren: `sudo apt install smem`, daarna `smem -k -t -P tabchat`.
 
 **Er werkt iets niet. Hoe meld ik dat?**
 Open een [issue](https://github.com/MMV2408/tabchat/issues) en voeg de logbestanden uit `~/.config/tabchat/` toe: `tabchat.log` (algemeen) en `updater.log` (updates).
