@@ -92,6 +92,16 @@
   }
   .row .name { flex: 1; }
   .row .mem { font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .dlrow { display: flex; align-items: center; gap: 12px; background: var(--bg-0); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; }
+  .dlrow .dlicon { width: 34px; height: 34px; border-radius: 8px; background: var(--bg-1); display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--text-muted); flex-shrink: 0; text-transform: uppercase; }
+  .dlrow .dltext { flex: 1; min-width: 0; }
+  .dlrow .dlname { color: var(--text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dlrow .dlmeta { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .dlrow .dlbar { height: 4px; border-radius: 2px; background: var(--bg-2); margin-top: 6px; overflow: hidden; }
+  .dlrow .dlbar span { display: block; height: 100%; background: #5865F2; }
+  .dlrow.failed .dlmeta { color: #f23f43; }
+  .dlrow button { flex-shrink: 0; }
+  #dlSection.flash .dlrow:first-child { box-shadow: 0 0 0 2px #5865F2; transition: box-shadow .3s; }
   .memsum { font-size: 13px; color: var(--text-muted); margin: 0 4px 8px; font-variant-numeric: tabular-nums; }
   .memsum:empty { display: none; }
   .mem-text { color: var(--text); font-size: 14px; line-height: 1.55; margin: 0 0 10px; }
@@ -191,6 +201,14 @@
 
   <h2><span data-i18n="home.dnd"></span> <span class="hint" data-i18n="home.dndHint"></span></h2>
   <div class="dndrow" id="dndrow"></div>
+
+  <div id="dlSection" hidden>
+    <div class="cathead">
+      <h2 data-i18n="home.downloads"></h2>
+      <button class="linkbtn" id="dlClear" data-i18n="dl.clear"></button>
+    </div>
+    <div id="dlList"></div>
+  </div>
 
   <h2 data-i18n="home.features"></h2>
   <div class="ftabs" id="featTabs"></div>
@@ -292,6 +310,7 @@
     { group: 'general', key: 'openLinks', options: 'links' }, // list depends on the browsers on this computer
     { group: 'general', key: 'spellcheck' },
     { group: 'general', key: 'hardwareAcceleration' },
+    { group: 'general', key: 'pdfInTabchat' },
     { group: 'accounts', key: 'stayLoggedIn' },
     { group: 'accounts', key: 'shareMicrosoft' },
     { group: 'accounts', key: 'brightspaceUrl', type: 'url' },
@@ -668,6 +687,56 @@
     else window.tabchat.back();
   });
 
+  // ---------- downloads (see downloads.js) ----------
+  const fmtSize = (b) => !b ? '' : b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1048576).toFixed(b < 10485760 ? 1 : 0) + ' MB';
+  const fmtTime = (ms) => new Date(ms).toLocaleString(document.documentElement.lang || undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  function renderDownloads(s) {
+    const sec = document.getElementById('dlSection');
+    const dl = s.downloads || { items: [] };
+    sec.hidden = !dl.items.length;
+    const list = document.getElementById('dlList');
+    list.replaceChildren();
+    for (const d of dl.items) {
+      const row = el('div', 'dlrow' + (d.state === 'failed' ? ' failed' : ''));
+      const ext = (d.name.split('.').pop() || '').slice(0, 4);
+      const text = el('div', 'dltext');
+      text.append(el('div', 'dlname', d.name));
+      let meta;
+      if (d.state === 'progress') meta = d.size ? `${fmtSize(d.received)} / ${fmtSize(d.size)}` : fmtSize(d.received);
+      else if (d.state === 'failed') meta = T('dl.failedShort') + ' · ' + fmtTime(d.time);
+      else if (d.missing) meta = T('dl.missing') + ' · ' + fmtTime(d.time);
+      else meta = [fmtSize(d.size || d.received), fmtTime(d.time)].filter(Boolean).join(' · ');
+      text.append(el('div', 'dlmeta', meta));
+      if (d.state === 'progress') {
+        const bar = el('div', 'dlbar');
+        const fill = el('span');
+        fill.style.width = (d.size ? Math.floor((d.received / d.size) * 100) : 5) + '%';
+        bar.append(fill);
+        text.append(bar);
+      }
+      row.append(el('div', 'dlicon', ext), text);
+      if (d.state === 'completed' && !d.missing) {
+        const o = el('button', 'dndbtn', T('dl.open'));
+        o.onclick = () => window.tabchat.dlOpen(d.id);
+        const f = el('button', 'dndbtn', T('dl.folder'));
+        f.onclick = () => window.tabchat.dlFolder(d.id);
+        row.append(o, f);
+      }
+      list.append(row);
+    }
+    // Looking at the + screen: the new downloads count as seen (the ⬇ in the bar goes away)
+    if (dl.unseen && s.active === 'home' && document.visibilityState !== 'hidden') window.tabchat.dlSeen();
+  }
+  document.getElementById('dlClear').onclick = () => window.tabchat.dlClear();
+  window.tabchat.onShowDownloads(() => {
+    const sec = document.getElementById('dlSection');
+    if (sec.hidden) return;
+    sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    sec.classList.add('flash');
+    setTimeout(() => sec.classList.remove('flash'), 1500);
+    window.tabchat.dlSeen();
+  });
+
   // ---------- memory per tab (same measurement as tools/memstat.js, see memory.js) ----------
   let memLast = null;
   function showMem() {
@@ -798,6 +867,8 @@
     const n = cat.children.length;
     const cols = n <= 2 ? n : Math.min(4, Math.ceil(n / 2));
     cat.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+
+    renderDownloads(s);
 
     const about = document.getElementById('about');
     about.replaceChildren();

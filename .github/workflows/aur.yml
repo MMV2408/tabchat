@@ -1,0 +1,65 @@
+# On every new GitHub release: update the Arch Linux package (AUR: tabchat-bin).
+# It fills the new version and checksums into packaging/aur/PKGBUILD and pushes it to the AUR.
+# Needs the secret AUR_SSH_KEY: the private SSH key that belongs to your AUR account.
+# Without that secret (no AUR account yet) the job skips itself and stays green.
+name: AUR
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 1.26.0); empty = latest release'
+        required: false
+
+jobs:
+  aur:
+    runs-on: ubuntu-24.04
+    env:
+      HAS_KEY: ${{ secrets.AUR_SSH_KEY != '' }}
+    steps:
+      - name: No AUR account yet
+        if: env.HAS_KEY != 'true'
+        run: echo "The secret AUR_SSH_KEY is not set, so the AUR is skipped."
+
+      - uses: actions/checkout@v5
+        if: env.HAS_KEY == 'true'
+
+      - name: Fill in version and checksums
+        if: env.HAS_KEY == 'true'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          INPUT: ${{ github.event.inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${INPUT:-${TAG#v}}"
+          [ -n "$V" ] || V=$(gh release view --json tagName -q .tagName | sed 's/^v//')
+          base="https://github.com/MMV2408/tabchat/releases/download/v$V"
+          # The release files may still be uploading: try for a few minutes
+          for f in "tabchat_${V}_amd64.deb" "tabchat_${V}_arm64.deb"; do
+            for i in $(seq 1 30); do curl -fsSL -o "$f" "$base/$f" && break; sleep 20; done
+            [ -s "$f" ] || { echo "Could not download $f"; exit 1; }
+          done
+          curl -fsSL -o LICENSE "https://raw.githubusercontent.com/MMV2408/tabchat/v$V/LICENSE"
+          sum() { sha256sum "$1" | cut -d' ' -f1; }
+          sed -i \
+            -e "s/^pkgver=.*/pkgver=$V/" \
+            -e "s/^pkgrel=.*/pkgrel=1/" \
+            -e "s/^sha256sums=.*/sha256sums=('$(sum LICENSE)')/" \
+            -e "s/^sha256sums_x86_64=.*/sha256sums_x86_64=('$(sum tabchat_${V}_amd64.deb)')/" \
+            -e "s/^sha256sums_aarch64=.*/sha256sums_aarch64=('$(sum tabchat_${V}_arm64.deb)')/" \
+            packaging/aur/PKGBUILD
+          echo "VERSION=$V" >> "$GITHUB_ENV"
+          grep -E '^(pkgver|sha256sums)' packaging/aur/PKGBUILD
+
+      - name: Publish to the AUR
+        if: env.HAS_KEY == 'true'
+        uses: KSXGitHub/github-actions-deploy-aur@v4
+        with:
+          pkgname: tabchat-bin
+          pkgbuild: packaging/aur/PKGBUILD
+          commit_username: MMV2408
+          commit_email: MMV2408@users.noreply.github.com
+          ssh_private_key: ${{ secrets.AUR_SSH_KEY }}
+          commit_message: "Update to ${{ env.VERSION }}"

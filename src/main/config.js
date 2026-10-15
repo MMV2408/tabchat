@@ -26,7 +26,8 @@ const DEFAULT_SETTINGS = {
   tabBar: 'normal',      // 'normal', 'compact' (icons only) or 'autohide' (appears at the top near the mouse)
   hiddenServices: [],    // built-in services hidden from the + screen
   cardOrder: [],         // order of the cards on the + screen (dragged)
-  hardwareAcceleration: true // off = fix for display problems, takes effect after a restart
+  hardwareAcceleration: true, // off = fix for display problems, takes effect after a restart
+  pdfInTabchat: true         // downloaded PDFs open in Tabchat's own viewer (off = only download)
 };
 
 // Read one setting before the app is ready (e.g. hardware acceleration must be chosen before startup)
@@ -58,7 +59,9 @@ function load() {
       feedback: c.feedback || null,
       custom: Array.isArray(c.custom) ? c.custom : [],
       icons: c.icons && typeof c.icons === 'object' ? c.icons : {},
-      split: c.split && typeof c.split === 'object' ? c.split : null
+      split: c.split && typeof c.split === 'object' ? c.split : null,
+      downloads: Array.isArray(c.downloads) ? c.downloads : [],
+      whatsNew: c.whatsNew && typeof c.whatsNew === 'object' ? c.whatsNew : null
     };
   } catch {
     // No file or a broken one: start with an empty app.

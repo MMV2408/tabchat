@@ -79,6 +79,9 @@
   /* update */
   #update .pill { background: #1f6f43; color: #fff; font-size: 13px; }
   #update:hover .pill { background: #24834f; }
+  #whatsnew .pill { background: #5865F2; color: #fff; font-size: 13px; }
+  #whatsnew:hover .pill { background: #4752c4; }
+  #downloads .pill { font-size: 13px; font-variant-numeric: tabular-nums; }
   /* do not disturb */
   #dnd .pill { background: var(--dnd-bg); color: var(--dnd-text); font-size: 13px; }
   #dnd:hover .pill { background: var(--dnd-hover); }
@@ -299,6 +302,25 @@
     rightBox.className = 'right';
     document.body.append(rightBox);
     const pillText = (btn, text) => { const p = document.createElement('span'); p.className = 'pill'; p.textContent = text; btn.append(p); };
+    // ✨ New in … (after an update; goes away once clicked)
+    if (s.whatsNew) {
+      const w = document.createElement('button');
+      w.id = 'whatsnew';
+      pillText(w, T('tabs.whatsNew', { v: s.whatsNew }));
+      w.title = T('tabs.whatsNewTitle');
+      w.onclick = () => window.tabchat.openWhatsNew();
+      rightBox.append(w);
+    }
+    // ⬇ Downloads: progress while downloading, count of new ones after
+    const dl = s.downloads;
+    if (dl && (dl.active || dl.unseen)) {
+      const d = document.createElement('button');
+      d.id = 'downloads';
+      pillText(d, dl.active ? (dl.percent != null ? `⬇ ${dl.percent}%` : '⬇ …') : `⬇ ${dl.unseen}`);
+      d.title = T('tabs.downloads');
+      d.onclick = () => window.tabchat.dlShow();
+      rightBox.append(d);
+    }
     if (s.update && (s.update.state === 'ready' || s.update.state === 'failed')) {
       const u = document.createElement('button');
       u.id = 'update';
@@ -338,7 +360,7 @@
   let lastKey = '';
   const update = async (s) => {
     await loadStrings(s.lang);
-    const key = JSON.stringify([s.lang, s.active, s.split, s.tabs, s.update && s.update.state, s.update && s.update.version, s.dnd, s.maximized, s.settings && s.settings.tabBar]);
+    const key = JSON.stringify([s.lang, s.active, s.split, s.tabs, s.update && s.update.state, s.update && s.update.version, s.whatsNew, s.downloads && [s.downloads.active, s.downloads.percent, s.downloads.unseen], s.dnd, s.maximized, s.settings && s.settings.tabBar]);
     if (key === lastKey) return;
     lastKey = key;
     render(s);

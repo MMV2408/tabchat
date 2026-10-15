@@ -1,5 +1,6 @@
 // "What's new": a small window on the + screen with the changes per version.
-// Shows up by itself after an update, and via "What's new" under About Tabchat.
+// After an update a "✨ New in …" button appears in the tab bar (no popup); clicking it opens
+// this window. Also via "What's new" under About Tabchat.
 const { app } = require('electron');
 const store = require('./store');
 const views = require('./views');
@@ -15,19 +16,27 @@ function send(from) {
   views.whenReady('home', (h) => h.webContents.send('whats-new', data(from)));
 }
 
-// From a click (notification or link): bring the window to the front
+// From a click (the ✨ button, a notification or the link): bring the window to the front.
+// Without a version: the changes since the last update, if that button is still there.
 function show(from, force = false) {
+  const pending = store.config.whatsNew;
+  if (from == null && pending) from = pending.from;
+  if (pending) {
+    store.config.whatsNew = null; // seen: the button goes away
+    require('./config').save();
+    views.broadcast();
+  }
   require('./palette').hide();
   require('./tray').showWindow({ force });
   send(from);
 }
 
-// After an update: show once the + screen is loaded and the window is visible
-function showAfterUpdate(from) {
+// After an update: only put the "✨ New in …" button in the tab bar
+function markNew(from) {
   if (!changelog.since(from, 'en').length) return require('./donate').afterWhatsNew();
-  const go = () => setTimeout(() => send(from), 1200);
-  const whenVisible = () => (store.win.isVisible() ? go() : store.win.once('show', go));
-  whenVisible();
+  store.config.whatsNew = { from: from || null, to: app.getVersion() };
+  require('./config').save();
+  views.broadcast();
 }
 
-module.exports = { show, showAfterUpdate };
+module.exports = { show, markNew };

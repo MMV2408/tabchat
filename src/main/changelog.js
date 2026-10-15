@@ -2,6 +2,19 @@
 // New version? Add a block at the top (and in packaging/flatpak/...metainfo.xml).
 const CHANGELOG = [
   {
+    v: '1.26.0',
+    nl: ['Downloads: je ziet de voortgang rechtsboven (⬇), en op het + scherm staat een lijst met je laatste downloads om te openen of in de map te tonen',
+         'PDF\'s openen in een eigen Tabchat-venster om te lezen, zoeken en printen (uit te zetten bij Instellingen → Algemeen)',
+         'Na een update verschijnt er een knop "✨ Nieuw in …" in de tabbalk in plaats van een venster dat vanzelf opent',
+         'Typ "WhatsApp", "Teams" of "Discord" in je app-menu en Tabchat verschijnt',
+         'Voorbereid voor Arch Linux (AUR): daar regelt je pakketbeheerder de updates'],
+    en: ['Downloads: see the progress in the top right (⬇), and the + screen lists your latest downloads to open or show in their folder',
+         'PDFs open in a Tabchat window to read, search and print (can be turned off under Settings → General)',
+         'After an update a "✨ New in …" button appears in the tab bar instead of a window that opens by itself',
+         'Type "WhatsApp", "Teams" or "Discord" in your app menu and Tabchat shows up',
+         'Ready for Arch Linux (AUR): there your package manager handles the updates']
+  },
+  {
     v: '1.25.1',
     nl: ['Snel zoeken (Ctrl+K) kon onzichtbaar open blijven staan, waardoor je nergens meer op kon klikken: opgelost. Esc sluit het nu altijd',
          'Reageert een tabblad of Tabchat zelf niet meer, dan kun je wachten, dat deel opnieuw starten of het probleem melden'],

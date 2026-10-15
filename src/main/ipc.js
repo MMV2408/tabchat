@@ -104,6 +104,15 @@ function register() {
   ipcMain.on('donate-open', () => require('./donate').open());
   ipcMain.on('feedback-open', () => require('./feedback').open());
   ipcMain.on('whats-new-open', () => require('./whatsnew').show(null));
+  // Downloads (list on the + screen, ⬇ in the bar)
+  ipcMain.on('dl-open', (_e, id) => require('./downloads').open(id));
+  ipcMain.on('dl-folder', (_e, id) => require('./downloads').showInFolder(id));
+  ipcMain.on('dl-clear', () => require('./downloads').clear());
+  ipcMain.on('dl-seen', () => require('./downloads').seen());
+  ipcMain.on('dl-show', () => {
+    views.show('home');
+    views.whenReady('home', (h) => h.webContents.send('show-downloads'));
+  });
   ipcMain.on('whats-new-closed', () => require('./donate').afterWhatsNew());
   // Click on a service notification: show the window with that tab in front
   // Service notifications via Ubuntu (see notifier.js)

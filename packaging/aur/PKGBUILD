@@ -1,0 +1,39 @@
+# Maintainer: Mike Vijverberg <your-email at example dot com>
+# Arch Linux package (AUR) that repackages the official .deb from the GitHub releases.
+# New version: change pkgver, set pkgrel=1, update the checksums (updpkgsums) and .SRCINFO.
+
+pkgname=tabchat-bin
+pkgver=1.25.1
+pkgrel=1
+pkgdesc="WhatsApp, Discord, Teams, Outlook and more in one window"
+arch=('x86_64' 'aarch64')
+url="https://github.com/MMV2408/tabchat"
+license=('MIT')
+depends=('gtk3' 'libnotify' 'nss' 'libxss' 'libxtst' 'xdg-utils' 'at-spi2-core' 'util-linux-libs' 'libsecret' 'alsa-lib')
+optdepends=('libappindicator-gtk3: tray icon'
+            'dunst: notifications on desktops without a notification service')
+provides=('tabchat')
+conflicts=('tabchat')
+options=('!strip' '!debug')
+source=("tabchat-LICENSE-${pkgver}::https://raw.githubusercontent.com/MMV2408/tabchat/v${pkgver}/LICENSE")
+source_x86_64=("tabchat-${pkgver}-x86_64.deb::${url}/releases/download/v${pkgver}/tabchat_${pkgver}_amd64.deb")
+source_aarch64=("tabchat-${pkgver}-aarch64.deb::${url}/releases/download/v${pkgver}/tabchat_${pkgver}_arm64.deb")
+sha256sums=('f3d7c2eb1aa3e310c1df26f805cf1a582754dbfccefbd1a409422f6ea398fc51')
+sha256sums_x86_64=('313850fafb17c268bc658b53f377ce13cad120565f0a80a3215e2a16d2fb5104')
+sha256sums_aarch64=('a5898f07f58196f7b1aaaffdc620ff9a91a3e30e65d23be7aaa480a32fdec028')
+
+package() {
+  bsdtar -xf data.tar.xz -C "$pkgdir"
+
+  # Updates come through pacman/yay: tell Tabchat, and remove the in-app updater config
+  echo aur > "$pkgdir/opt/Tabchat/resources/package-type"
+  rm -f "$pkgdir/opt/Tabchat/resources/app-update.yml"
+
+  # What the .deb does in its install script
+  install -d "$pkgdir/usr/bin"
+  ln -s /opt/Tabchat/tabchat "$pkgdir/usr/bin/tabchat"
+  chmod 4755 "$pkgdir/opt/Tabchat/chrome-sandbox"
+
+  rm -rf "$pkgdir/usr/share/doc"
+  install -Dm644 "tabchat-LICENSE-${pkgver}" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

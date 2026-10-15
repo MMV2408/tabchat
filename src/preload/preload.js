@@ -52,6 +52,12 @@ contextBridge.exposeInMainWorld('tabchat', {
   openFeedback: () => ipcRenderer.send('feedback-open'),
   openWhatsNew: () => ipcRenderer.send('whats-new-open'),
   whatsNewClosed: () => ipcRenderer.send('whats-new-closed'),
+  dlOpen: (id) => ipcRenderer.send('dl-open', id),
+  dlFolder: (id) => ipcRenderer.send('dl-folder', id),
+  dlClear: () => ipcRenderer.send('dl-clear'),
+  dlSeen: () => ipcRenderer.send('dl-seen'),
+  dlShow: () => ipcRenderer.send('dl-show'),
+  onShowDownloads: (cb) => ipcRenderer.on('show-downloads', () => cb()),
   onWhatsNew: (cb) => ipcRenderer.on('whats-new', (_e, d) => cb(d)),
 
   onShareOpen: (cb) => ipcRenderer.on('share-open', (_e, list) => cb(list)),

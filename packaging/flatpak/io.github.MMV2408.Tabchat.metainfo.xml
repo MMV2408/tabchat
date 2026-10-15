@@ -119,6 +119,11 @@
   </requires>
 
   <releases>
+    <release version="1.26.0" date="2026-10-15">
+      <description>
+        <p>A downloads list with progress, PDFs open in a built-in viewer, and a "New in" button after updates instead of a popup.</p>
+      </description>
+    </release>
     <release version="1.25.1" date="2026-10-14">
       <description>
         <p>Fixes quick search (Ctrl+K) staying open invisibly and offers to restart or report a part of the app that stops responding.</p>

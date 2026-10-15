@@ -124,6 +124,8 @@ function getState() {
     browsers: require('./links').browsers().map(b => ({ id: b.id, name: b.name })),
     platform: { kind: require('./platform').kind, storeManaged: require('./platform').storeManaged },
     update: require('./updater').getStatus(),
+    downloads: require('./downloads').state(),
+    whatsNew: store.config.whatsNew ? store.config.whatsNew.to : null, // "✨ New in …" in the bar
     catalog: Object.entries(CATALOG).filter(([, s]) => !s.temp).map(([id, s]) => ({
       id, name: s.name, key: s.key || '', color: s.color, base: s.base || null, askUrl: !!s.askUrl,
       custom: !!s.custom, icon: s.icon || null, school: s.group === 'microsoft',

@@ -62,14 +62,10 @@ function announceUpdate() {
   // No previous version known? Then only report if Tabchat was used before
   // (versions before 1.9.1 didn't remember their version number yet)
   if (!before && store.config.tabs.length === 0) return require('./donate').schedule('install');
-  // After an update: show "What's new"; the donation request comes when you close it
+  // After an update: a "✨ New in …" button in the tab bar (no popup);
+  // the donation request comes when you close "What's new"
   require('./donate').schedule('update');
-  require('./whatsnew').showAfterUpdate(before);
-  require('./notify').notify({
-    title: t('upd.doneTitle', { v: now }),
-    body: before ? t('upd.doneBodyFrom', { v: before }) : t('upd.doneBody'),
-    onClick: () => require('./whatsnew').show(before)
-  });
+  require('./whatsnew').markNew(before);
 }
 
 function init() {
@@ -77,7 +73,7 @@ function init() {
   const special = app.isPackaged && store.config.lastVersion !== app.getVersion();
   announceUpdate();
   require('./feedback').start(special);
-  if (platform.storeManaged) return set({ state: 'store' }); // updates through the store
+  if (platform.externalUpdates) return set({ state: 'store' }); // updates through the store or pacman
   if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' }); // npm start: no updates
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = false; // the user chooses when (password needed for .deb)
@@ -106,7 +102,7 @@ function init() {
 }
 
 function sync() {
-  if (!app.isPackaged || !autoUpdater || platform.storeManaged) return;
+  if (!app.isPackaged || !autoUpdater || platform.externalUpdates) return;
   clearInterval(timer);
   if (!enabled()) return set({ state: 'off' });
   if (status.state === 'off') set({ state: 'idle' });
@@ -116,7 +112,7 @@ function sync() {
 
 // Check now (also via the button on the + screen)
 function check() {
-  if (platform.storeManaged) return;
+  if (platform.externalUpdates) return;
   if (!app.isPackaged || !autoUpdater) return set({ state: 'dev' });
   if (status.state === 'downloading' || status.state === 'ready') return;
   autoUpdater.checkForUpdates().catch(() => set({ state: 'error' }));
