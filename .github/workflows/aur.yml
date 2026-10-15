@@ -55,7 +55,7 @@ jobs:
 
       - name: Publish to the AUR
         if: env.HAS_KEY == 'true'
-        uses: KSXGitHub/github-actions-deploy-aur@v4
+        uses: KSXGitHub/github-actions-deploy-aur@v4.2.0
         with:
           pkgname: tabchat-bin
           pkgbuild: packaging/aur/PKGBUILD
